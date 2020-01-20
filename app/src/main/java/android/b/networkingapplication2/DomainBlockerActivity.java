@@ -31,8 +31,6 @@ public class DomainBlockerActivity extends AppCompatActivity {
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-//        addData();
     }
 
     @Override
@@ -47,17 +45,25 @@ public class DomainBlockerActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.action_overview:
                 intent = new Intent(this, OverviewActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                this.startActivity(intent);
-                return true;
+                break;
             case R.id.action_domain_blocker:
                 intent = new Intent(this, DomainBlockerActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                this.startActivity(intent);
+                break;
+            case R.id.action_vpn_servers:
+                intent = new Intent(this, VPNActivity.class);
+                break;
+            case R.id.action_dns_servers:
+                intent = new Intent(this, DNSActivity.class);
+                break;
+            case R.id.action_firewall:
+                intent  = new Intent(this, FirewallActivity.class);
                 break;
             default:
                 return super.onOptionsItemSelected(item);
         }
+        intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        this.startActivity(intent);
+
         return true;
     }
 

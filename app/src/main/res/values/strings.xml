@@ -29,4 +29,8 @@
     <string name="last_6_hours_title">Queries over last 6 hours</string>
     <string name="all_time_title">Queries from beginning of time</string>
     <string name="last_hour_title">Queries over last hour</string>
+    <string name="custom_1_ipv4_title">Custom 1 (IPv4)</string>
+    <string name="custom_2_ipv4_title">Custom 2 (IPv4)</string>
+    <string name="custom_3_ipv6_title">Custom 3 (IPv6)</string>
+    <string name="custom_4_ipv6_title">Custom 4 (IPv6)</string>
 </resources>

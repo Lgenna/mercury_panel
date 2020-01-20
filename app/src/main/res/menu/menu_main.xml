@@ -9,7 +9,7 @@
         android:title="@string/domain_blocker"
         app:showAsAction="never" />
     <item
-        android:id="@+id/action_vpn"
+        android:id="@+id/action_vpn_servers"
         android:title="@string/vpn"
         app:showAsAction="never" />
     <item

@@ -23,11 +23,11 @@ public class DomainBlockerFragment extends Fragment {
         View view = inflater.inflate(R.layout.activity_domain_blocker, container, false);
         try {
 
-//            Date startupDate = new Date();
-//            long startupTime = startupDate.getTime();
-//
-//            TextView totalQueries = view.findViewById(R.id.total_queries_number);
-//            totalQueries.setText(startupTime + "");
+            Date startupDate = new Date();
+            long startupTime = startupDate.getTime();
+            TextView totalQueries = view.findViewById(R.id.total_queries_number);
+            totalQueries.setText(startupTime + "");
+
             GraphView graph = view.findViewById(R.id.graph);
             addData(graph);
         }
