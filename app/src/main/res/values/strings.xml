@@ -1,0 +1,32 @@
+<resources>
+    <string name="app_name">Mercury Panel 2</string>
+    <string name="overview">Overview</string>
+    <string name="domain_blocker">Domain Blocker</string>
+    <string name="vpn">VPN Servers</string>
+    <string name="dns_servers">DNS Servers</string>
+    <string name="firewall">Firewall</string>
+    <string name="block_lists">Block Lists</string>
+    <string name="black_white_lists">BLK / WHI Lists</string>
+    <string name="query_log">Query Log</string>
+    <string name="no_data">No Data</string>
+    <string name="domains_on_blocklist">Domains On Blocklist</string>
+    <string name="total_queries">Total Queries</string>
+    <string name="queries_blocked">Queries Blocked</string>
+    <string name="percent_blocked">% Blocked</string>
+    <string name="add_blocklist_url_title">Enter the URL of a new block list</string>
+    <string name="blocklist_urls_title">Blocklist URL\'s</string>
+    <string name="blacklist_domains">Blacklist Domains</string>
+    <string name="whitelist_domains">Whitelist Domains</string>
+    <string name="add_blacklist_domain_title">Add a domain to the blacklist</string>
+    <string name="add_whitelist_domain_title">Add a domain to the whitelist</string>
+    <string name="domain_example">Ex: www.google.com</string>
+    <string name="time_title">Time</string>
+    <string name="domain_title">Domain</string>
+    <string name="status_title">Status</string>
+    <string name="last_5_minutes_title">Queries over last 5 minutes</string>
+    <string name="last_10_minutes_title">Queries over last 10 minutes</string>
+    <string name="last_1_hour_title">Queries over last hour</string>
+    <string name="last_6_hours_title">Queries over last 6 hours</string>
+    <string name="all_time_title">Queries from beginning of time</string>
+    <string name="last_hour_title">Queries over last hour</string>
+</resources>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+<!---->
+<!--    <androidx.constraintlayout.widget.ConstraintLayout-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent">-->
+<!---->
+<!--        <com.google.android.material.appbar.AppBarLayout-->
+<!--            android:id="@+id/appBarLayout"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:theme="@style/AppTheme.AppBarOverlay"-->
+<!--            app:layout_constraintEnd_toEndOf="parent"-->
+<!--            app:layout_constraintStart_toStartOf="parent"-->
+<!--            app:layout_constraintTop_toTopOf="parent">-->
+<!---->
+<!--            <androidx.constraintlayout.widget.ConstraintLayout-->
+<!--                android:id="@+id/linearLayout2"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="match_parent">-->
+<!---->
+<!--                <TextView-->
+<!--                    android:id="@+id/title"-->
+<!--                    android:layout_width="0dp"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:minHeight="?actionBarSize"-->
+<!--                    android:padding="@dimen/appbar_padding"-->
+<!--                    android:text="@string/app_name"-->
+<!--                    android:textAppearance="@style/TextAppearance.Widget.AppCompat.Toolbar.Title"-->
+<!--                    app:layout_constraintEnd_toStartOf="@+id/toolbar"-->
+<!--                    app:layout_constraintStart_toStartOf="parent"-->
+<!--                    app:layout_constraintTop_toTopOf="parent" />-->
+<!---->
+<!--                <androidx.appcompat.widget.Toolbar-->
+<!--                    android:id="@+id/toolbar"-->
+<!--                    android:layout_width="?attr/actionBarSize"-->
+<!--                    android:layout_height="?attr/actionBarSize"-->
+<!--                    android:background="?attr/colorPrimary"-->
+<!--                    app:layout_constraintEnd_toEndOf="parent"-->
+<!--                    app:layout_constraintStart_toEndOf="@+id/title"-->
+<!--                    app:layout_constraintTop_toTopOf="parent"-->
+<!--                    app:popupTheme="@style/AppTheme.PopupOverlay" />-->
+<!--            </androidx.constraintlayout.widget.ConstraintLayout>-->
+<!---->
+<!--        </com.google.android.material.appbar.AppBarLayout>-->
+<!---->
+<!--        <LinearLayout-->
+<!--            android:id="@+id/emptybox"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="0dp"-->
+<!--            android:orientation="vertical"-->
+<!--            android:background="@color/colorAccent"-->
+<!--            app:layout_constraintBottom_toBottomOf="parent"-->
+<!--            app:layout_constraintTop_toBottomOf="@+id/appBarLayout" />-->
+<!--    </androidx.constraintlayout.widget.ConstraintLayout>-->
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
