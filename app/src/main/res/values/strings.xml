@@ -54,4 +54,6 @@
     <string name="disable_5_minutes">5 Minutes</string>
     <string name="disable_10_minutes">10 Minutes</string>
     <string name="disable_1_hour">1 Hour</string>
+    <string name="disable_entire_application">Disable Entire Application</string>
+    <string name="danger_zone">Danger Zone!</string>
 </resources>

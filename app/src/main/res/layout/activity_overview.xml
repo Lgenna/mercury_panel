@@ -27,14 +27,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            app:layout_constraintGuide_percent="0.10" />
+            app:layout_constraintGuide_percent="0.15" />
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            app:layout_constraintGuide_percent="0.20" />
+            app:layout_constraintGuide_percent="0.30" />
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline"
@@ -209,11 +209,9 @@
 
 
         <LinearLayout
-            android:id="@+id/linearLayout7"
+            android:id="@+id/bottom_half"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:background="@drawable/light_gray_border"
             android:orientation="vertical"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -226,7 +224,6 @@
                 android:layout_marginLeft="8dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginRight="8dp"
-                android:layout_weight="1"
                 android:background="@drawable/light_gray_border"
                 android:orientation="vertical">
 
@@ -237,117 +234,6 @@
                     android:background="@drawable/light_gray_border"
                     android:padding="8dp"
                     android:text="@string/network_info_title" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="8dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginRight="8dp"
-                    android:background="@drawable/light_gray_border"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/temporarily_disable"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:padding="8dp"
-                        android:text="@string/temporarily_disable" />
-
-                    <androidx.constraintlayout.widget.ConstraintLayout
-                        android:id="@+id/linearLayout6"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="8dp">
-
-                        <androidx.constraintlayout.widget.Guideline
-                            android:id="@+id/guideline9"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            app:layout_constraintGuide_percent="0.25" />
-                        <androidx.constraintlayout.widget.Guideline
-                            android:id="@+id/guideline10"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            app:layout_constraintGuide_percent="0.5" />
-                        <androidx.constraintlayout.widget.Guideline
-                            android:id="@+id/guideline11"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            app:layout_constraintGuide_percent="0.75" />
-
-                        <TextView
-                            android:id="@+id/disable_30_seconds"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:padding="8dp"
-                            android:text="@string/disable_30_seconds"
-                            app:layout_constraintEnd_toEndOf="@+id/guideline9"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
-
-                        <TextView
-                            android:id="@+id/disable_5_minutes"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:padding="8dp"
-                            android:text="@string/disable_5_minutes"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toEndOf="@+id/guideline10"
-                            app:layout_constraintStart_toStartOf="@+id/guideline9"
-                            app:layout_constraintTop_toTopOf="parent" />
-
-                        <TextView
-                            android:id="@+id/disable_10_minutes"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:padding="8dp"
-                            android:text="@string/disable_10_minutes"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toEndOf="@+id/guideline11"
-                            app:layout_constraintStart_toStartOf="@+id/guideline10"
-                            app:layout_constraintTop_toTopOf="parent" />
-
-                        <TextView
-                            android:id="@+id/disable_1_hour"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:padding="8dp"
-                            android:text="@string/disable_1_hour"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="@+id/guideline11"
-                            app:layout_constraintTop_toTopOf="parent" />
-
-                    </androidx.constraintlayout.widget.ConstraintLayout>
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="8dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginRight="8dp"
-                    android:background="@drawable/light_gray_border"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/monitoring_start_time_title"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:padding="8dp"
-                        android:text="@string/monitoring_start_time_title" />
-
-                    <TextView
-                        android:id="@+id/monitoring_start_time"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:padding="8dp"
-                        android:text="@string/no_data" />
-                </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -401,7 +287,7 @@
             <LinearLayout
                 android:id="@+id/application_info"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
                 android:layout_margin="8dp"
                 android:layout_weight="1"
                 android:background="@drawable/light_gray_border"
@@ -414,17 +300,6 @@
                     android:background="@drawable/light_gray_border"
                     android:padding="8dp"
                     android:text="@string/system_info_title" />
-
-                <!--                    <Switch-->
-                <!--                        android:id="@+id/monitoring_network_traffic_status"-->
-                <!--                        android:layout_width="match_parent"-->
-                <!--                        android:layout_height="wrap_content"-->
-                <!--                        android:layout_marginLeft="8dp"-->
-                <!--                        android:layout_marginTop="8dp"-->
-                <!--                        android:layout_marginRight="8dp"-->
-                <!--                        android:background="@drawable/light_gray_border"-->
-                <!--                        android:padding="8dp"-->
-                <!--                        android:text="@string/monitoring_network_traffic_status" />-->
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -498,11 +373,150 @@
                         android:text="@string/no_data" />
 
                 </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginBottom="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/light_gray_border"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/monitoring_start_time_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="8dp"
+                        android:text="@string/monitoring_start_time_title" />
+
+                    <TextView
+                        android:id="@+id/monitoring_start_time"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="8dp"
+                        android:text="@string/no_data" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/danger_zone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/red_border"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/danger_zone_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/red_border"
+                    android:padding="8dp"
+                    android:text="@string/danger_zone" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginRight="8dp"
+                    android:background="@drawable/red_border"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/temporarily_disable"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="8dp"
+                        android:text="@string/temporarily_disable" />
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/linearLayout6"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <Button
+                            android:id="@+id/disable_30_seconds"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginTop="8dp"
+                            android:text="@string/disable_30_seconds"
+                            app:layout_constraintEnd_toStartOf="@+id/guideline12"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <Button
+                            android:id="@+id/disable_10_minutes"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginBottom="8dp"
+                            android:text="@string/disable_10_minutes"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@+id/guideline12"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@+id/disable_30_seconds" />
+
+                        <androidx.constraintlayout.widget.Guideline
+                            android:id="@+id/guideline12"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            app:layout_constraintGuide_percent="0.5" />
+
+                        <Button
+                            android:id="@+id/disable_5_minutes"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="8dp"
+                            android:layout_marginTop="8dp"
+                            android:text="@string/disable_5_minutes"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="@+id/guideline12"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <Button
+                            android:id="@+id/disable_1_hour"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="8dp"
+                            android:layout_marginBottom="8dp"
+                            android:text="@string/disable_1_hour"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="@+id/guideline12"
+                            app:layout_constraintTop_toBottomOf="@+id/disable_5_minutes" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:background="@drawable/red_border"
+                    android:orientation="vertical">
+
+                    <Switch
+                        android:id="@+id/disable_entire_application"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="8dp"
+                        android:layout_marginEnd="8dp"
+                        android:padding="8dp"
+                        android:text="@string/disable_entire_application" />
+
+                </LinearLayout>
 
             </LinearLayout>
 
         </LinearLayout>
-
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
