@@ -33,4 +33,25 @@
     <string name="custom_2_ipv4_title">Custom 2 (IPv4)</string>
     <string name="custom_3_ipv6_title">Custom 3 (IPv6)</string>
     <string name="custom_4_ipv6_title">Custom 4 (IPv6)</string>
+    <string name="vpn_info">VPN Info</string>
+    <string name="status_offline">Offline</string>
+    <string name="status_online">Online!</string>
+    <string name="vpn_server">VPN not setup</string>
+    <string name="dns_ip_address">DNS not setup</string>
+    <string name="firewall_info">Firewall Info</string>
+    <string name="network_info_title">Network Info</string>
+    <string name="ipv4_title">IPV4 Address</string>
+    <string name="ipv6_title">IPV6 Address</string>
+    <string name="system_info_title">System Info</string>
+    <string name="cpu_usage_title">CPU Usage</string>
+    <string name="memory_usage_title">Memory Usage</string>
+    <string name="device_temperature_title">Device Temperature</string>
+    <string name="monitoring_start_time_title">Monitoring Started</string>
+    <string name="temporarily_disable">Temporarily Disable</string>
+    <string name="domain_blocker_info">Domain Blocker Info</string>
+    <string name="dns_info">DNS Info</string>
+    <string name="disable_30_seconds">30 Seconds</string>
+    <string name="disable_5_minutes">5 Minutes</string>
+    <string name="disable_10_minutes">10 Minutes</string>
+    <string name="disable_1_hour">1 Hour</string>
 </resources>
