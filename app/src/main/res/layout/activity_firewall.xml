@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
-        android:background="@drawable/light_gray_border"
+        android:background="@drawable/red_border"
         android:orientation="vertical">
 
         <LinearLayout
@@ -27,6 +27,7 @@
                 android:text="@string/danger_zone" />
 
             <ImageButton
+                android:id="@+id/close_warning"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 app:srcCompat="@android:drawable/ic_menu_close_clear_cancel" />
@@ -40,5 +41,16 @@
             android:textSize="18sp"
             android:text="@string/warning_message" />
     </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/application_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:padding="8dp"
+        android:background="@drawable/light_gray_border"/>
+
 
 </LinearLayout>

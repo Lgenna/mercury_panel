@@ -57,4 +57,16 @@
     <string name="disable_entire_application">Disable Entire Application</string>
     <string name="danger_zone">Danger Zone!</string>
     <string name="warning_message">Using this feature can cause some unintended side effects for various applications. Use at your own risk.</string>
+    <string name="application_name">Application Name</string>
+    <string name="vpn_file_title">VPN File Type</string>
+    <string name="vpn_url">URL</string>
+    <string name="url_temp">https://</string>
+    <string name="or">OR</string>
+    <string name="use_default">Use Default VPN Server</string>
+    <string name="upstream_title">Upstream</string>
+    <string name="vpn_settings_title">VPN Settings</string>
+    <string name="toggle_vpn">Toggle VPN</string>
+    <string name="downstream_title">Downstream</string>
+    <string name="change_vpn_server_title">Change VPN Server</string>
+    <string name="current_vpn_server_title">Current VPN Server</string>
 </resources>

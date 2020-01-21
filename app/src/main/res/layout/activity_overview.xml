@@ -1,17 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true">
-
-
-
-<!--    <androidx.constraintlayout.widget.ConstraintLayout-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:orientation="vertical">-->
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/linearLayout5"
@@ -47,7 +39,10 @@
             android:id="@+id/domain_blocker_info_box"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_margin="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="4dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="4dp"
             android:background="@drawable/light_gray_border"
             android:orientation="vertical"
             app:layout_constraintBottom_toTopOf="@+id/guideline3"
@@ -87,7 +82,10 @@
             android:id="@+id/dns_info_box"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_margin="8dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="4dp"
             android:layout_weight="1"
             android:background="@drawable/light_gray_border"
             android:orientation="vertical"
@@ -130,7 +128,10 @@
             android:id="@+id/firewall_info_box"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_margin="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="4dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="8dp"
             android:background="@drawable/light_gray_border"
             android:orientation="vertical"
             app:layout_constraintBottom_toTopOf="@+id/guideline2"
@@ -170,7 +171,10 @@
             android:id="@+id/vpn_info_box"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_margin="8dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="8dp"
             android:layout_weight="1"
             android:background="@drawable/light_gray_border"
             android:orientation="vertical"
@@ -222,7 +226,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="8dp"
-                android:layout_marginTop="8dp"
                 android:layout_marginRight="8dp"
                 android:background="@drawable/light_gray_border"
                 android:orientation="vertical">
@@ -279,7 +282,6 @@
                         android:layout_height="wrap_content"
                         android:padding="8dp"
                         android:text="@string/no_data" />
-
                 </LinearLayout>
 
             </LinearLayout>
