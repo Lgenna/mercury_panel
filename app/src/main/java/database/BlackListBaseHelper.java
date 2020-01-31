@@ -6,15 +6,15 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import static database.BlockListDbSchema.BlockListTable.Cols.DOMAIN;
-import static database.BlockListDbSchema.BlockListTable.Cols.STATUS;
-import static database.BlockListDbSchema.BlockListTable.TABLE_NAME;
+import static database.BlackListDbSchema.BlackListTable.Cols.DOMAIN;
+import static database.BlackListDbSchema.BlackListTable.TABLE_NAME;
 
-public class BlackWhiteListBaseHelper extends SQLiteOpenHelper {
+public class BlackListBaseHelper extends SQLiteOpenHelper {
 
     private static final int VERSION = 1;
+    private static final String DATABASE_NAME = "blacklist.db";
 
-    public BlackWhiteListBaseHelper(Context context, String DATABASE_NAME) {
+    public BlackListBaseHelper(Context context) {
         super(context, DATABASE_NAME, null, VERSION);
     }
 

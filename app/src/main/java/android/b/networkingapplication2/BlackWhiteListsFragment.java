@@ -16,16 +16,18 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
-import database.BlackWhiteListBaseHelper;
+import database.BlackListBaseHelper;
+import database.WhiteListBaseHelper;
 
 public class BlackWhiteListsFragment extends Fragment {
 
-    private TextView whitelist_textbox;
+    private TextView editWhiteListDomain;
     private TextView editBlackListDomain;
-    private BlackWhiteListBaseHelper myBlaDb, myWhiDb;
+    private BlackListBaseHelper myBlaDb;
+    private WhiteListBaseHelper myWhiDb;
     private RecyclerView mWhiteListRecyclerView;
     private RecyclerView mBlackListRecyclerView;
-    public static View view;
+    public View view;
 
     private static final String TAG = "BlackWhiteListsFragment";
 
@@ -36,15 +38,22 @@ public class BlackWhiteListsFragment extends Fragment {
 
         view = inflater.inflate(R.layout.activity_black_white_lists, container, false);
 
-        myBlaDb = new BlackWhiteListBaseHelper(getContext(), "blacklist.db");
-        myWhiDb = new BlackWhiteListBaseHelper(getContext(), "whitelist.db");
+        myBlaDb = new BlackListBaseHelper(getContext());
+        myWhiDb = new WhiteListBaseHelper(getContext());
 
         addBlacklist = view.findViewById(R.id.addBlacklist);
+        addWhitelist = view.findViewById(R.id.addWhitelist);
+
         editBlackListDomain = view.findViewById(R.id.blacklist_textbox);
+        editWhiteListDomain = view.findViewById(R.id.whitelist_textbox);
         mBlackListRecyclerView = view.findViewById(R.id.blacklist_domains_recycler_view);
+        mWhiteListRecyclerView = view.findViewById(R.id.whitelist_domains_recycler_view);
 
         LinearLayoutManager blacklistlinearLayoutManager = new LinearLayoutManager(getContext());
         mBlackListRecyclerView.setLayoutManager(blacklistlinearLayoutManager);
+
+        LinearLayoutManager whitelistlinearLayoutManager = new LinearLayoutManager(getContext());
+        mWhiteListRecyclerView.setLayoutManager(whitelistlinearLayoutManager);
 
         try {
 
@@ -55,6 +64,15 @@ public class BlackWhiteListsFragment extends Fragment {
                 myBlaDb.insertData("3333");
                 myBlaDb.insertData("4444");
                 myBlaDb.insertData("5555");
+            }
+
+            if (myWhiDb.getAllData().getCount() == 0) {
+                Log.w(TAG, "Whitelist DB empty, adding test data");
+                myWhiDb.insertData("1111");
+                myWhiDb.insertData("2222");
+                myWhiDb.insertData("3333");
+                myWhiDb.insertData("4444");
+                myWhiDb.insertData("5555");
             }
 
             updateUI();
@@ -74,6 +92,21 @@ public class BlackWhiteListsFragment extends Fragment {
                 }
             });
 
+            addWhitelist.setOnClickListener(v -> {
+                if (!editWhiteListDomain.getText().toString().equals("")) {
+                    String enteredText = editWhiteListDomain.getText().toString();
+
+                    myWhiDb.insertData(enteredText);
+                    Toast.makeText(getContext(), "Added: " + enteredText, Toast.LENGTH_SHORT).show();
+                    Log.i(TAG, "Added: " + enteredText + " to whitelist Database");
+
+                    updateUI();
+                    editWhiteListDomain.setText("");
+                } else {
+                    Toast.makeText(getContext(), "White list can't be blank", Toast.LENGTH_SHORT).show();
+                }
+            });
+
         } catch (NullPointerException e) {
             Toast.makeText(getContext(), "[NullPointerException]", Toast.LENGTH_LONG).show();
             System.err.println("[NullPointerException] Now just stop tryin' ta mess with my contraptions.");
@@ -83,21 +116,35 @@ public class BlackWhiteListsFragment extends Fragment {
 
     public void updateUI() {
 
-        ArrayList<BlackList> mBlackLists = new ArrayList<>();
+        ArrayList<BlackWhiteList> mBlackLists = new ArrayList<>();
+        ArrayList<BlackWhiteList> mWhiteLists = new ArrayList<>();
 
         Cursor blacklistRes = myBlaDb.getAllData();
+        Cursor whitelistRes = myWhiDb.getAllData();
 
         if (blacklistRes.getCount() != 0) {
             while (blacklistRes.moveToNext()) {
-                BlackList BlackListItem = new BlackList();
+                BlackWhiteList BlackListItem = new BlackWhiteList();
                 BlackListItem.setDomain(blacklistRes.getString(1));
 
                 mBlackLists.add(BlackListItem);
             }
         }
 
+        if (whitelistRes.getCount() != 0) {
+            while (whitelistRes.moveToNext()) {
+                BlackWhiteList WhiteListItem = new BlackWhiteList();
+                WhiteListItem.setDomain(whitelistRes.getString(1));
+
+                mWhiteLists.add(WhiteListItem);
+            }
+        }
+
         BlackListCustomAdapter blacklistcustomAdapter = new BlackListCustomAdapter(getContext(), mBlackLists);
         mBlackListRecyclerView.setAdapter(blacklistcustomAdapter);
+
+        WhiteListCustomAdapter whitelistcustomAdapter = new WhiteListCustomAdapter(getContext(), mWhiteLists);
+        mWhiteListRecyclerView.setAdapter(whitelistcustomAdapter);
 
 //        System.out.println("You know where ya' oughta' hide next time? Back in France.");
 

@@ -19,14 +19,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.material.tabs.TabLayout;
-import com.jjoe64.graphview.GraphView;
-import com.jjoe64.graphview.series.DataPoint;
-import com.jjoe64.graphview.series.LineGraphSeries;
-
-import java.util.ArrayList;
-
-import database.BlockListBaseHelper;
-import database.BlockListBaseHelper;
 
 
 public class DomainBlockerActivity extends AppCompatActivity {

@@ -2,16 +2,16 @@ package android.b.networkingapplication2;
 
 import java.util.UUID;
 
-public class BlackList {
+public class BlackWhiteList {
 
     private UUID mId;
     private String mDomain;
 
-    public BlackList() {
+    public BlackWhiteList() {
         this(UUID.randomUUID());
     }
 
-    public BlackList(UUID id) {
+    public BlackWhiteList(UUID id) {
         mId = id;
     }
 
