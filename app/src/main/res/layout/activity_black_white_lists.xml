@@ -41,15 +41,14 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:text=""
-                app:layout_constraintEnd_toStartOf="@+id/add_blacklist"
+                app:layout_constraintEnd_toStartOf="@+id/addBlacklist"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/blacklist_title" />
 
             <ImageButton
-                android:id="@+id/add_blacklist"
+                android:id="@+id/addBlacklist"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/invisible_border"
                 android:padding="8dp"
                 app:layout_constraintBottom_toBottomOf="@+id/blacklist_textbox"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -124,15 +123,14 @@
                 android:layout_marginStart="8dp"
                 android:hint="@string/domain_example"
                 android:text=""
-                app:layout_constraintEnd_toStartOf="@+id/add_whitelist"
+                app:layout_constraintEnd_toStartOf="@+id/addWhitelist"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/whitelist_title" />
 
             <ImageButton
-                android:id="@+id/add_whitelist"
+                android:id="@+id/addWhitelist"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/invisible_border"
                 android:padding="8dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/whitelist_title"

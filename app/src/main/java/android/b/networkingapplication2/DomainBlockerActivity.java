@@ -2,6 +2,7 @@ package android.b.networkingapplication2;
 
 import android.b.networkingapplication2.ui.main.SectionsPagerAdapter;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.Menu;
@@ -27,6 +28,7 @@ import java.util.ArrayList;
 import database.BlockListBaseHelper;
 import database.BlockListBaseHelper;
 
+
 public class DomainBlockerActivity extends AppCompatActivity {
 
 
@@ -34,6 +36,7 @@ public class DomainBlockerActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tabs);
+
 
         SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(this, getSupportFragmentManager());
         ViewPager viewPager = findViewById(R.id.view_pager);
@@ -44,8 +47,6 @@ public class DomainBlockerActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
     }
-
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

@@ -15,23 +15,23 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
-import database.BlockListBaseHelper;
+import database.BlackWhiteListBaseHelper;
 
-public class BlockListCustomAdapter extends RecyclerView.Adapter<BlockListCustomAdapter.MyViewHolder> {
+public class BlackListCustomAdapter extends RecyclerView.Adapter<BlackListCustomAdapter.MyViewHolder> {
 
-    private ArrayList<BlockList> mBlockLists;
-    private static final String TAG = "BlockListCustomAdapter";
+    private ArrayList<BlackList> mBlackLists;
+    private static final String TAG = "BlackListCustomAdapter";
     private Context context;
 
-    public BlockListCustomAdapter(Context context, ArrayList<BlockList> mBlockLists) {
+    public BlackListCustomAdapter(Context context, ArrayList<BlackList> mBlackLists) {
         this.context = context;
-        this.mBlockLists = mBlockLists;
+        this.mBlackLists = mBlackLists;
     }
 
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         // inflate the item Layout
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_blocklist, parent, false);
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_black_list, parent, false);
         // set the view's size, margins, padding and layout parameters
         MyViewHolder vh = new MyViewHolder(v); // pass the view to View Holder
         return vh;
@@ -40,14 +40,13 @@ public class BlockListCustomAdapter extends RecyclerView.Adapter<BlockListCustom
     @Override
     public void onBindViewHolder(MyViewHolder holder, final int position) {
 
-        holder.domain.setText(mBlockLists.get(position).getDomain());
-        holder.status.setChecked(mBlockLists.get(position).getStatus());
-        holder.removeBlocklist.setOnClickListener(v -> {
+        holder.domain.setText(mBlackLists.get(position).getDomain());
+        holder.removeBlacklist.setOnClickListener(v -> {
 
             // Throw some toast at the user stating what happened
-            Toast.makeText(context, "Removed: " + (mBlockLists.get(position).getDomain()), Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Removed: " + (mBlackLists.get(position).getDomain()), Toast.LENGTH_SHORT).show();
 
-            BlockListBaseHelper database = new BlockListBaseHelper(context);
+            BlackWhiteListBaseHelper database = new BlackWhiteListBaseHelper(context, "blacklist.db");
 
             // grab everything in the database
             Cursor databaseRes = database.getAllData();
@@ -67,8 +66,8 @@ public class BlockListCustomAdapter extends RecyclerView.Adapter<BlockListCustom
             }
 
             // remove the value also from the array list, this ones easier
-            Log.w(TAG, "Removing position " + position + " from the ArrayList: " + mBlockLists.get(position).getDomain());
-            mBlockLists.remove(position);
+            Log.w(TAG, "Removing position " + position + " from the ArrayList: " + mBlackLists.get(position).getDomain());
+            mBlackLists.remove(position);
 
             // notify everything
             notifyItemRemoved(position);
@@ -79,21 +78,19 @@ public class BlockListCustomAdapter extends RecyclerView.Adapter<BlockListCustom
 
     @Override
     public int getItemCount() {
-        return mBlockLists.size();
+        return mBlackLists.size();
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         TextView domain;
-        Switch status;
-        ImageButton removeBlocklist;
+        ImageButton removeBlacklist;
 
         public MyViewHolder(View itemView) {
             super(itemView);
 
             // get the reference of item view's
-            domain = itemView.findViewById(R.id.domain_title);
-            status = itemView.findViewById(R.id.domain_status);
-            removeBlocklist = itemView.findViewById(R.id.blocklist_remove);
+            domain = itemView.findViewById(R.id.blacklist_url);
+            removeBlacklist = itemView.findViewById(R.id.blacklist_remove);
 
         }
     }
