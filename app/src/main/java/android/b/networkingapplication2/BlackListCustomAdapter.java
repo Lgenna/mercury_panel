@@ -72,6 +72,21 @@ public class BlackListCustomAdapter extends RecyclerView.Adapter<BlackListCustom
             notifyItemRemoved(position);
             notifyItemRangeRemoved(position, getItemCount());
             notifyDataSetChanged();
+
+//            // hey, if the user deletes the last row, add a "no data" row. not sure what happens
+//            //  if they delete these however...
+//            if (databaseRes.getCount() == 1) {
+//
+//
+//                database.insertData(context.getString(R.string.no_data));
+//                Log.w(TAG, "Adding initial row");
+//
+//                notifyItemRemoved(position);
+//                notifyItemRangeRemoved(position, getItemCount());
+//                notifyDataSetChanged();
+//
+//            }
+
         });
     }
 

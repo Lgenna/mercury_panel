@@ -53,11 +53,7 @@ public class BlockListsFragment extends Fragment {
 
             if (myBloDb.getAllData().getCount() == 0) {
                 Log.w(TAG, "Blocklist DB empty, adding test data");
-                myBloDb.insertData("1111", "true");
-                myBloDb.insertData("2222", "false");
-                myBloDb.insertData("3333", "true");
-                myBloDb.insertData("4444", "false");
-                myBloDb.insertData("5555", "true");
+                myBloDb.insertData(getResources().getString(R.string.no_data), "false");
             }
 
             updateUI();
@@ -65,6 +61,21 @@ public class BlockListsFragment extends Fragment {
             addBlocklist.setOnClickListener(v -> {
                 if (!editDomain.getText().toString().equals("")) {
                     String enteredText = editDomain.getText().toString();
+
+                    // just a precautionary measure because there might somehow be nothing in the list
+                    try {
+                        Cursor checkInitial = myBloDb.getAllData();
+
+                        if (checkInitial.getCount() == 1) {
+                            checkInitial.moveToFirst();
+                            if (checkInitial.getString(1).equals(getResources().getString(R.string.no_data))) {
+                                myBloDb.deleteData("1");
+                                Log.w(TAG, "Removing initial row");
+                            }
+                        }
+                    } catch (IndexOutOfBoundsException e) {
+                        Log.e(TAG, "Phew, we were just grazed by an apocalypse...");
+                    }
 
                     myBloDb.insertData(
                             enteredText,

@@ -30,6 +30,8 @@ public class BlackWhiteListsFragment extends Fragment {
     public View view;
 
     private static final String TAG = "BlackWhiteListsFragment";
+    private static final String BLTAG = "BlackWhiteListsFragment - BlackList";
+    private static final String WLTAG = "BlackWhiteListsFragment - WhiteList";
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
@@ -58,21 +60,13 @@ public class BlackWhiteListsFragment extends Fragment {
         try {
 
             if (myBlaDb.getAllData().getCount() == 0) {
-                Log.w(TAG, "Blacklist DB empty, adding test data");
-                myBlaDb.insertData("1111");
-                myBlaDb.insertData("2222");
-                myBlaDb.insertData("3333");
-                myBlaDb.insertData("4444");
-                myBlaDb.insertData("5555");
+                Log.w(BLTAG, "DB empty, adding initial data");
+                myBlaDb.insertData(getResources().getString(R.string.no_data));
             }
 
             if (myWhiDb.getAllData().getCount() == 0) {
-                Log.w(TAG, "Whitelist DB empty, adding test data");
-                myWhiDb.insertData("1111");
-                myWhiDb.insertData("2222");
-                myWhiDb.insertData("3333");
-                myWhiDb.insertData("4444");
-                myWhiDb.insertData("5555");
+                Log.w(WLTAG, "DB empty, adding initial data");
+                myWhiDb.insertData(getResources().getString(R.string.no_data));
             }
 
             updateUI();
@@ -81,9 +75,24 @@ public class BlackWhiteListsFragment extends Fragment {
                 if (!editBlackListDomain.getText().toString().equals("")) {
                     String enteredText = editBlackListDomain.getText().toString();
 
+                    // just a precautionary measure because there might somehow be nothing in the list
+                    try {
+                        Cursor checkInitial = myBlaDb.getAllData();
+
+                        if (checkInitial.getCount() == 1) {
+                            checkInitial.moveToFirst();
+                            if (checkInitial.getString(1).equals(getResources().getString(R.string.no_data))) {
+                                myBlaDb.deleteData("1");
+                                Log.w(BLTAG, "Removing initial row");
+                            }
+                        }
+                    } catch (IndexOutOfBoundsException e) {
+                        Log.e(TAG, "Phew, we were just grazed by an apocalypse...");
+                    }
+
                     myBlaDb.insertData(enteredText);
                     Toast.makeText(getContext(), "Added: " + enteredText, Toast.LENGTH_SHORT).show();
-                    Log.i(TAG, "Added: " + enteredText + " to blacklist Database");
+                    Log.i(BLTAG, "Added: " + enteredText);
 
                     updateUI();
                     editBlackListDomain.setText("");
@@ -96,9 +105,24 @@ public class BlackWhiteListsFragment extends Fragment {
                 if (!editWhiteListDomain.getText().toString().equals("")) {
                     String enteredText = editWhiteListDomain.getText().toString();
 
+                    // just a precautionary measure because there might somehow be nothing in the list
+                    try {
+                        Cursor checkInitial = myWhiDb.getAllData();
+
+                        if (checkInitial.getCount() == 1) {
+                            checkInitial.moveToFirst();
+                            if (checkInitial.getString(1).equals(getResources().getString(R.string.no_data))) {
+                                myWhiDb.deleteData("1");
+                                Log.w(WLTAG, "Removing initial row");
+                            }
+                        }
+                    } catch (IndexOutOfBoundsException e) {
+                        Log.e(TAG, "Phew, we were just grazed by an apocalypse...");
+                    }
+
                     myWhiDb.insertData(enteredText);
                     Toast.makeText(getContext(), "Added: " + enteredText, Toast.LENGTH_SHORT).show();
-                    Log.i(TAG, "Added: " + enteredText + " to whitelist Database");
+                    Log.i(WLTAG, "Added: " + enteredText);
 
                     updateUI();
                     editWhiteListDomain.setText("");
