@@ -8,7 +8,7 @@
     <string name="block_lists">Block Lists</string>
     <string name="black_white_lists">BLK / WHI Lists</string>
     <string name="query_log">Query Log</string>
-    <string name="no_data">No Data</string>
+    <string name="no_data">No Data Found</string>
     <string name="domains_on_blocklist">Domains On Blocklist</string>
     <string name="total_queries">Total Queries</string>
     <string name="queries_blocked">Queries Blocked</string>
@@ -69,4 +69,6 @@
     <string name="downstream_title">Downstream</string>
     <string name="change_vpn_server_title">Change VPN Server</string>
     <string name="current_vpn_server_title">Current VPN Server</string>
+    <string name="degree_symbol_celsius">°C</string>
+    <string name="percent_symbol">%</string>
 </resources>
