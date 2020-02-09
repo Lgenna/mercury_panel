@@ -2,6 +2,8 @@ package android.b.networkingapplication2;
 
 import android.app.ActivityManager;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -16,7 +18,9 @@ import java.io.RandomAccessFile;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.sql.Time;
 import java.text.DecimalFormat;
+import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
@@ -49,6 +53,9 @@ public class OverviewActivity extends AppCompatActivity {
     private Intent intent;
     private String formattedStartupTime, formattedStartupDate;
 
+
+    long startupTime;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,7 +72,7 @@ public class OverviewActivity extends AppCompatActivity {
         deviceCPU = findViewById(R.id.cpu_usage_percent);
         IPV4Address = findViewById(R.id.ipv4_address);
         IPV6Address = findViewById(R.id.ipv6_address);
-        startTime = findViewById(R.id.monitoring_start_time);
+        startTime = findViewById(R.id.up_time_data);
 
 
         domainBlockerBox = findViewById(R.id.domain_blocker_info_box);
@@ -73,15 +80,9 @@ public class OverviewActivity extends AppCompatActivity {
         FirewallBox = findViewById(R.id.firewall_info_box);
         VPNBox = findViewById(R.id.vpn_info_box);
 
+        // get time when OnCreate is called
+        startupTime = new Date().getTime();
 
-        Date startupDate = new Date();
-        long startupTime = startupDate.getTime();
-
-        SimpleDateFormat dateStandard = new SimpleDateFormat("MM/dd/yy", Locale.US);
-        SimpleDateFormat timeStandard = new SimpleDateFormat("hh:mm:ss aa", Locale.US);
-
-        formattedStartupDate = dateStandard.format(startupTime);
-        formattedStartupTime = timeStandard.format(startupTime);
 
         domainBlockerBox.setOnClickListener(v -> {
             intent = new Intent(this, DomainBlockerActivity.class);
@@ -107,7 +108,6 @@ public class OverviewActivity extends AppCompatActivity {
             this.startActivity(intent);
         });
 
-
         updateUI();
 
         uiUpdater = new Thread() {
@@ -118,7 +118,6 @@ public class OverviewActivity extends AppCompatActivity {
                     while (!mFinished) {
                         Thread.sleep(10000);
                         runOnUiThread(() -> updateUI());
-
                         synchronized (mPauseLock) {
                             while (mPaused) {
                                 try {
@@ -149,13 +148,11 @@ public class OverviewActivity extends AppCompatActivity {
 
     public void updateUI() {
 
-        DecimalFormat format = new DecimalFormat("0.00");
+        DecimalFormat decimalFormat = new DecimalFormat("0.00");
 
-        boolean setIPV6 = false;
-
-        try {
+        try { // IP Address
+            // TODO this is a temporary solution to find the ip addresses of the device
             List<NetworkInterface> interfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
-            System.out.println(interfaces.size());
             for (NetworkInterface intf : interfaces) {
                 List<InetAddress> addrs = Collections.list(intf.getInetAddresses());
                 for (InetAddress addr : addrs) {
@@ -171,10 +168,12 @@ public class OverviewActivity extends AppCompatActivity {
                             int delimiter = sAddr.indexOf('%');
 
                             if (delimiter > 0) {
-                                if (!setIPV6) {
-                                    IPV6Address.setText(sAddr.substring(0, delimiter).toUpperCase());
-                                    setIPV6 = true;
-                                }
+
+                                String addressIPV6 = sAddr.substring(0, delimiter).toUpperCase();
+
+                                Log.i(TAG, "IPV6 Address :" + addressIPV6);
+
+                                IPV6Address.setText(addressIPV6);
                             }
                         }
                     }
@@ -182,7 +181,8 @@ public class OverviewActivity extends AppCompatActivity {
             }
         } catch (SocketException ignored) { }
 
-        for (String location : locations) {
+        for (String location : locations) { // Temperature of battery
+            // TODO this is a temporary solution to find the battery temperature
             try {
                 RandomAccessFile reader = new RandomAccessFile(location, "r");
                 String temperatureValue = reader.readLine();
@@ -191,7 +191,7 @@ public class OverviewActivity extends AppCompatActivity {
                     String formattedTemperature = currentTemp + getResources().getString(R.string.degree_symbol_celsius);
                     Log.i(TAG, "Valid location : " + formattedTemperature + " : " + location);
                     deviceTemp.setText(formattedTemperature);
-                    break; // breaks the for-each loop
+                    break; // breaks the for-each loop once it finds one valid temperature
                 }
             } catch (IOException e) {
                 Log.w(TAG, "[IOException] File not found at " + location);
@@ -199,9 +199,11 @@ public class OverviewActivity extends AppCompatActivity {
         }
 
         try {
+            // CPU % Usage
+
+            // TODO this is a temporary solution to find the CPU usage
             RandomAccessFile reader = new RandomAccessFile("/proc/stat", "r");
             String load = reader.readLine();
-
 
             String[] toks = load.split(" +");
 
@@ -211,7 +213,7 @@ public class OverviewActivity extends AppCompatActivity {
 
             try {
                 Thread.sleep(360);
-            } catch (Exception e) {}
+            } catch (Exception ignore) {}
 
             reader.seek(0);
             load = reader.readLine();
@@ -228,13 +230,17 @@ public class OverviewActivity extends AppCompatActivity {
 
             double rawPercentage = (numerator / denominator) * 100.0;
 
-            String formattedCPUUsage = format.format(rawPercentage) + getResources().getString(R.string.percent_symbol);
+            String formattedCPUUsage = decimalFormat.format(rawPercentage) + getResources().getString(R.string.percent_symbol);
 
             Log.i(TAG, "CPU Usage: " + formattedCPUUsage);
             deviceCPU.setText(formattedCPUUsage);
         } catch (IOException e) {
             Log.w(TAG, "[IOException] File not found at /proc/stat");
         }
+
+        // Memory % Usage
+
+        // TODO this is a temporary solution to find the memory usage
 
         ActivityManager.MemoryInfo mi = new ActivityManager.MemoryInfo();
         ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
@@ -245,14 +251,25 @@ public class OverviewActivity extends AppCompatActivity {
 
         double percentUsed = (usedMegs / totalMegs) * 100.0;
 
-        String formattedMemoryUsed = format.format(percentUsed) + getResources().getString(R.string.percent_symbol);
+        String formattedMemoryUsed = decimalFormat.format(percentUsed) + getResources().getString(R.string.percent_symbol);
 
         Log.i(TAG, "Memory Usage: " + formattedMemoryUsed);
         memoryUsage.setText(formattedMemoryUsed);
 
-        String formattedStartString = formattedStartupDate + " at " + formattedStartupTime;
 
-        startTime.setText(formattedStartString);
+
+        // System Uptime - get current time
+
+        long currentTime = new Date().getTime();
+
+        long timeDifference = currentTime - startupTime;
+
+        int currentTimeDifference = (int)timeDifference / 1000;
+
+        String formattedUpTime = decimalFormat.format(currentTimeDifference) + " seconds";
+
+        startTime.setText(formattedUpTime);
+
 
     }
 
@@ -278,17 +295,19 @@ public class OverviewActivity extends AppCompatActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
+
         intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         this.startActivity(intent);
 
         return true;
     }
 
-
-
     @Override
     protected void onResume() {
         super.onResume();
+
+        updateUI();
+
         synchronized (mPauseLock) {
             mPaused = false;
             mPauseLock.notifyAll();

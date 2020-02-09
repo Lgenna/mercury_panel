@@ -31,7 +31,7 @@ public class BlockListCustomAdapter extends RecyclerView.Adapter<BlockListCustom
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         // inflate the item Layout
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_blocklist, parent, false);
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_blank, parent, false);
         // set the view's size, margins, padding and layout parameters
         MyViewHolder vh = new MyViewHolder(v); // pass the view to View Holder
         return vh;
@@ -41,7 +41,7 @@ public class BlockListCustomAdapter extends RecyclerView.Adapter<BlockListCustom
     public void onBindViewHolder(MyViewHolder holder, final int position) {
 
         holder.domain.setText(mBlockLists.get(position).getDomain());
-        holder.status.setChecked(mBlockLists.get(position).getStatus());
+//        holder.status.setChecked(mBlockLists.get(position).getStatus());
         holder.removeBlocklist.setOnClickListener(v -> {
 
             // Throw some toast at the user stating what happened
@@ -84,16 +84,16 @@ public class BlockListCustomAdapter extends RecyclerView.Adapter<BlockListCustom
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         TextView domain;
-        Switch status;
+//        Switch status;
         ImageButton removeBlocklist;
 
         public MyViewHolder(View itemView) {
             super(itemView);
 
             // get the reference of item view's
-            domain = itemView.findViewById(R.id.domain_title);
-            status = itemView.findViewById(R.id.domain_status);
-            removeBlocklist = itemView.findViewById(R.id.blocklist_remove);
+            domain = itemView.findViewById(R.id.item_text);
+//            status = itemView.findViewById(R.id.domain_status);
+            removeBlocklist = itemView.findViewById(R.id.remove_button);
 
         }
     }

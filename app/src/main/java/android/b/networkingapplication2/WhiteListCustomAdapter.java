@@ -30,7 +30,7 @@ public class WhiteListCustomAdapter extends RecyclerView.Adapter<WhiteListCustom
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         // inflate the item Layout
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_black_white_list, parent, false);
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_blank, parent, false);
         // set the view's size, margins, padding and layout parameters
         MyViewHolder vh = new MyViewHolder(v); // pass the view to View Holder
         return vh;
@@ -89,7 +89,7 @@ public class WhiteListCustomAdapter extends RecyclerView.Adapter<WhiteListCustom
             super(itemView);
 
             // get the reference of item view's
-            domain = itemView.findViewById(R.id.domain_url);
+            domain = itemView.findViewById(R.id.item_text);
             removeWhiteList = itemView.findViewById(R.id.remove_button);
 
         }

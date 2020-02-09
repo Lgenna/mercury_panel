@@ -6,7 +6,7 @@ public class BlockList {
 
     private UUID mId;
     private String mDomain;
-    private Boolean mStatus;
+//    private Boolean mStatus;
 
     public BlockList() {
         this(UUID.randomUUID());
@@ -28,11 +28,11 @@ public class BlockList {
         mDomain = domain;
     }
 
-    public Boolean getStatus() {
-        return mStatus;
-    }
+//    public Boolean getStatus() {
+//        return mStatus;
+//    }
 
-    public void setStatus(Boolean status) {
-        mStatus = status;
-    }
+//    public void setStatus(Boolean status) {
+//        mStatus = status;
+//    }
 }

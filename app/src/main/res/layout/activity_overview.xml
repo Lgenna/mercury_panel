@@ -390,10 +390,10 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:padding="8dp"
-                        android:text="@string/monitoring_start_time_title" />
+                        android:text="@string/up_time" />
 
                     <TextView
-                        android:id="@+id/monitoring_start_time"
+                        android:id="@+id/up_time_data"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:padding="8dp"

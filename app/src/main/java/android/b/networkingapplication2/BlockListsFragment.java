@@ -53,7 +53,8 @@ public class BlockListsFragment extends Fragment {
 
             if (myBloDb.getAllData().getCount() == 0) {
                 Log.w(TAG, "Blocklist DB empty, adding test data");
-                myBloDb.insertData(getResources().getString(R.string.no_data), "false");
+                myBloDb.insertData(getResources().getString(R.string.no_data));
+//                myBloDb.insertData(getResources().getString(R.string.no_data), "false");
             }
 
             updateUI();
@@ -77,9 +78,11 @@ public class BlockListsFragment extends Fragment {
                         Log.e(TAG, "Phew, we were just grazed by an apocalypse...");
                     }
 
-                    myBloDb.insertData(
-                            enteredText,
-                            "true");
+                    myBloDb.insertData(enteredText);
+
+//                    myBloDb.insertData(
+//                            enteredText,
+//                            "true");
                     Toast.makeText(getContext(), "Added: " + enteredText, Toast.LENGTH_SHORT).show();
                     Log.i(TAG, "Added: " + enteredText + " to blocklist Database");
 
@@ -107,7 +110,7 @@ public class BlockListsFragment extends Fragment {
             while (blocklistRes.moveToNext()) {
                 BlockList BlockListItem = new BlockList();
                 BlockListItem.setDomain(blocklistRes.getString(1));
-                BlockListItem.setStatus(Boolean.parseBoolean(blocklistRes.getString(2)));
+//                BlockListItem.setStatus(Boolean.parseBoolean(blocklistRes.getString(2)));
 
                 mBlockLists.add(BlockListItem);
             }

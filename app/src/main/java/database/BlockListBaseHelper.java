@@ -23,10 +23,16 @@ public class BlockListBaseHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("create table " + TABLE_NAME + " ( " +
                 " ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                DOMAIN + ", " +
-                STATUS +
+                DOMAIN +
                 ")"
         );
+
+//        db.execSQL("create table " + TABLE_NAME + " ( " +
+//                " ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+//                DOMAIN + ", " +
+//                STATUS +
+//                ")"
+//        );
     }
 
     @Override
@@ -34,12 +40,12 @@ public class BlockListBaseHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
         onCreate(db);
     }
-
-    public boolean insertData(String domain, String status) {
+                                         //, String status
+    public boolean insertData(String domain) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(DOMAIN, domain);
-        contentValues.put(STATUS, status);
+//        contentValues.put(STATUS, status);
         long result = db.insert(TABLE_NAME, null, contentValues);
         return result != -1;
     }

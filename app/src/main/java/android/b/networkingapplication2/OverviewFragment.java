@@ -1,13 +1,11 @@
 package android.b.networkingapplication2;
 
-import android.hardware.SensorEventListener;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.fragment.app.Fragment;
-import android.hardware.Sensor;
 
 public class OverviewFragment extends Fragment {
 

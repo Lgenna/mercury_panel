@@ -46,7 +46,7 @@
     <string name="cpu_usage_title">CPU Usage</string>
     <string name="memory_usage_title">Memory Usage</string>
     <string name="device_temperature_title">Device Temperature</string>
-    <string name="monitoring_start_time_title">Monitoring Started</string>
+    <string name="up_time">Application Up-Time</string>
     <string name="temporarily_disable">Temporarily Disable</string>
     <string name="domain_blocker_info">Domain Blocker Info</string>
     <string name="dns_info">DNS Info</string>
