@@ -39,7 +39,6 @@ public class FirewallActivity extends AppCompatActivity {
     RecyclerView mFirewallRecyclerView;
 
     Thread appFetcher;
-    ArrayList<AppInfo> storedList;
     ArrayList<ApplicationInfo> installedApps;
 
     private static final String TAG = "FirewallActivity";
@@ -92,17 +91,17 @@ public class FirewallActivity extends AppCompatActivity {
 
         Log.i(TAG, "Started getApplications...");
 
-        installedApps = new ArrayList<>();
-
-        PackageManager pm = getPackageManager();
-        List<ApplicationInfo> apps = pm.getInstalledApplications(0);
-
         // Code created with the help of Stack Overflow question
         // https://stackoverflow.com/questions/6165023/get-list-of-installed-android-applications
         // Question by user577732:
         // https://stackoverflow.com/users/577732/user577732
         // Answer by Kevin Coppock:
         // https://stackoverflow.com/users/321697/kevin-coppock
+
+        installedApps = new ArrayList<>();
+
+        PackageManager pm = getPackageManager();
+        List<ApplicationInfo> apps = pm.getInstalledApplications(0);
 
         for (ApplicationInfo app : apps) {
             // updated system app
