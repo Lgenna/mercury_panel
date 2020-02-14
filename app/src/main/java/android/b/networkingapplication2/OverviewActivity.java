@@ -29,6 +29,8 @@ import java.util.Locale;
 
 public class OverviewActivity extends AppCompatActivity {
 
+    public static final String PREFS_NAME = "NetworkingApp";
+
     String[] locations = new String[]  {"/sys/devices/system/cpu/cpu0/cpufreq/cpu_temp",
             "/sys/devices/system/cpu/cpu0/cpufreq/FakeShmoo_cpu_temp",
             "/sys/class/thermal/thermal_zone1/temp",

@@ -6,27 +6,28 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import static database.QueryLogDbSchema.QueryLogTable.Cols.TIME;
-import static database.QueryLogDbSchema.QueryLogTable.Cols.DOMAIN;
-import static database.QueryLogDbSchema.QueryLogTable.Cols.STATUS;
-import static database.QueryLogDbSchema.QueryLogTable.TABLE_NAME;
+import static database.FirewallDbSchema.FirewallTable.Cols.APPLICATION;
+import static database.FirewallDbSchema.FirewallTable.Cols.STATUS;
+import static database.FirewallDbSchema.FirewallTable.TABLE_NAME;
 
-public class QueryLogBaseHelper extends SQLiteOpenHelper {
+public class FirewallBaseHelper extends SQLiteOpenHelper {
 
-    private static final int VERSION = 3;
-    private static final String DATABASE_NAME = "querylog.db";
+    private static final int VERSION = 2;
+    private static final String DATABASE_NAME = "firewall.db";
 
-    public QueryLogBaseHelper(Context context) {
+
+    public FirewallBaseHelper(Context context) {
         super(context, DATABASE_NAME, null, VERSION);
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+
         db.execSQL("create table " + TABLE_NAME + " ( " +
                 " ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                TIME + ", " +
-                DOMAIN + ", " +
-                STATUS +
+                APPLICATION +
+//                APPLICATION + ", " +
+//                STATUS +
                 ")"
         );
     }
@@ -36,16 +37,16 @@ public class QueryLogBaseHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
         onCreate(db);
     }
-
-    public boolean insertData(String time, String domain, String status) {
+                                                // String status
+    public boolean insertData(String application) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        contentValues.put(TIME, time);
-        contentValues.put(DOMAIN, domain);
-        contentValues.put(STATUS, status);
+        contentValues.put(APPLICATION, application);
+//        contentValues.put(STATUS, status);
         long result = db.insert(TABLE_NAME, null, contentValues);
         return result != -1;
     }
+
 
     public Cursor getAllData() {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -53,10 +54,18 @@ public class QueryLogBaseHelper extends SQLiteOpenHelper {
         return res;
     }
 
+//    public boolean updateData(String application, String status, String id) {
+//        SQLiteDatabase db = this.getWritableDatabase();
+//        ContentValues contentValues = new ContentValues();
+//        contentValues.put(APPLICATION, application);
+//        contentValues.put(STATUS, status);
+//        db.update(TABLE_NAME, contentValues, "ID = ?", new String[]{id});
+//        return true;
+//    }
+
     public Integer deleteData(String id) {
         SQLiteDatabase db = this.getWritableDatabase();
         return db.delete(TABLE_NAME, "ID = ?", new String[]{id});
     }
-
 
 }

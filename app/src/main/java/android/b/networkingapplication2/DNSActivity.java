@@ -11,10 +11,11 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import static android.b.networkingapplication2.OverviewActivity.PREFS_NAME;
+
 
 public class DNSActivity extends AppCompatActivity {
 
-    public static final String PREFS_NAME = "NetworkingApp";
 
     private String sDNS_name_1, sDNS_name_2, sDNS_name_3, sDNS_name_4;
     private Boolean sDNS_stat_1, sDNS_stat_2, sDNS_stat_3, sDNS_stat_4;
