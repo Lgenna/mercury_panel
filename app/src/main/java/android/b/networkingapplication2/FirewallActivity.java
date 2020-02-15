@@ -1,19 +1,13 @@
 package android.b.networkingapplication2;
 
-import android.app.Application;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
@@ -21,25 +15,20 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import database.FirewallBaseHelper;
-import database.QueryLogBaseHelper;
 
 import static android.b.networkingapplication2.OverviewActivity.PREFS_NAME;
 import static android.view.View.GONE;
 
 public class FirewallActivity extends AppCompatActivity {
 
-    FirewallBaseHelper myFireDb;
-    RecyclerView mFirewallRecyclerView;
-
-    Thread appFetcher;
-    ArrayList<ApplicationInfo> installedApps;
+    private FirewallBaseHelper myFireDb;
+    private RecyclerView mFirewallRecyclerView;
+    private ArrayList<ApplicationInfo> installedApps;
+    private Thread uiUpdater;
 
     private static final String TAG = "FirewallActivity";
 
@@ -61,14 +50,6 @@ public class FirewallActivity extends AppCompatActivity {
         LinearLayoutManager firewalllinearLayoutManager = new LinearLayoutManager(getBaseContext());
         mFirewallRecyclerView.setLayoutManager(firewalllinearLayoutManager);
 
-        appFetcher = new Thread() {
-            @Override
-            public void run() {
-                getApplications();
-            }
-        };
-
-        appFetcher.start();
 
         ImageButton removeFirewallDangerZone = findViewById(R.id.close_warning);
         LinearLayout firewallDangerZone = findViewById(R.id.danger_zone_firewall);
@@ -85,53 +66,29 @@ public class FirewallActivity extends AppCompatActivity {
             });
         }
 
-    }
-
-    private void getApplications() {
-
-        Log.i(TAG, "Started getApplications...");
-
-        // Code created with the help of Stack Overflow question
-        // https://stackoverflow.com/questions/6165023/get-list-of-installed-android-applications
-        // Question by user577732:
-        // https://stackoverflow.com/users/577732/user577732
-        // Answer by Kevin Coppock:
-        // https://stackoverflow.com/users/321697/kevin-coppock
-
-        installedApps = new ArrayList<>();
-
-        PackageManager pm = getPackageManager();
-        List<ApplicationInfo> apps = pm.getInstalledApplications(0);
-
-        for (ApplicationInfo app : apps) {
-            // updated system app
-            if ((app.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0) {
-                installedApps.add(app);
-
-            // non-updated system app
-            } else if ((app.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
-                // do nothing.
-            // user-installed app
-
-            } else {
-                installedApps.add(app);
+        uiUpdater = new Thread() {
+            @Override
+            public void run() {
+                runOnUiThread(() -> updateUI());
             }
-        }
-
-//        runOnUiThread(() -> updateUI());
-        runOnUiThread(this :: updateUI); // somehow better?
-
-        Log.i(TAG, "Finished getApplications.");
+        };
+        uiUpdater.start();
 
     }
 
     public void updateUI() {
 
-        Log.i(TAG, "Updating the user interface...");
+        Log.i(TAG, "updateUI");
+
+//        OverviewActivity overviewActivity = getBaseContext().OverviewActivity();
+//        installedApps = overviewActivity.getApps();
+//        Log.i(TAG, "installedApps.size 3 : " + installedApps.size());
+
+        installedApps = OverviewActivity.installedApps;
 
         ArrayList<Firewall> mApplications = new ArrayList<>();
 
-        if (installedApps != null || installedApps.size() != 0) {
+        if (installedApps != null && installedApps.size() != 0) {
             for (ApplicationInfo element : installedApps) {
 
                 PackageManager pm = getPackageManager();
@@ -148,8 +105,6 @@ public class FirewallActivity extends AppCompatActivity {
 
         FirewallCustomAdapter firewallcustomAdapter = new FirewallCustomAdapter(getBaseContext(), mApplications);
         mFirewallRecyclerView.setAdapter(firewallcustomAdapter);
-
-        Log.i(TAG, "Finished updating the user interface...");
 
     }
 

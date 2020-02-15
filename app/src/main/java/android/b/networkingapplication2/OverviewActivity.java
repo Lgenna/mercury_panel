@@ -4,6 +4,8 @@ import android.app.ActivityManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.ApplicationInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -18,10 +20,13 @@ import java.io.RandomAccessFile;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.sql.Array;
 import java.sql.Time;
 import java.text.DecimalFormat;
 import java.text.Format;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -48,13 +53,19 @@ public class OverviewActivity extends AppCompatActivity {
 
     private Object mPauseLock;
     private boolean mPaused, mFinished;
-    private TextView deviceTemp, deviceCPU, memoryUsage, IPV4Address, IPV6Address, startTime;
+    private TextView deviceTemp, deviceCPU, memoryUsage, IPV4Address,
+            IPV6Address, startTime, totalApps, blockedApps;
+
     private Thread uiUpdater;
+    private Thread appFetcher;
+
     private LinearLayout domainBlockerBox, DNSBox, FirewallBox, VPNBox;
     private static final String TAG = "OverviewActivity";
     private Intent intent;
     private String formattedStartupTime, formattedStartupDate;
-
+    public static ArrayList<ApplicationInfo> installedApps = new ArrayList<>();
+    private ArrayList<ApplicationInfo> mAppList;
+//    private PackageManager pm;
 
     long startupTime;
 
@@ -67,7 +78,7 @@ public class OverviewActivity extends AppCompatActivity {
         mFinished = false;
 
         setContentView(R.layout.activity_overview);
-        OverviewFragment.newInstance();
+        OverviewFragment.newInstance(); // TODO find out if this ACTUALLY does anything
 
         deviceTemp = findViewById(R.id.cpu_temperature_status);
         memoryUsage = findViewById(R.id.memory_usage_percent);
@@ -75,6 +86,8 @@ public class OverviewActivity extends AppCompatActivity {
         IPV4Address = findViewById(R.id.ipv4_address);
         IPV6Address = findViewById(R.id.ipv6_address);
         startTime = findViewById(R.id.up_time_data);
+        totalApps = findViewById(R.id.allowed_applications);
+        blockedApps = findViewById(R.id.blocked_applications);
 
 
         domainBlockerBox = findViewById(R.id.domain_blocker_info_box);
@@ -110,36 +123,64 @@ public class OverviewActivity extends AppCompatActivity {
             this.startActivity(intent);
         });
 
-        updateUI();
+        appFetcher = new Thread() {
+            @Override
+            public void run() {
+                getApplications();
 
+                String sTotalApps = installedApps.size() + " Total Apps";
+                totalApps.setText(sTotalApps);
+
+            }
+        };
+        appFetcher.start();
+
+        updateUI(); // initial call
+
+        // Builds a new thread
         uiUpdater = new Thread() {
             @Override
             public void run() {
 
                 try {
+                    // while the app is open...
                     while (!mFinished) {
+
+                        // update the user interface every 10 seconds
                         Thread.sleep(10000);
                         runOnUiThread(() -> updateUI());
+
+                        // create a synchronized boolean mPauseLock
                         synchronized (mPauseLock) {
+                            // check to see if the activity was paused
                             while (mPaused) {
+                                // if paused, stop updating the ui
                                 try {
                                     mPauseLock.wait();
-                                } catch (InterruptedException e) {
+                                } catch (InterruptedException ignore) {
                                   // Panic x2
                                 }
                             }
                         }
                     }
-                } catch (InterruptedException e) {
+                } catch (InterruptedException ignore) {
                     // panic.
                 }
             }
         };
 
+        // start the thread
         uiUpdater.start();
-
     }
 
+//    public ArrayList<ApplicationInfo> getApps() {
+//        return mAppList;
+//    }
+//
+//    public void setApps(ArrayList<ApplicationInfo> installedApps) {
+//        Log.i(TAG, "installedApps.size 2 : " + installedApps.size());
+//        mAppList = installedApps;
+//    }
 
 
     @Override
@@ -148,7 +189,46 @@ public class OverviewActivity extends AppCompatActivity {
         return true;
     }
 
+
+    public void getApplications() {
+
+        Log.i(TAG, "Started getApplications...");
+
+        // Code created with the help of Stack Overflow question
+        // https://stackoverflow.com/questions/6165023/get-list-of-installed-android-applications
+        // Question by user577732:
+        // https://stackoverflow.com/users/577732/user577732
+        // Answer by Kevin Coppock:
+        // https://stackoverflow.com/users/321697/kevin-coppock
+
+        PackageManager pm = getPackageManager();
+        List<ApplicationInfo> apps = pm.getInstalledApplications(0);
+
+        for (ApplicationInfo app : apps) {
+            // updated system app
+            if ((app.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0) {
+                installedApps.add(app);
+
+                // non-updated system app
+            } else if ((app.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                // do nothing.
+                // user-installed app
+
+            } else {
+                installedApps.add(app);
+            }
+        }
+        Log.i(TAG, "installedApps.size 1 : " + installedApps.size());
+//        setApps(installedApps);
+    }
+
     public void updateUI() {
+
+        // update the blocked apps number here so apps can be blocked dynamically
+        SharedPreferences FirewallPrefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+
+        String sBlockedApps = FirewallPrefs.getAll().size() + " Blocked Apps";
+        blockedApps.setText(sBlockedApps);
 
         DecimalFormat decimalFormat = new DecimalFormat("0.00");
 
@@ -268,7 +348,7 @@ public class OverviewActivity extends AppCompatActivity {
 
         int currentTimeDifference = (int)timeDifference / 1000;
 
-        String formattedUpTime = decimalFormat.format(currentTimeDifference) + " seconds";
+        String formattedUpTime = currentTimeDifference + " seconds";
 
         startTime.setText(formattedUpTime);
 

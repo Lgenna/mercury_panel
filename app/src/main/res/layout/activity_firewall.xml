@@ -44,13 +44,45 @@
             android:text="@string/warning_message" />
     </LinearLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/application_list"
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="@drawable/light_gray_border"
         android:layout_margin="8dp"
-        android:padding="8dp"
-        android:background="@drawable/light_gray_border"/>
+        android:padding="8dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingBottom="8dp"
+            android:background="@drawable/light_gray_line_bottom">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight=".50"
+                android:text="Application Name">
+            </TextView>
+
+            <TextView
+                android:layout_weight="1"
+                android:textAlignment="textEnd"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Firewall Enabled">
+            </TextView>
+        </LinearLayout>
 
 
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/application_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="8dp"
+            android:foreground="@drawable/faded_border"/>
+
+    </LinearLayout>
 </LinearLayout>
