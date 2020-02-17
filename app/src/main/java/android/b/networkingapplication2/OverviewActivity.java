@@ -35,6 +35,7 @@ import java.util.Locale;
 public class OverviewActivity extends AppCompatActivity {
 
     public static final String PREFS_NAME = "NetworkingApp";
+    public static final String PREFS_NAME_FIREWALL = "FirewallMenu";
 
     String[] locations = new String[]  {"/sys/devices/system/cpu/cpu0/cpufreq/cpu_temp",
             "/sys/devices/system/cpu/cpu0/cpufreq/FakeShmoo_cpu_temp",
@@ -52,20 +53,20 @@ public class OverviewActivity extends AppCompatActivity {
             "/sys/devices/platform/s5p-tmu/curr_temp"};
 
     private Object mPauseLock;
-    private boolean mPaused, mFinished;
+    private boolean mPaused, mFinished, getApplications = false;
     private TextView deviceTemp, deviceCPU, memoryUsage, IPV4Address,
             IPV6Address, startTime, totalApps, blockedApps;
 
     private Thread uiUpdater;
-    private Thread appFetcher;
 
     private LinearLayout domainBlockerBox, DNSBox, FirewallBox, VPNBox;
     private static final String TAG = "OverviewActivity";
     private Intent intent;
-    private String formattedStartupTime, formattedStartupDate;
     public static ArrayList<ApplicationInfo> installedApps = new ArrayList<>();
-    private ArrayList<ApplicationInfo> mAppList;
-//    private PackageManager pm;
+
+    String addressIPV6, sTotalApps, addressIPV4, formattedMemoryUsed, formattedTemperature,
+        formattedCPUUsage, formattedUpTime, sBlockedApps;
+
 
     long startupTime;
 
@@ -123,20 +124,6 @@ public class OverviewActivity extends AppCompatActivity {
             this.startActivity(intent);
         });
 
-        appFetcher = new Thread() {
-            @Override
-            public void run() {
-                getApplications();
-
-                String sTotalApps = installedApps.size() + " Total Apps";
-                totalApps.setText(sTotalApps);
-
-            }
-        };
-        appFetcher.start();
-
-        updateUI(); // initial call
-
         // Builds a new thread
         uiUpdater = new Thread() {
             @Override
@@ -146,9 +133,19 @@ public class OverviewActivity extends AppCompatActivity {
                     // while the app is open...
                     while (!mFinished) {
 
+                        getIPAddresses();
+                        getBatteryTemp();
+                        getCPUUsage();
+                        getMemoryUsage();
+                        if (!getApplications) {
+                            getApplications();
+                        }
+                        getUpTime();
+
+                        runOnUiThread(() -> updateUI());
+
                         // update the user interface every 10 seconds
                         Thread.sleep(10000);
-                        runOnUiThread(() -> updateUI());
 
                         // create a synchronized boolean mPauseLock
                         synchronized (mPauseLock) {
@@ -173,20 +170,23 @@ public class OverviewActivity extends AppCompatActivity {
         uiUpdater.start();
     }
 
-//    public ArrayList<ApplicationInfo> getApps() {
-//        return mAppList;
-//    }
-//
-//    public void setApps(ArrayList<ApplicationInfo> installedApps) {
-//        Log.i(TAG, "installedApps.size 2 : " + installedApps.size());
-//        mAppList = installedApps;
-//    }
-
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
+    }
+
+    private void getUpTime() {
+        // System Uptime - get current time
+
+        long currentTime = new Date().getTime();
+
+        long timeDifference = currentTime - startupTime;
+
+        int currentTimeDifference = (int)timeDifference / 1000;
+
+        formattedUpTime = currentTimeDifference + " seconds";
+        Log.i(TAG, "Up-time : " + formattedUpTime);
     }
 
 
@@ -194,7 +194,7 @@ public class OverviewActivity extends AppCompatActivity {
 
         Log.i(TAG, "Started getApplications...");
 
-        // Code created with the help of Stack Overflow question
+        // Code created with the help of Stack Overflow question:
         // https://stackoverflow.com/questions/6165023/get-list-of-installed-android-applications
         // Question by user577732:
         // https://stackoverflow.com/users/577732/user577732
@@ -205,85 +205,104 @@ public class OverviewActivity extends AppCompatActivity {
         List<ApplicationInfo> apps = pm.getInstalledApplications(0);
 
         for (ApplicationInfo app : apps) {
-            // updated system app
-            if ((app.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0) {
+            if ((app.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0) { // updated system app
                 installedApps.add(app);
 
-                // non-updated system app
-            } else if ((app.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
-                // do nothing.
-                // user-installed app
+            } else if ((app.flags & ApplicationInfo.FLAG_SYSTEM) != 0) { // non-updated system app, do nothing
 
-            } else {
+            } else { // user-installed app
                 installedApps.add(app);
             }
         }
-        Log.i(TAG, "installedApps.size 1 : " + installedApps.size());
-//        setApps(installedApps);
-    }
 
-    public void updateUI() {
+        getApplications = true;
+
+        sTotalApps = installedApps.size() + " Total Apps";
+        Log.i(TAG, sTotalApps);
 
         // update the blocked apps number here so apps can be blocked dynamically
-        SharedPreferences FirewallPrefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        SharedPreferences FirewallPrefs = getSharedPreferences(PREFS_NAME_FIREWALL, MODE_PRIVATE);
 
-        String sBlockedApps = FirewallPrefs.getAll().size() + " Blocked Apps";
-        blockedApps.setText(sBlockedApps);
+        sBlockedApps = FirewallPrefs.getAll().size() + " Blocked Apps";
+    }
 
-        DecimalFormat decimalFormat = new DecimalFormat("0.00");
+    private void getIPAddresses() {
 
-        try { // IP Address
-            // TODO this is a temporary solution to find the ip addresses of the device
+        // Code created with help of Stack Overflow question
+        // https://stackoverflow.com/questions/6064510/how-to-get-ip-address-of-the-device-from-code
+        // Question by Nilesh Tupe:
+        // https://stackoverflow.com/users/640034/nilesh-tupe
+        // Answer by Whome:
+        // https://stackoverflow.com/users/185565/whome
+
+        try {
             List<NetworkInterface> interfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
             for (NetworkInterface intf : interfaces) {
                 List<InetAddress> addrs = Collections.list(intf.getInetAddresses());
-                for (InetAddress addr : addrs) {
-                    if (!addr.isLoopbackAddress()) {
-                        String sAddr = addr.getHostAddress();
+//                for (InetAddress addr : addrs) {
+                for(int i = 0; i < addrs.size(); i++) {
+                    if (!addrs.get(i).isLoopbackAddress()) {
+                        String sAddr = addrs.get(i).getHostAddress();
 
                         if (sAddr.indexOf(':') < 0) {
                             // the address was ipv4
                             Log.i(TAG, "IPV4 Address :" +sAddr);
-                            IPV4Address.setText(sAddr);
+                            addressIPV4 = sAddr;
                         } else {
                             // the address was ipv6
                             int delimiter = sAddr.indexOf('%');
 
-                            if (delimiter > 0) {
+                            if (delimiter > 0 && i != 0) {
 
-                                String addressIPV6 = sAddr.substring(0, delimiter).toUpperCase();
+                                addressIPV6 = sAddr.substring(0, delimiter).toUpperCase();
 
                                 Log.i(TAG, "IPV6 Address :" + addressIPV6);
-
-                                IPV6Address.setText(addressIPV6);
                             }
                         }
                     }
                 }
             }
         } catch (SocketException ignored) { }
+    }
+
+    private void getBatteryTemp() {
+
+        // Code created with help of Stack Overflow question:
+        // https://stackoverflow.com/questions/20771070/how-do-i-get-the-cpu-temperature
+        // Question by Asaf:
+        // https://stackoverflow.com/users/1225878/asaf
+        // Answer by Jyoti-jk:
+        // https://stackoverflow.com/users/8867002/jyoti-jk
 
         for (String location : locations) { // Temperature of battery
-            // TODO this is a temporary solution to find the battery temperature
             try {
                 RandomAccessFile reader = new RandomAccessFile(location, "r");
                 String temperatureValue = reader.readLine();
                 if (temperatureValue != null) {
                     String currentTemp = Double.toString(Double.parseDouble(temperatureValue) / 1000);
-                    String formattedTemperature = currentTemp + getResources().getString(R.string.degree_symbol_celsius);
-                    Log.i(TAG, "Valid location : " + formattedTemperature + " : " + location);
-                    deviceTemp.setText(formattedTemperature);
+                    formattedTemperature = currentTemp + getResources().getString(R.string.degree_symbol_celsius);
+                    Log.i(TAG, "Battery Temperature : " + formattedTemperature + " : " + location);
+
                     break; // breaks the for-each loop once it finds one valid temperature
                 }
-            } catch (IOException e) {
-                Log.w(TAG, "[IOException] File not found at " + location);
+            } catch (IOException ignore) {
+//                Log.w(TAG, "[IOException] File not found at " + location);
             }
         }
+    }
+
+    private void getCPUUsage() {
+
+        DecimalFormat decimalFormat = new DecimalFormat("0.00");
+
+        // Code created with help of Stack Overflow question:
+        // https://stackoverflow.com/questions/3118234/get-memory-usage-in-android
+        // Question by Badal:
+        // https://stackoverflow.com/users/376287/badal
+        // Answer by Szcoder:
+        // https://stackoverflow.com/users/688747/szcoder
 
         try {
-            // CPU % Usage
-
-            // TODO this is a temporary solution to find the CPU usage
             RandomAccessFile reader = new RandomAccessFile("/proc/stat", "r");
             String load = reader.readLine();
 
@@ -312,17 +331,26 @@ public class OverviewActivity extends AppCompatActivity {
 
             double rawPercentage = (numerator / denominator) * 100.0;
 
-            String formattedCPUUsage = decimalFormat.format(rawPercentage) + getResources().getString(R.string.percent_symbol);
+            formattedCPUUsage = decimalFormat.format(rawPercentage) + getResources().getString(R.string.percent_symbol);
 
             Log.i(TAG, "CPU Usage: " + formattedCPUUsage);
-            deviceCPU.setText(formattedCPUUsage);
+
         } catch (IOException e) {
             Log.w(TAG, "[IOException] File not found at /proc/stat");
         }
+    }
 
-        // Memory % Usage
+    private void getMemoryUsage() {
 
-        // TODO this is a temporary solution to find the memory usage
+        DecimalFormat decimalFormat = new DecimalFormat("0.00");
+
+        // Code created with help of Stack Overflow question:
+        // https://stackoverflow.com/questions/3170691/how-to-get-current-memory-usage-in-android
+        // Question by Badal:
+        // https://stackoverflow.com/users/376287/badal
+        // Answer by Badal:
+        // https://stackoverflow.com/users/376287/badal
+        //  Possibly a site error for the same asker/answerer?
 
         ActivityManager.MemoryInfo mi = new ActivityManager.MemoryInfo();
         ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
@@ -333,26 +361,22 @@ public class OverviewActivity extends AppCompatActivity {
 
         double percentUsed = (usedMegs / totalMegs) * 100.0;
 
-        String formattedMemoryUsed = decimalFormat.format(percentUsed) + getResources().getString(R.string.percent_symbol);
+        formattedMemoryUsed = decimalFormat.format(percentUsed) + getResources().getString(R.string.percent_symbol);
 
         Log.i(TAG, "Memory Usage: " + formattedMemoryUsed);
+    }
+
+    private void updateUI() {
+
+        IPV4Address.setText(addressIPV4);
+        IPV6Address.setText(addressIPV6);
+        totalApps.setText(sTotalApps);
         memoryUsage.setText(formattedMemoryUsed);
-
-
-
-        // System Uptime - get current time
-
-        long currentTime = new Date().getTime();
-
-        long timeDifference = currentTime - startupTime;
-
-        int currentTimeDifference = (int)timeDifference / 1000;
-
-        String formattedUpTime = currentTimeDifference + " seconds";
+        deviceTemp.setText(formattedTemperature);
+        deviceCPU.setText(formattedCPUUsage);
+        blockedApps.setText(sBlockedApps);
 
         startTime.setText(formattedUpTime);
-
-
     }
 
     @Override

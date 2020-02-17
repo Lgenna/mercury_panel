@@ -71,4 +71,7 @@
     <string name="current_vpn_server_title">Current VPN Server</string>
     <string name="degree_symbol_celsius">°C</string>
     <string name="percent_symbol">%</string>
+    <string name="connecting">Mercury Panel is connecting...</string>
+    <string name="connected">Mercury Panel is connected!</string>
+    <string name="disconnected">Mercury Panel is disconnected!</string>
 </resources>

@@ -43,13 +43,10 @@ public class FirewallActivity extends AppCompatActivity {
 
         boolean closedDangerZone = FirewallPrefs.getBoolean("dangerZoneClosed", false);
 
-        myFireDb = new FirewallBaseHelper(getBaseContext());
-
         mFirewallRecyclerView = findViewById(R.id.application_list);
 
         LinearLayoutManager firewalllinearLayoutManager = new LinearLayoutManager(getBaseContext());
         mFirewallRecyclerView.setLayoutManager(firewalllinearLayoutManager);
-
 
         ImageButton removeFirewallDangerZone = findViewById(R.id.close_warning);
         LinearLayout firewallDangerZone = findViewById(R.id.danger_zone_firewall);
@@ -79,10 +76,6 @@ public class FirewallActivity extends AppCompatActivity {
     public void updateUI() {
 
         Log.i(TAG, "updateUI");
-
-//        OverviewActivity overviewActivity = getBaseContext().OverviewActivity();
-//        installedApps = overviewActivity.getApps();
-//        Log.i(TAG, "installedApps.size 3 : " + installedApps.size());
 
         installedApps = OverviewActivity.installedApps;
 

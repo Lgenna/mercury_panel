@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:orientation="vertical"
     android:layout_margin="8dp"
     android:background="@drawable/light_gray_border">
@@ -12,102 +12,23 @@
         android:id="@+id/dns_servers_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/light_gray_border"
         android:padding="8dp"
         android:text="@string/dns_servers" />
 
-    <LinearLayout
+    <View
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginTop="8dp"
-        android:background="@drawable/light_gray_border"
-        android:orientation="vertical">
+        android:background="@drawable/light_gray_underline">
+    </View>
 
-        <Switch
-            android:id="@+id/tdns_title_1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:text="@string/custom_1_ipv4_title" />
-
-        <EditText
-            android:id="@+id/dns_textbox_1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"/>
-
-    </LinearLayout>
-
-    <LinearLayout
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/dns_recycler_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginTop="8dp"
-        android:background="@drawable/light_gray_border"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
-        <Switch
-            android:id="@+id/tdns_title_2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:text="@string/custom_2_ipv4_title" />
+    </androidx.recyclerview.widget.RecyclerView>
 
-        <EditText
-            android:id="@+id/dns_textbox_2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"/>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginTop="8dp"
-        android:background="@drawable/light_gray_border"
-        android:orientation="vertical">
-
-        <Switch
-            android:id="@+id/tdns_title_3"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:text="@string/custom_3_ipv6_title" />
-
-        <EditText
-            android:id="@+id/dns_textbox_3"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"/>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:background="@drawable/light_gray_border"
-        android:orientation="vertical">
-
-        <Switch
-            android:id="@+id/tdns_title_4"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:text="@string/custom_4_ipv6_title" />
-
-        <EditText
-            android:id="@+id/dns_textbox_4"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"/>
-
-    </LinearLayout>
 
 </LinearLayout>
