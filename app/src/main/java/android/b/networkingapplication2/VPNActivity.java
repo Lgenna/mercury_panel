@@ -16,10 +16,15 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
+//import static android.b.networkingapplication2.OverviewActivity.BlockedApps;
+import static android.b.networkingapplication2.OverviewActivity.PREFS_FIREWALL;
 import static android.b.networkingapplication2.OverviewActivity.PREFS_GENERAL;
 import static android.b.networkingapplication2.OverviewActivity.PREFS_VPN;
 
@@ -30,6 +35,8 @@ public class VPNActivity extends AppCompatActivity {
     ImageButton VPNURLAdd, VPNDefaultAdd, ChangeVPNServer;
     TextView VPNURL;
     private static final String TAG = "VPNActivity";
+
+    ArrayList<String> blockedApps;
 
     public interface Prefs {
         String NAME = "connection";
@@ -84,12 +91,16 @@ public class VPNActivity extends AppCompatActivity {
 
         });
 
-        String[] appPackages = {
-                "com.android.chrome",
-                "com.example.a.missing.app"};
+//        String[] appPackages = {
+//                "com.android.chrome",
+//                "com.example.a.missing.app"};
+
+//        ArrayList<String> apps = new ArrayList<>();
 
 
-        final Set<String> packageSet = new HashSet<>(Arrays.asList(appPackages));
+
+
+        final Set<String> packageSet = new HashSet<>(getBlockedApps());
 
         SharedPreferences VPNPrefs = getSharedPreferences(PREFS_GENERAL, MODE_PRIVATE);
 
@@ -117,9 +128,52 @@ public class VPNActivity extends AppCompatActivity {
             }
         });
 
-
-
     }
+
+
+    private ArrayList<String> getBlockedApps() {
+
+        SharedPreferences FirewallPrefs = getSharedPreferences(PREFS_FIREWALL, MODE_PRIVATE);
+
+        ArrayList<String> BlockedApps = new ArrayList<>();
+
+        Map<String, ?> keys = FirewallPrefs.getAll();
+
+        for(Map.Entry<String, ?> element : keys.entrySet()){
+//            Log.i("map values",element.getKey());
+            BlockedApps.add(element.getKey());
+        }
+
+        if (BlockedApps.size() > 0) {
+            return BlockedApps;
+        } else {
+            // no applications blocked, therefore die.
+            return null;
+        }
+
+
+//        Log.i(TAG, "applicationList.size() : " + applicationList.size());
+//
+//        if (FirewallActivity.mApplications != null && FirewallActivity.mApplications.size() != 0) {
+//            for (Firewall element : applicationList) {
+//
+//                String currentAppName = element.getProcessName();
+//
+//                boolean appStatus = FirewallPrefs.getBoolean(currentAppName, false);
+//
+//                if (appStatus) {
+//                    Log.i(TAG, "adding " + currentAppName + " to blockedApps");
+//                    BlockedApps.add(currentAppName);
+//                }
+//            }
+//            Log.i(TAG, "BlockedApps : " + BlockedApps.toString());
+//
+//            return BlockedApps;
+//        }
+//
+//        return null;
+    }
+
 
     private void updateViews() {
 

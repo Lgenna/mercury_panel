@@ -69,7 +69,7 @@ public class OverviewActivity extends AppCompatActivity {
 
     long startupTime;
 
-    private ArrayList<Firewall> applicationList;
+
 
     public static ArrayList<String> BlockedApps;
 
@@ -82,7 +82,7 @@ public class OverviewActivity extends AppCompatActivity {
         mFinished = false;
 
         setContentView(R.layout.activity_overview);
-        OverviewFragment.newInstance(); // TODO find out if this ACTUALLY does anything
+//        OverviewFragment.newInstance(); // TODO find out if this ACTUALLY does anything
 
         deviceTemp = findViewById(R.id.cpu_temperature_status);
         memoryUsage = findViewById(R.id.memory_usage_percent);
@@ -143,9 +143,9 @@ public class OverviewActivity extends AppCompatActivity {
                         getBatteryTemp();
                         getCPUUsage();
                         getMemoryUsage();
-                        if (!getApplications) {
-                            getApplications();
-                        }
+//                        if (!getApplications) {
+                        getApplications();
+//                        }
                         getVPNStatus();
                         getDnsInfo();
 
@@ -157,8 +157,10 @@ public class OverviewActivity extends AppCompatActivity {
                         Thread.sleep(10000);
 
                         // create a synchronized boolean mPauseLock
+//                        Log.i(TAG, "mPauseLock : " + mPauseLock);
                         synchronized (mPauseLock) {
                             // check to see if the activity was paused
+//                            Log.i(TAG, "mPaused : " + mPaused);
                             while (mPaused) {
                                 // if paused, stop updating the ui
                                 try {
@@ -169,6 +171,7 @@ public class OverviewActivity extends AppCompatActivity {
                             }
                         }
                     }
+                    Log.i(TAG, "Finished Looping, this isn't supposed to happen.");
                 } catch (InterruptedException ignore) {
                     // panic.
                 }
@@ -255,7 +258,7 @@ public class OverviewActivity extends AppCompatActivity {
         PackageManager pm = getPackageManager();
         List<ApplicationInfo> apps = pm.getInstalledApplications(0);
 
-
+        installedApps = new ArrayList<>();
 
         for (ApplicationInfo app : apps) {
             if ((app.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0) { // updated system app
@@ -278,22 +281,25 @@ public class OverviewActivity extends AppCompatActivity {
 
         sBlockedApps = FirewallPrefs.getAll().size() + " Blocked Apps";
 
-        applicationList = FirewallActivity.mApplications;
 
 
-        BlockedApps = new ArrayList<>();
-        if (FirewallActivity.mApplications != null && FirewallActivity.mApplications.size() != 0) {
-            for (Firewall element : applicationList) {
 
-                String currentAppName = element.getProcessName();
 
-                boolean appStatus = FirewallPrefs.getBoolean(currentAppName, false);
-
-                if (appStatus) {
-                    BlockedApps.add(currentAppName);
-                }
-            }
-        }
+//        BlockedApps = new ArrayList<>();
+//
+//        if (FirewallActivity.mApplications != null && FirewallActivity.mApplications.size() != 0) {
+//            for (Firewall element : applicationList) {
+//
+//                String currentAppName = element.getProcessName();
+//
+//                boolean appStatus = FirewallPrefs.getBoolean(currentAppName, false);
+//
+//                if (appStatus) {
+//                    Log.i(TAG, "adding " + currentAppName + " to blockedApps");
+//                    BlockedApps.add(currentAppName);
+//                }
+//            }
+//        }
 
 //
 //

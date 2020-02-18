@@ -101,7 +101,6 @@ public class ToyVpnService extends VpnService implements Handler.Callback {
         // Extract information from the shared preferences.
         final SharedPreferences prefs = getSharedPreferences(PREFS_VPN, MODE_PRIVATE);
         final String server = prefs.getString(VPNActivity.Prefs.SERVER_ADDRESS, "");
-        Log.i(TAG, "serverAddress : " + server);
         final byte[] secret = prefs.getString(VPNActivity.Prefs.SHARED_SECRET, "").getBytes();
 //        final boolean allow = prefs.getBoolean(VPNActivity.Prefs.ALLOW, true);
         final Set<String> packages =
