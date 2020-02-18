@@ -16,8 +16,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
-import static android.b.networkingapplication2.OverviewActivity.PREFS_NAME;
-import static android.content.Context.MODE_PRIVATE;
 import static androidx.constraintlayout.widget.Constraints.TAG;
 
 public class DNSFragment extends Fragment {

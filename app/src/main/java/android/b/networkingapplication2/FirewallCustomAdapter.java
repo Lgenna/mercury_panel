@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
-import static android.b.networkingapplication2.OverviewActivity.PREFS_NAME_FIREWALL;
+import static android.b.networkingapplication2.OverviewActivity.PREFS_FIREWALL;
 import static android.content.Context.MODE_PRIVATE;
 
 public class FirewallCustomAdapter extends RecyclerView.Adapter<FirewallCustomAdapter.MyViewHolder> {
@@ -40,7 +40,7 @@ public class FirewallCustomAdapter extends RecyclerView.Adapter<FirewallCustomAd
     @Override
     public void onBindViewHolder(MyViewHolder holder, final int position) {
 
-        SharedPreferences FirewallPrefs = context.getSharedPreferences(PREFS_NAME_FIREWALL, MODE_PRIVATE);
+        SharedPreferences FirewallPrefs = context.getSharedPreferences(PREFS_FIREWALL, MODE_PRIVATE);
 
         boolean appStatus = FirewallPrefs.getBoolean(mApplications.get(position).getProcessName(), false);
 
@@ -49,7 +49,7 @@ public class FirewallCustomAdapter extends RecyclerView.Adapter<FirewallCustomAd
         holder.status.setText(mApplications.get(position).getApplication());
         holder.status.setOnClickListener(v -> {
 
-            SharedPreferences.Editor editor = context.getSharedPreferences(PREFS_NAME_FIREWALL, MODE_PRIVATE).edit();
+            SharedPreferences.Editor editor = context.getSharedPreferences(PREFS_FIREWALL, MODE_PRIVATE).edit();
 
             if(holder.status.isChecked()) {
 

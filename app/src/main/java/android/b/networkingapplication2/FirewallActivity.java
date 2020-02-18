@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
@@ -16,19 +17,15 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
-import java.util.List;
 
-import database.FirewallBaseHelper;
-
-import static android.b.networkingapplication2.OverviewActivity.PREFS_NAME;
-import static android.view.View.GONE;
+import static android.b.networkingapplication2.OverviewActivity.PREFS_GENERAL;
 
 public class FirewallActivity extends AppCompatActivity {
 
-    private FirewallBaseHelper myFireDb;
     private RecyclerView mFirewallRecyclerView;
     private ArrayList<ApplicationInfo> installedApps;
     private Thread uiUpdater;
+    public static ArrayList<Firewall> mApplications;
 
     private static final String TAG = "FirewallActivity";
 
@@ -39,9 +36,9 @@ public class FirewallActivity extends AppCompatActivity {
         setContentView(R.layout.activity_firewall);
         FirewallFragment.newInstance();
 
-        SharedPreferences FirewallPrefs = getSharedPreferences(OverviewActivity.PREFS_NAME, MODE_PRIVATE);
+        SharedPreferences GeneralPrefs = getSharedPreferences(PREFS_GENERAL, MODE_PRIVATE);
 
-        boolean closedDangerZone = FirewallPrefs.getBoolean("dangerZoneClosed", false);
+        boolean closedDangerZone = GeneralPrefs.getBoolean("dangerZoneClosed", false);
 
         mFirewallRecyclerView = findViewById(R.id.application_list);
 
@@ -52,14 +49,14 @@ public class FirewallActivity extends AppCompatActivity {
         LinearLayout firewallDangerZone = findViewById(R.id.danger_zone_firewall);
 
         if (closedDangerZone) {
-            firewallDangerZone.setVisibility(GONE);
+            firewallDangerZone.setVisibility(View.GONE);
         } else {
            removeFirewallDangerZone.setOnClickListener(v -> {
-                SharedPreferences.Editor editor = getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit();
+                SharedPreferences.Editor editor = getSharedPreferences(PREFS_GENERAL, MODE_PRIVATE).edit();
                 editor.putBoolean("dangerZoneClosed", true);
                 editor.apply();
 
-                firewallDangerZone.setVisibility(GONE);
+                firewallDangerZone.setVisibility(View.GONE);
             });
         }
 
@@ -79,7 +76,7 @@ public class FirewallActivity extends AppCompatActivity {
 
         installedApps = OverviewActivity.installedApps;
 
-        ArrayList<Firewall> mApplications = new ArrayList<>();
+        mApplications = new ArrayList<>();
 
         if (installedApps != null && installedApps.size() != 0) {
             for (ApplicationInfo element : installedApps) {

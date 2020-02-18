@@ -3,9 +3,9 @@ package android.b.networkingapplication2;
 import android.app.ActivityManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ApplicationInfo;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -20,22 +20,19 @@ import java.io.RandomAccessFile;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
-import java.sql.Array;
-import java.sql.Time;
 import java.text.DecimalFormat;
-import java.text.Format;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 public class OverviewActivity extends AppCompatActivity {
 
-    public static final String PREFS_NAME = "NetworkingApp";
-    public static final String PREFS_NAME_FIREWALL = "FirewallMenu";
+    public static final String PREFS_GENERAL = "NetworkingApp";
+    public static final String PREFS_FIREWALL = "Firewall";
+    public static final String PREFS_DNS = "DomainNameSystem";
+    public static final String PREFS_DOMAINBLOCKER = "DomainBlocker";
+    public static final String PREFS_VPN = "VirtualPrivateNetwork";
 
     String[] locations = new String[]  {"/sys/devices/system/cpu/cpu0/cpufreq/cpu_temp",
             "/sys/devices/system/cpu/cpu0/cpufreq/FakeShmoo_cpu_temp",
@@ -55,7 +52,8 @@ public class OverviewActivity extends AppCompatActivity {
     private Object mPauseLock;
     private boolean mPaused, mFinished, getApplications = false;
     private TextView deviceTemp, deviceCPU, memoryUsage, IPV4Address,
-            IPV6Address, startTime, totalApps, blockedApps;
+            IPV6Address, startTime, totalApps, blockedApps, dnsStatus,
+            dnsNumber, vpnStatus, vpnServer;
 
     private Thread uiUpdater;
 
@@ -65,10 +63,15 @@ public class OverviewActivity extends AppCompatActivity {
     public static ArrayList<ApplicationInfo> installedApps = new ArrayList<>();
 
     String addressIPV6, sTotalApps, addressIPV4, formattedMemoryUsed, formattedTemperature,
-        formattedCPUUsage, formattedUpTime, sBlockedApps;
+            formattedCPUUsage, formattedUpTime, sBlockedApps, sDNSStatus, sDNSNumber,
+            sVPNStatus, sVPNServer;
 
 
     long startupTime;
+
+    private ArrayList<Firewall> applicationList;
+
+    public static ArrayList<String> BlockedApps;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,7 +92,10 @@ public class OverviewActivity extends AppCompatActivity {
         startTime = findViewById(R.id.up_time_data);
         totalApps = findViewById(R.id.allowed_applications);
         blockedApps = findViewById(R.id.blocked_applications);
-
+        dnsStatus = findViewById(R.id.dns_status);
+        dnsNumber = findViewById(R.id.dns_ip_address);
+        vpnStatus = findViewById(R.id.vpn_status);
+        vpnServer = findViewById(R.id.vpn_server);
 
         domainBlockerBox = findViewById(R.id.domain_blocker_info_box);
         DNSBox = findViewById(R.id.dns_info_box);
@@ -140,6 +146,9 @@ public class OverviewActivity extends AppCompatActivity {
                         if (!getApplications) {
                             getApplications();
                         }
+                        getVPNStatus();
+                        getDnsInfo();
+
                         getUpTime();
 
                         runOnUiThread(() -> updateUI());
@@ -155,7 +164,7 @@ public class OverviewActivity extends AppCompatActivity {
                                 try {
                                     mPauseLock.wait();
                                 } catch (InterruptedException ignore) {
-                                  // Panic x2
+                                    // Panic x2
                                 }
                             }
                         }
@@ -174,6 +183,48 @@ public class OverviewActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
+    }
+
+    private void getDnsInfo() {
+
+        SharedPreferences DNSPrefs = getSharedPreferences(PREFS_DNS, MODE_PRIVATE);
+
+        String[] DNSNames = {"Custom 1 (IPV4)", "Custom 2 (IPV4)", "Custom 3 (IPV6)", "Custom 4 (IPV6)"};
+
+        int counter = 0;
+        for (String element : DNSNames) {
+            boolean currentValue = DNSPrefs.getBoolean("b" + element, false);
+            if (currentValue) {
+                counter++;
+            }
+        }
+
+        if (counter > 0) {
+            sDNSNumber = counter + " DNS(s) Active";
+            sDNSStatus = "Online!";
+            runOnUiThread(() -> dnsNumber.setText(sDNSNumber));
+            runOnUiThread(() -> dnsStatus.setText(sDNSStatus));
+        }
+    }
+
+    private void getVPNStatus() {
+        SharedPreferences GeneralPrefs = getSharedPreferences(PREFS_GENERAL, MODE_PRIVATE);
+
+        boolean monitoringStatus = GeneralPrefs.getBoolean("monitoringStatus", false);
+
+        if (monitoringStatus) {
+            sVPNStatus = "Online!";
+        } else {
+            sVPNStatus = "Offline";
+        }
+        runOnUiThread(() -> vpnStatus.setText(sVPNStatus));
+
+        boolean VPNServer = GeneralPrefs.getBoolean("isVPNServerDefault", false);
+
+        if (VPNServer) {
+            sVPNServer = "Default VPN Server";
+            runOnUiThread(() -> vpnServer.setText(sVPNServer));
+        }
     }
 
     private void getUpTime() {
@@ -204,6 +255,8 @@ public class OverviewActivity extends AppCompatActivity {
         PackageManager pm = getPackageManager();
         List<ApplicationInfo> apps = pm.getInstalledApplications(0);
 
+
+
         for (ApplicationInfo app : apps) {
             if ((app.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0) { // updated system app
                 installedApps.add(app);
@@ -221,9 +274,34 @@ public class OverviewActivity extends AppCompatActivity {
         Log.i(TAG, sTotalApps);
 
         // update the blocked apps number here so apps can be blocked dynamically
-        SharedPreferences FirewallPrefs = getSharedPreferences(PREFS_NAME_FIREWALL, MODE_PRIVATE);
+        SharedPreferences FirewallPrefs = getSharedPreferences(PREFS_FIREWALL, MODE_PRIVATE);
 
         sBlockedApps = FirewallPrefs.getAll().size() + " Blocked Apps";
+
+        applicationList = FirewallActivity.mApplications;
+
+
+        BlockedApps = new ArrayList<>();
+        if (FirewallActivity.mApplications != null && FirewallActivity.mApplications.size() != 0) {
+            for (Firewall element : applicationList) {
+
+                String currentAppName = element.getProcessName();
+
+                boolean appStatus = FirewallPrefs.getBoolean(currentAppName, false);
+
+                if (appStatus) {
+                    BlockedApps.add(currentAppName);
+                }
+            }
+        }
+
+//
+//
+//
+//        for (int i = 0; i < FirewallPrefs.getAll().size(); i++) {
+//            BlockedApps.add();
+//        }
+
     }
 
     private void getIPAddresses() {
@@ -370,11 +448,13 @@ public class OverviewActivity extends AppCompatActivity {
 
         IPV4Address.setText(addressIPV4);
         IPV6Address.setText(addressIPV6);
+
         totalApps.setText(sTotalApps);
         memoryUsage.setText(formattedMemoryUsed);
         deviceTemp.setText(formattedTemperature);
         deviceCPU.setText(formattedCPUUsage);
         blockedApps.setText(sBlockedApps);
+
 
         startTime.setText(formattedUpTime);
     }

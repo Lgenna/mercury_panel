@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
-import static android.b.networkingapplication2.OverviewActivity.PREFS_NAME;
+import static android.b.networkingapplication2.OverviewActivity.PREFS_DNS;
 import static android.content.Context.MODE_PRIVATE;
 
 public class DNSCustomAdapter extends RecyclerView.Adapter<DNSCustomAdapter.MyViewHolder> {
@@ -41,7 +41,7 @@ public class DNSCustomAdapter extends RecyclerView.Adapter<DNSCustomAdapter.MyVi
     @Override
     public void onBindViewHolder(MyViewHolder holder, final int position) {
 
-        SharedPreferences DNSPrefs = context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        SharedPreferences DNSPrefs = context.getSharedPreferences(PREFS_DNS, MODE_PRIVATE);
 
         String DNSTextbox = DNSPrefs.getString("s" + mDNSEntries.get(position).getTitle(), "");
         boolean DNSStatus = DNSPrefs.getBoolean("b" + mDNSEntries.get(position).getTitle(), false);
@@ -51,7 +51,7 @@ public class DNSCustomAdapter extends RecyclerView.Adapter<DNSCustomAdapter.MyVi
         holder.status.setChecked(DNSStatus);
         holder.status.setOnClickListener(v -> {
 
-            SharedPreferences.Editor editor = context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit();
+            SharedPreferences.Editor editor = context.getSharedPreferences(PREFS_DNS, MODE_PRIVATE).edit();
 
             String DNSEntryTitle = mDNSEntries.get(position).getTitle();
             String entereredText = holder.textbox.getText().toString();

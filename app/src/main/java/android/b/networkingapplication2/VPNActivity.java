@@ -4,65 +4,147 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.VpnService;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.Switch;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
+import static android.b.networkingapplication2.OverviewActivity.PREFS_GENERAL;
+import static android.b.networkingapplication2.OverviewActivity.PREFS_VPN;
 
 public class VPNActivity extends AppCompatActivity {
+
+    Switch monitoringStatus;
+    LinearLayout VPNFileBox, VPNSettingsBox;
+    ImageButton VPNURLAdd, VPNDefaultAdd, ChangeVPNServer;
+    TextView VPNURL;
+    private static final String TAG = "VPNActivity";
 
     public interface Prefs {
         String NAME = "connection";
         String SERVER_ADDRESS = "server.address";
         String SERVER_PORT = "server.port";
         String SHARED_SECRET = "shared.secret";
+        String PACKAGES = "packages";
     }
-
-
-    Switch monitoringStatus;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_vpn);
-//        setContentView(R.layout.activity_empty);
-//
-//        FragmentManager fragmentManager = getSupportFragmentManager();
-//        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-//
-//        fragmentTransaction.add(R.id.fragment_container, VPNFragment.newInstance());
-//        fragmentTransaction.commit();
 
-        final SharedPreferences prefs = getSharedPreferences(VPNActivity.Prefs.NAME, MODE_PRIVATE);
+        final SharedPreferences prefs = getSharedPreferences(PREFS_VPN, MODE_PRIVATE);
+
+        VPNFileBox = findViewById(R.id.vpn_file_box);
+        VPNSettingsBox = findViewById(R.id.vpn_settings_box);
+        monitoringStatus = findViewById(R.id.toggle_vpn);
+        VPNURLAdd = findViewById(R.id.vpn_url_add);
+        VPNDefaultAdd = findViewById(R.id.vpn_default_add);
+        ChangeVPNServer = findViewById(R.id.change_vpn_server_button);
+        VPNURL = findViewById(R.id.vpn_url);
+
+        updateViews();
+
+        SharedPreferences.Editor editor = getSharedPreferences(PREFS_GENERAL, MODE_PRIVATE).edit();
+
+        ChangeVPNServer.setOnClickListener(v -> {
+//            isVPNServerDefault = false;
+//            selectedVPNServer = false;
+            editor.putBoolean("isVPNServerDefault", false);
+            editor.putBoolean("selectedVPNServer", false);
+            editor.apply();
+            updateViews();
+        });
+
+        VPNURLAdd.setOnClickListener(v -> {
+            Toast.makeText(this, "Currently not implemented, using default", Toast.LENGTH_LONG).show();
+            editor.putBoolean("isVPNServerDefault", true);
+            editor.putBoolean("selectedVPNServer", true);
+            editor.apply();
+            updateViews();
+        });
+
+        VPNDefaultAdd.setOnClickListener(v -> {
+            Toast.makeText(this, "Setting VPN to default", Toast.LENGTH_SHORT).show();
+            editor.putBoolean("isVPNServerDefault", true);
+            editor.putBoolean("selectedVPNServer", true);
+            editor.apply();
+            updateViews();
+
+        });
+
+        String[] appPackages = {
+                "com.android.chrome",
+                "com.example.a.missing.app"};
 
 
-        findViewById(R.id.toggle_vpn).setOnClickListener(v -> {
-            monitoringStatus = findViewById(R.id.toggle_vpn);
+        final Set<String> packageSet = new HashSet<>(Arrays.asList(appPackages));
 
+        SharedPreferences VPNPrefs = getSharedPreferences(PREFS_GENERAL, MODE_PRIVATE);
+
+        monitoringStatus.setOnClickListener(v -> {
             if (monitoringStatus.isChecked()) {
-                prefs.edit()
-                        .putString(VPNActivity.Prefs.SERVER_ADDRESS, "192.168.91.90")
-                        .putInt(VPNActivity.Prefs.SERVER_PORT, 8000)
-                        .putString(VPNActivity.Prefs.SHARED_SECRET, "test")
-                        .apply();
-                Intent intent = VpnService.prepare(getBaseContext());
-                if (intent != null) {
-//                    VPNFragment.this.startActivityForResult(intent, 0);
-                    VPNActivity.this.startActivityForResult(intent, 0);
+                if (VPNPrefs.getBoolean("isVPNServerDefault", false)) {
+                    prefs.edit()
+                            .putString(VPNActivity.Prefs.SERVER_ADDRESS, "10.120.86.219")
+                            .putInt(VPNActivity.Prefs.SERVER_PORT, 8000)
+                            .putString(VPNActivity.Prefs.SHARED_SECRET, "test")
+                            .putStringSet(VPNActivity.Prefs.PACKAGES, packageSet)
+                            .apply();
+                    Intent intent = VpnService.prepare(getBaseContext());
+                    if (intent != null) {
+                        VPNActivity.this.startActivityForResult(intent, 0);
+                    } else {
+                        VPNActivity.this.onActivityResult(0, RESULT_OK, null);
+                    }
                 } else {
-//                    VPNFragment.this.onActivityResult(0, RESULT_OK, null);
-                    VPNActivity.this.onActivityResult(0, RESULT_OK, null);
+                    Log.i(TAG, "VPN turned off");
+                    VPNActivity.this.startService(VPNActivity.this.getServiceIntent().setAction(ToyVpnService.ACTION_DISCONNECT));
                 }
             } else {
-                VPNActivity.this.startService(VPNActivity.this.getServiceIntent().setAction(ToyVpnService.ACTION_DISCONNECT));
+                // TODO URL based vpn server, but for now, we scream.
             }
         });
 
+
+
     }
+
+    private void updateViews() {
+
+        SharedPreferences VPNPrefs = getSharedPreferences(PREFS_GENERAL, MODE_PRIVATE);
+        boolean selectedVPNServer = VPNPrefs.getBoolean("selectedVPNServer", false);
+
+        if (!selectedVPNServer) {
+            VPNSettingsBox.setForeground(getDrawable(R.color.transparent));
+            VPNFileBox.setForeground(getDrawable(R.color.transparentClear));
+            VPNURL.setEnabled(true);
+            monitoringStatus.setClickable(false);
+            ChangeVPNServer.setClickable(false);
+            VPNURLAdd.setClickable(true);
+            VPNDefaultAdd.setClickable(true);
+        } else {
+            VPNFileBox.setForeground(getDrawable(R.color.transparent));
+            VPNSettingsBox.setForeground(getDrawable(R.color.transparentClear));
+            VPNURL.setEnabled(false);
+            monitoringStatus.setClickable(true);
+            ChangeVPNServer.setClickable(true);
+            VPNURLAdd.setClickable(false);
+            VPNDefaultAdd.setClickable(false);
+        }
+    }
+
 
 
     @Override
@@ -72,7 +154,7 @@ public class VPNActivity extends AppCompatActivity {
         }
     }
 
-    private Intent getServiceIntent() {
+    public Intent getServiceIntent() {
         return new Intent(this, ToyVpnService.class);
     }
 
@@ -100,7 +182,7 @@ public class VPNActivity extends AppCompatActivity {
                 intent = new Intent(this, DNSActivity.class);
                 break;
             case R.id.action_firewall:
-                intent  = new Intent(this, FirewallActivity.class);
+                intent = new Intent(this, FirewallActivity.class);
                 break;
             default:
                 return super.onOptionsItemSelected(item);

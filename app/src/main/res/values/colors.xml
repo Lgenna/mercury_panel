@@ -9,4 +9,6 @@
     <color name="notAsLightGray">#CCCCCC</color>
     <color name="white">#FFFFFF</color>
     <color name="transparent">#50000000</color>
+    <color name="transparentGreen">#5045A00E</color>
+    <color name="transparentClear">#00000000</color>
 </resources>

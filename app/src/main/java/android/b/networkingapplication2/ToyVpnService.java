@@ -33,8 +33,13 @@ import android.widget.Toast;
 import androidx.core.app.NotificationManagerCompat;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static android.b.networkingapplication2.OverviewActivity.PREFS_GENERAL;
+import static android.b.networkingapplication2.OverviewActivity.PREFS_VPN;
 
 public class ToyVpnService extends VpnService implements Handler.Callback {
     private static final String TAG = ToyVpnService.class.getSimpleName();
@@ -57,7 +62,7 @@ public class ToyVpnService extends VpnService implements Handler.Callback {
             mHandler = new Handler(this);
         }
         // Create the intent to "configure" the connection (just start ToyVpnClient).
-        mConfigureIntent = PendingIntent.getActivity(this, 0, new Intent(this, VPNFragment.class),
+        mConfigureIntent = PendingIntent.getActivity(this, 0, new Intent(this, VPNActivity.class),
                 PendingIntent.FLAG_UPDATE_CURRENT);
     }
     @Override
@@ -77,7 +82,13 @@ public class ToyVpnService extends VpnService implements Handler.Callback {
     @Override
     public boolean handleMessage(Message message) {
         Toast.makeText(this, message.what, Toast.LENGTH_SHORT).show();
+
         if (message.what != R.string.disconnected) {
+            if(message.what == R.string.connected) {
+                SharedPreferences.Editor editor = getSharedPreferences(PREFS_GENERAL, MODE_PRIVATE).edit();
+                editor.putBoolean("monitoringStatus", true);
+                editor.apply();
+            }
             updateForegroundNotification(message.what);
         }
         return true;
@@ -88,17 +99,16 @@ public class ToyVpnService extends VpnService implements Handler.Callback {
         updateForegroundNotification(R.string.connecting);
         mHandler.sendEmptyMessage(R.string.connecting);
         // Extract information from the shared preferences.
-        final SharedPreferences prefs = getSharedPreferences(VPNActivity.Prefs.NAME, MODE_PRIVATE);
+        final SharedPreferences prefs = getSharedPreferences(PREFS_VPN, MODE_PRIVATE);
         final String server = prefs.getString(VPNActivity.Prefs.SERVER_ADDRESS, "");
+        Log.i(TAG, "serverAddress : " + server);
         final byte[] secret = prefs.getString(VPNActivity.Prefs.SHARED_SECRET, "").getBytes();
-//        final boolean allow = prefs.getBoolean(DashboardActivity.Prefs.ALLOW, true);
-//        final Set<String> packages =
-//                prefs.getStringSet(DashboardActivity.Prefs.PACKAGES, Collections.emptySet());
+//        final boolean allow = prefs.getBoolean(VPNActivity.Prefs.ALLOW, true);
+        final Set<String> packages =
+                prefs.getStringSet(VPNActivity.Prefs.PACKAGES, Collections.emptySet());
         final int port = prefs.getInt(VPNActivity.Prefs.SERVER_PORT, 0);
-//        final String proxyHost = prefs.getString(DashboardActivity.Prefs.PROXY_HOSTNAME, "");
-//        final int proxyPort = prefs.getInt(DashboardActivity.Prefs.PROXY_PORT, 0);
         startConnection(new ToyVpnConnection(
-                this, mNextConnectionId.getAndIncrement(), server, port, secret));
+                this, mNextConnectionId.getAndIncrement(), server, port, secret, packages));
     }
     private void startConnection(final ToyVpnConnection connection) {
         // Replace any existing connecting thread with the  new one.
@@ -142,6 +152,9 @@ public class ToyVpnService extends VpnService implements Handler.Callback {
         setConnectingThread(null);
         setConnection(null);
         stopForeground(true);
+        SharedPreferences.Editor editor = getSharedPreferences(PREFS_GENERAL, MODE_PRIVATE).edit();
+        editor.putBoolean("monitoringStatus", false);
+        editor.apply();
     }
 
     private void updateForegroundNotification(final int message) {
