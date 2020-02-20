@@ -53,7 +53,14 @@ public class ToyVpnConnection implements Runnable {
      * TODO: don't do this; it's much better to let the connection die and then reconnect when
      *       necessary instead of keeping the network hardware up for hours on end in between.
      **/
-    private static final long KEEPALIVE_INTERVAL_MS = TimeUnit.SECONDS.toMillis(15);
+    private static final long KEEPALIVE_INTERVAL_MS = TimeUnit.SECONDS.toMillis(1500);
+    /**
+     * Original duration "15"
+     *
+     * 15 is a rookie number, we got to pump that number up, lets see what happens at 1500 == 25 min
+     *
+     * Edit: turns out, this doesn't do anything except make it die quicker.
+     */
     /** Time to wait without receiving any response before assuming the server is gone. */
     private static final long RECEIVE_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(20);
     /**
@@ -85,15 +92,19 @@ public class ToyVpnConnection implements Runnable {
     // Allowed/Disallowed packages for VPN usage
 //    private final boolean mAllow;
     private final Set<String> mPackages;
+    private final Set<String> mDnsServers;
+
     public ToyVpnConnection(final VpnService service, final int connectionId,
                             final String serverName, final int serverPort,
-                            final byte[] sharedSecret, final Set<String> packages) {
+                            final byte[] sharedSecret, final Set<String> packages,
+                            final Set<String> dnsServers) {
 
         mService = service;
         mConnectionId = connectionId;
         mServerName = serverName;
         mServerPort= serverPort;
         mSharedSecret = sharedSecret;
+        mDnsServers = dnsServers;
 //        if (!TextUtils.isEmpty(proxyHostName)) {
 //            mProxyHostName = proxyHostName;
 //        }
@@ -271,27 +282,7 @@ public class ToyVpnConnection implements Runnable {
     private ParcelFileDescriptor configure(String parameters) throws IllegalArgumentException {
         // Configure a builder while parsing the parameters.
         VpnService.Builder builder = mService.new Builder();
-//        PackageManager packageManager = context.getPackageManager();
-
-
-//        int mApplicationsSize = FirewallActivity.mApplications.size();
-
-//        for(int i = 0; i < mApplicationsSize; i++) {
-//            FirewallActivity.mApplications.get(i).getProcessName();
-//        }
-
-//        SharedPreferences FirewallPrefs = getSharedPreferences(PREFS_FIREWALL, MODE_PRIVATE);
-
-
-
-//        for (String element : OverviewActivity.BlockedApps) {
-//            try {
-//                builder.addDisallowedApplication(element);
-//                Log.i(TAG, "Blocking app : " + element);
-//            } catch (PackageManager.NameNotFoundException e) {
-//                // The app isn't installed.
-//            }
-//        }
+//
 
         for (String parameter : parameters.split(" ")) {
             String[] fields = parameter.split(",");
@@ -319,17 +310,33 @@ public class ToyVpnConnection implements Runnable {
         }
         // Create a new interface using the builder and save the parameters.
         final ParcelFileDescriptor vpnInterface;
+
         for (String packageName : mPackages) {
             try {
 //                if (mAllow) {
 //                    builder.addAllowedApplication(packageName);
 //                } else {
-                    builder.addAllowedApplication(packageName);
+                builder.addAllowedApplication(packageName); // any application enabled on the firewall
+                //  is added to a VPN which is hosted on
+                //  a server that doesn't have internet
+                //  access. AKA, The Crude Approach
 //                }
-            } catch (PackageManager.NameNotFoundException e){
-                Log.w(getTag(), "Package not available: " + packageName, e);
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.w(TAG, "Package not available: " + packageName, e);
             }
         }
+
+        /**
+         * instead of sending every application except for a few home free, why not send all the
+         *  applications through the vpn, but send the ones who you want blocked with a dead end
+         *  dns server, whereas all the other ones use... well, somehow get a default dns server
+         *  otherwise use the one that was provided.
+         */
+
+        // TODO builder.addDnsServer(dnsAddress1);
+
+//        mDnsServers
+
         builder.setSession(mServerName).setConfigureIntent(mConfigureIntent);
 //        if (!TextUtils.isEmpty(mProxyHostName)) {
 //            builder.setHttpProxy(ProxyInfo.buildDirectProxy(mProxyHostName, mProxyHostPort));

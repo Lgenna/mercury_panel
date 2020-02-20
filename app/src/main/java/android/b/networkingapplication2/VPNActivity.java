@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 
 //import static android.b.networkingapplication2.OverviewActivity.BlockedApps;
+import static android.b.networkingapplication2.OverviewActivity.PREFS_DNS;
 import static android.b.networkingapplication2.OverviewActivity.PREFS_FIREWALL;
 import static android.b.networkingapplication2.OverviewActivity.PREFS_GENERAL;
 import static android.b.networkingapplication2.OverviewActivity.PREFS_VPN;
@@ -44,6 +45,7 @@ public class VPNActivity extends AppCompatActivity {
         String SERVER_PORT = "server.port";
         String SHARED_SECRET = "shared.secret";
         String PACKAGES = "packages";
+        String DNSSERVERS = "dnsServers";
     }
 
     @Override
@@ -100,7 +102,9 @@ public class VPNActivity extends AppCompatActivity {
 
 
 
-        final Set<String> packageSet = new HashSet<>(getBlockedApps());
+        final Set<String> packageSet = new HashSet<>(getBlockedApps()); // This will crash if getBlockedApps == null
+
+        final Set<String> dnsServersSet = new HashSet<>(getDnsServers());
 
         SharedPreferences VPNPrefs = getSharedPreferences(PREFS_GENERAL, MODE_PRIVATE);
 
@@ -112,6 +116,7 @@ public class VPNActivity extends AppCompatActivity {
                             .putInt(VPNActivity.Prefs.SERVER_PORT, 8000)
                             .putString(VPNActivity.Prefs.SHARED_SECRET, "test")
                             .putStringSet(VPNActivity.Prefs.PACKAGES, packageSet)
+                            .putStringSet(VPNActivity.Prefs.DNSSERVERS, dnsServersSet)
                             .apply();
                     Intent intent = VpnService.prepare(getBaseContext());
                     if (intent != null) {
@@ -139,39 +144,38 @@ public class VPNActivity extends AppCompatActivity {
 
         Map<String, ?> keys = FirewallPrefs.getAll();
 
+        /**
+         * Add a dud item, otherwise if the user doesn't add anything, it blocks ALL network
+         *  traffic, even though the list given is empty. This is because with the Crude Approach
+         *  it tells specific apps to be killed by the VPN whereas all the others are told to
+         *  ignore it. If no apps are set, all apps are sent down the lonely VPN road.
+         */
+        BlockedApps.add("com.example.a.missing.app");
+
         for(Map.Entry<String, ?> element : keys.entrySet()){
-//            Log.i("map values",element.getKey());
             BlockedApps.add(element.getKey());
         }
 
-        if (BlockedApps.size() > 0) {
-            return BlockedApps;
-        } else {
-            // no applications blocked, therefore die.
-            return null;
+        return BlockedApps;
+    }
+
+    private ArrayList<String> getDnsServers() {
+        SharedPreferences DNSPrefs = getSharedPreferences(PREFS_DNS, MODE_PRIVATE);
+
+        ArrayList<String> DNSServers = new ArrayList<>();
+
+        Map<String, ?> keys = DNSPrefs.getAll();
+
+        // TODO check for String and boolean pairs of DNS values ex. if DNS1 has a value, but not enabled
+
+        for(Map.Entry<String, ?> element : keys.entrySet()){
+            if (element.getKey().startsWith("s")) {
+                DNSServers.add(element.getKey());
+                Log.i(TAG, "Adding " + element.getKey() + " to DNSServers");
+            }
         }
 
-
-//        Log.i(TAG, "applicationList.size() : " + applicationList.size());
-//
-//        if (FirewallActivity.mApplications != null && FirewallActivity.mApplications.size() != 0) {
-//            for (Firewall element : applicationList) {
-//
-//                String currentAppName = element.getProcessName();
-//
-//                boolean appStatus = FirewallPrefs.getBoolean(currentAppName, false);
-//
-//                if (appStatus) {
-//                    Log.i(TAG, "adding " + currentAppName + " to blockedApps");
-//                    BlockedApps.add(currentAppName);
-//                }
-//            }
-//            Log.i(TAG, "BlockedApps : " + BlockedApps.toString());
-//
-//            return BlockedApps;
-//        }
-//
-//        return null;
+        return DNSServers;
     }
 
 
