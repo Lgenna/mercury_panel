@@ -93,20 +93,13 @@ public class VPNActivity extends AppCompatActivity {
 
         });
 
-//        String[] appPackages = {
-//                "com.android.chrome",
-//                "com.example.a.missing.app"};
-
-//        ArrayList<String> apps = new ArrayList<>();
-
-
-
-
         final Set<String> packageSet = new HashSet<>(getBlockedApps()); // This will crash if getBlockedApps == null
 
         final Set<String> dnsServersSet = new HashSet<>(getDnsServers());
 
         SharedPreferences VPNPrefs = getSharedPreferences(PREFS_GENERAL, MODE_PRIVATE);
+
+        Log.i(TAG, "DnsServersSet : " + dnsServersSet.toString());
 
         monitoringStatus.setOnClickListener(v -> {
             if (monitoringStatus.isChecked()) {
@@ -164,14 +157,33 @@ public class VPNActivity extends AppCompatActivity {
 
         ArrayList<String> DNSServers = new ArrayList<>();
 
+        ArrayList<String> DNSBoolean = new ArrayList<>();
+
+
         Map<String, ?> keys = DNSPrefs.getAll();
 
         // TODO check for String and boolean pairs of DNS values ex. if DNS1 has a value, but not enabled
 
-        for(Map.Entry<String, ?> element : keys.entrySet()){
-            if (element.getKey().startsWith("s")) {
-                DNSServers.add(element.getKey());
-                Log.i(TAG, "Adding " + element.getKey() + " to DNSServers");
+
+        // Find all the dns servers, then check if they are set to true, if case, add to a list
+        for(Map.Entry<String, ?> element : keys.entrySet()) {
+            String currentBoolean = element.getKey();
+            if (currentBoolean.startsWith("b") && (element.getValue() + "").equals("true")) {
+                DNSBoolean.add(currentBoolean.substring(1));
+            }
+        }
+
+        // Go through the boolean value list and see if any strings with the same name match
+        for(Map.Entry<String, ?> element : keys.entrySet()) {
+            String currentString = element.getKey();
+            if (currentString.startsWith("s") && !(element.getValue() + "").equals("")) {
+                currentString = currentString.substring(1);
+                for(String booleanKey : DNSBoolean) {
+
+                    if (currentString.equals(booleanKey)) {
+                        DNSServers.add(element.getValue() + "");
+                    }
+                }
             }
         }
 
