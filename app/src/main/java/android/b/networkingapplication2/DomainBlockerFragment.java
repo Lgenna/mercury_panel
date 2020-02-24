@@ -1,5 +1,8 @@
 package android.b.networkingapplication2;
 
+import android.app.admin.DevicePolicyManager;
+import android.app.admin.NetworkEvent;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -18,6 +21,7 @@ import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
 import java.util.Date;
+import java.util.List;
 
 public class DomainBlockerFragment extends Fragment {
 
@@ -43,6 +47,9 @@ public class DomainBlockerFragment extends Fragment {
         return view;
 
     }
+
+
+
 
 //    LineGraphSeries<DataPoint> series1;
 //    LineGraphSeries<DataPoint> series2;

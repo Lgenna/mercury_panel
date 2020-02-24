@@ -3,6 +3,7 @@ package android.b.networkingapplication2;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -75,27 +76,33 @@ public class BlackWhiteListsFragment extends Fragment {
                 if (!editBlackListDomain.getText().toString().equals("")) {
                     String enteredText = editBlackListDomain.getText().toString();
 
-                    // just a precautionary measure because there might somehow be nothing in the list
-                    try {
-                        Cursor checkInitial = myBlaDb.getAllData();
+                    if (Patterns.WEB_URL.matcher(enteredText).matches()) {
 
-                        if (checkInitial.getCount() == 1) {
-                            checkInitial.moveToFirst();
-                            if (checkInitial.getString(1).equals(getResources().getString(R.string.no_data))) {
-                                myBlaDb.deleteData("1");
-                                Log.w(BLTAG, "Removing initial row");
+                        // just a precautionary measure because there might somehow be nothing in the list
+                        try {
+                            Cursor checkInitial = myBlaDb.getAllData();
+
+                            if (checkInitial.getCount() == 1) {
+                                checkInitial.moveToFirst();
+                                if (checkInitial.getString(1).equals(getResources().getString(R.string.no_data))) {
+                                    myBlaDb.deleteData("1");
+                                    Log.w(BLTAG, "Removing initial row");
+                                }
                             }
+                        } catch (IndexOutOfBoundsException e) {
+                            Log.e(TAG, "Phew, we were just grazed by an apocalypse...");
                         }
-                    } catch (IndexOutOfBoundsException e) {
-                        Log.e(TAG, "Phew, we were just grazed by an apocalypse...");
+
+                        myBlaDb.insertData(enteredText);
+                        Toast.makeText(getContext(), "Added: " + enteredText, Toast.LENGTH_SHORT).show();
+                        Log.i(BLTAG, "Added: " + enteredText);
+
+                        updateUI();
+                        editBlackListDomain.setText("");
+                    } else {
+                        Toast.makeText(getContext(), "\"" + enteredText + "\" is not a valid black list", Toast.LENGTH_SHORT).show();
+                        Log.i(BLTAG, "\"" + enteredText + "\" is not a valid black list");
                     }
-
-                    myBlaDb.insertData(enteredText);
-                    Toast.makeText(getContext(), "Added: " + enteredText, Toast.LENGTH_SHORT).show();
-                    Log.i(BLTAG, "Added: " + enteredText);
-
-                    updateUI();
-                    editBlackListDomain.setText("");
                 } else {
                     Toast.makeText(getContext(), "Black list can't be blank", Toast.LENGTH_SHORT).show();
                 }
@@ -105,27 +112,33 @@ public class BlackWhiteListsFragment extends Fragment {
                 if (!editWhiteListDomain.getText().toString().equals("")) {
                     String enteredText = editWhiteListDomain.getText().toString();
 
-                    // just a precautionary measure because there might somehow be nothing in the list
-                    try {
-                        Cursor checkInitial = myWhiDb.getAllData();
+                    if (Patterns.WEB_URL.matcher(enteredText).matches()) {
 
-                        if (checkInitial.getCount() == 1) {
-                            checkInitial.moveToFirst();
-                            if (checkInitial.getString(1).equals(getResources().getString(R.string.no_data))) {
-                                myWhiDb.deleteData("1");
-                                Log.w(WLTAG, "Removing initial row");
+                        // just a precautionary measure because there might somehow be nothing in the list
+                        try {
+                            Cursor checkInitial = myWhiDb.getAllData();
+
+                            if (checkInitial.getCount() == 1) {
+                                checkInitial.moveToFirst();
+                                if (checkInitial.getString(1).equals(getResources().getString(R.string.no_data))) {
+                                    myWhiDb.deleteData("1");
+                                    Log.w(WLTAG, "Removing initial row");
+                                }
                             }
+                        } catch (IndexOutOfBoundsException e) {
+                            Log.e(TAG, "Phew, we were just grazed by an apocalypse...");
                         }
-                    } catch (IndexOutOfBoundsException e) {
-                        Log.e(TAG, "Phew, we were just grazed by an apocalypse...");
+
+                        myWhiDb.insertData(enteredText);
+                        Toast.makeText(getContext(), "Added: " + enteredText, Toast.LENGTH_SHORT).show();
+                        Log.i(WLTAG, "Added: " + enteredText);
+
+                        updateUI();
+                        editWhiteListDomain.setText("");
+                    } else {
+                        Toast.makeText(getContext(), "\"" + enteredText + "\" is not a valid white list", Toast.LENGTH_SHORT).show();
+                        Log.i(WLTAG, "\"" + enteredText + "\" is not a valid white list");
                     }
-
-                    myWhiDb.insertData(enteredText);
-                    Toast.makeText(getContext(), "Added: " + enteredText, Toast.LENGTH_SHORT).show();
-                    Log.i(WLTAG, "Added: " + enteredText);
-
-                    updateUI();
-                    editWhiteListDomain.setText("");
                 } else {
                     Toast.makeText(getContext(), "White list can't be blank", Toast.LENGTH_SHORT).show();
                 }

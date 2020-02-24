@@ -23,9 +23,13 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.ProxyInfo;
 import android.net.VpnService;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Toast;
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -77,7 +81,8 @@ public class ToyVpnConnection implements Runnable {
      */
 
     private final String TAG = "ToyVpnConnection";
-    private static final int MAX_HANDSHAKE_ATTEMPTS = 50;
+//    private static final int MAX_HANDSHAKE_ATTEMPTS = 50;
+    private static final int MAX_HANDSHAKE_ATTEMPTS = 5;
     private final VpnService mService;
     private final int mConnectionId;
     private final String mServerName;
@@ -146,8 +151,21 @@ public class ToyVpnConnection implements Runnable {
                 Thread.sleep(3000);
             }
             Log.i(getTag(), "Giving up");
+
+            new Handler(Looper.getMainLooper()).post(() -> {
+                VPNActivity.monitoringStatus.setChecked(false);
+                VPNActivity.monitoringStatus.setEnabled(true);
+                Toast.makeText(VPNActivity.context, "The server timed out", Toast.LENGTH_SHORT).show();
+            });
+
         } catch (IOException | InterruptedException | IllegalArgumentException e) {
             Log.e(getTag(), "Connection failed, exiting", e);
+            new Handler(Looper.getMainLooper()).post(() -> {
+                VPNActivity.monitoringStatus.setChecked(false);
+                VPNActivity.monitoringStatus.setEnabled(true);
+                Toast.makeText(VPNActivity.context, "There was an error connecting", Toast.LENGTH_SHORT).show();
+            });
+
         }
     }
     private boolean run(SocketAddress server)
@@ -271,6 +289,7 @@ public class ToyVpnConnection implements Runnable {
             }
         }
         throw new IOException("Timed out");
+
     }
 
 //    String[] appPackages = {

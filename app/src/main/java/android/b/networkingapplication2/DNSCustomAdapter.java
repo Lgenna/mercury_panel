@@ -3,6 +3,8 @@ package android.b.networkingapplication2;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
+import android.util.Patterns;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +15,7 @@ import android.widget.Toast;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 import static android.b.networkingapplication2.OverviewActivity.PREFS_DNS;
 import static android.content.Context.MODE_PRIVATE;
@@ -49,39 +52,46 @@ public class DNSCustomAdapter extends RecyclerView.Adapter<DNSCustomAdapter.MyVi
         holder.status.setText(mDNSEntries.get(position).getTitle());
         holder.textbox.setText(DNSTextbox);
         holder.status.setChecked(DNSStatus);
-        holder.status.setOnClickListener(v -> {
 
+        holder.status.setOnClickListener(v -> {
             SharedPreferences.Editor editor = context.getSharedPreferences(PREFS_DNS, MODE_PRIVATE).edit();
 
             String DNSEntryTitle = mDNSEntries.get(position).getTitle();
             String entereredText = holder.textbox.getText().toString();
 
-            if(holder.status.isChecked()) {
+            // Check what was entered
+            if (Patterns.IP_ADDRESS.matcher(entereredText).matches()) {
 
-                if (!entereredText.equals("")) {
-                    Toast.makeText(this.context, "Set \"" + entereredText + "\" as " + DNSEntryTitle + "!", Toast.LENGTH_SHORT).show();
-                    Log.i(TAG, "Changed state of " + DNSEntryTitle + " to enabled");
-                    editor.putString("s" + DNSEntryTitle, entereredText);
-                    editor.putBoolean("b" + DNSEntryTitle, true);
+                if (holder.status.isChecked()) {
 
+                    if (!entereredText.equals("")) {
+                        Toast.makeText(DNSCustomAdapter.this.context, "Set \"" + entereredText + "\" as " + DNSEntryTitle + "!", Toast.LENGTH_SHORT).show();
+                        Log.i(TAG, "Changed state of " + DNSEntryTitle + " to enabled");
+                        editor.putString("s" + DNSEntryTitle, entereredText);
+                        editor.putBoolean("b" + DNSEntryTitle, true);
+
+                    } else {
+                        Toast.makeText(DNSCustomAdapter.this.context, "DNS server can not be empty.", Toast.LENGTH_SHORT).show();
+                        holder.status.setChecked(false);
+                    }
                 } else {
-                    Toast.makeText(this.context, "DNS server can not be empty.", Toast.LENGTH_SHORT).show();
-                    holder.status.setChecked(false);
+                    if (!entereredText.equals("")) {
+                        Toast.makeText(DNSCustomAdapter.this.context, "Disabled " + DNSEntryTitle, Toast.LENGTH_SHORT).show();
+                        Log.i(TAG, "Changed state of " + DNSEntryTitle + " to disabled");
+                        editor.putBoolean("b" + DNSEntryTitle, false);
+                    } else {
+                        editor.putString("s" + DNSEntryTitle, "");
+                        editor.putBoolean("b" + DNSEntryTitle, false);
+                        Toast.makeText(DNSCustomAdapter.this.context, "Removed " + DNSEntryTitle, Toast.LENGTH_SHORT).show();
+                        Log.i(TAG, "Changed state of " + DNSEntryTitle + " to removed");
+                    }
                 }
+                editor.apply();
             } else {
-                if (!entereredText.equals("")) {
-                    Toast.makeText(this.context, "Disabled " + DNSEntryTitle, Toast.LENGTH_SHORT).show();
-                    Log.i(TAG, "Changed state of " + DNSEntryTitle + " to disabled");
-                    editor.putBoolean("b" + DNSEntryTitle, false);
-                } else {
-                    editor.putString("s" + DNSEntryTitle, "");
-                    editor.putBoolean("b" + DNSEntryTitle, false);
-                    Toast.makeText(this.context, "Removed " + DNSEntryTitle, Toast.LENGTH_SHORT).show();
-                    Log.i(TAG, "Changed state of " + DNSEntryTitle + " to removed");
-                }
+                holder.status.setChecked(false);
+                Toast.makeText(DNSCustomAdapter.this.context, "Invalid input for " + DNSEntryTitle, Toast.LENGTH_SHORT).show();
+                Log.i(TAG, "Invalid input for " + DNSEntryTitle);
             }
-
-            editor.apply();
         });
     }
 

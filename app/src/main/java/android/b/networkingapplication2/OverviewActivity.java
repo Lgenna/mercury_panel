@@ -1,12 +1,22 @@
 package android.b.networkingapplication2;
 
 import android.app.ActivityManager;
+import android.app.usage.NetworkStats;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ApplicationInfo;
 import android.database.Cursor;
+import android.net.NetworkInfo;
+import android.net.NetworkSpecifier;
+import android.net.Uri;
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,6 +27,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -62,12 +75,11 @@ public class OverviewActivity extends AppCompatActivity {
     private Intent intent;
     public static ArrayList<ApplicationInfo> installedApps = new ArrayList<>();
 
-    String addressIPV6, sTotalApps, addressIPV4, formattedMemoryUsed, formattedTemperature,
+    private String addressIPV6, sTotalApps, addressIPV4, formattedMemoryUsed, formattedTemperature,
             formattedCPUUsage, formattedUpTime, sBlockedApps, sDNSStatus, sDNSNumber,
             sVPNStatus, sVPNServer;
 
-
-    long startupTime;
+    public static long startupTime;
 
 
 
@@ -82,7 +94,8 @@ public class OverviewActivity extends AppCompatActivity {
         mFinished = false;
 
         setContentView(R.layout.activity_overview);
-//        OverviewFragment.newInstance(); // TODO find out if this ACTUALLY does anything
+//        OverviewFragment.newInstance(); // TODO find out if this ACTUALLY does anything, turns out
+                                          //  nothing because its never "officially" called.
 
         deviceTemp = findViewById(R.id.cpu_temperature_status);
         memoryUsage = findViewById(R.id.memory_usage_percent);
@@ -143,9 +156,9 @@ public class OverviewActivity extends AppCompatActivity {
                         getBatteryTemp();
                         getCPUUsage();
                         getMemoryUsage();
-//                        if (!getApplications) {
+
                         getApplications();
-//                        }
+
                         getVPNStatus();
                         getDnsInfo();
 
@@ -157,10 +170,8 @@ public class OverviewActivity extends AppCompatActivity {
                         Thread.sleep(10000);
 
                         // create a synchronized boolean mPauseLock
-//                        Log.i(TAG, "mPauseLock : " + mPauseLock);
                         synchronized (mPauseLock) {
                             // check to see if the activity was paused
-//                            Log.i(TAG, "mPaused : " + mPaused);
                             while (mPaused) {
                                 // if paused, stop updating the ui
                                 try {
@@ -180,6 +191,7 @@ public class OverviewActivity extends AppCompatActivity {
 
         // start the thread
         uiUpdater.start();
+
     }
 
     @Override
@@ -280,34 +292,6 @@ public class OverviewActivity extends AppCompatActivity {
         SharedPreferences FirewallPrefs = getSharedPreferences(PREFS_FIREWALL, MODE_PRIVATE);
 
         sBlockedApps = FirewallPrefs.getAll().size() + " Blocked Apps";
-
-
-
-
-
-//        BlockedApps = new ArrayList<>();
-//
-//        if (FirewallActivity.mApplications != null && FirewallActivity.mApplications.size() != 0) {
-//            for (Firewall element : applicationList) {
-//
-//                String currentAppName = element.getProcessName();
-//
-//                boolean appStatus = FirewallPrefs.getBoolean(currentAppName, false);
-//
-//                if (appStatus) {
-//                    Log.i(TAG, "adding " + currentAppName + " to blockedApps");
-//                    BlockedApps.add(currentAppName);
-//                }
-//            }
-//        }
-
-//
-//
-//
-//        for (int i = 0; i < FirewallPrefs.getAll().size(); i++) {
-//            BlockedApps.add();
-//        }
-
     }
 
     private void getIPAddresses() {
@@ -323,7 +307,6 @@ public class OverviewActivity extends AppCompatActivity {
             List<NetworkInterface> interfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
             for (NetworkInterface intf : interfaces) {
                 List<InetAddress> addrs = Collections.list(intf.getInetAddresses());
-//                for (InetAddress addr : addrs) {
                 for(int i = 0; i < addrs.size(); i++) {
                     if (!addrs.get(i).isLoopbackAddress()) {
                         String sAddr = addrs.get(i).getHostAddress();
@@ -369,9 +352,7 @@ public class OverviewActivity extends AppCompatActivity {
 
                     break; // breaks the for-each loop once it finds one valid temperature
                 }
-            } catch (IOException ignore) {
-//                Log.w(TAG, "[IOException] File not found at " + location);
-            }
+            } catch (IOException ignore) { }
         }
     }
 
@@ -460,7 +441,6 @@ public class OverviewActivity extends AppCompatActivity {
         deviceTemp.setText(formattedTemperature);
         deviceCPU.setText(formattedCPUUsage);
         blockedApps.setText(sBlockedApps);
-
 
         startTime.setText(formattedUpTime);
     }

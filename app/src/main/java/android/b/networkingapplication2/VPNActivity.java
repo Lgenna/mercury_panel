@@ -1,5 +1,6 @@
 package android.b.networkingapplication2;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.VpnService;
@@ -7,7 +8,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Switch;
@@ -15,15 +15,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-//import static android.b.networkingapplication2.OverviewActivity.BlockedApps;
 import static android.b.networkingapplication2.OverviewActivity.PREFS_DNS;
 import static android.b.networkingapplication2.OverviewActivity.PREFS_FIREWALL;
 import static android.b.networkingapplication2.OverviewActivity.PREFS_GENERAL;
@@ -31,13 +28,22 @@ import static android.b.networkingapplication2.OverviewActivity.PREFS_VPN;
 
 public class VPNActivity extends AppCompatActivity {
 
-    Switch monitoringStatus;
+    public static Switch monitoringStatus;
     LinearLayout VPNFileBox, VPNSettingsBox;
     ImageButton VPNURLAdd, VPNDefaultAdd, ChangeVPNServer;
-    TextView VPNURL;
+    TextView VPNURL, currentVpnServer, upTime;
+    Thread timer;
+
+    public static Context context; // this might be very bad to do this...
+
+    String currentServer;
+
+    private Object mPauseLock;
+    private boolean mPaused, mFinished;
+
     private static final String TAG = "VPNActivity";
 
-    ArrayList<String> blockedApps;
+    private String formattedUpTime;
 
     public interface Prefs {
         String NAME = "connection";
@@ -53,7 +59,11 @@ public class VPNActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_vpn);
 
-        final SharedPreferences prefs = getSharedPreferences(PREFS_VPN, MODE_PRIVATE);
+        context = getBaseContext();
+
+        mPauseLock = new Object();
+        mPaused = false;
+        mFinished = false;
 
         VPNFileBox = findViewById(R.id.vpn_file_box);
         VPNSettingsBox = findViewById(R.id.vpn_settings_box);
@@ -62,17 +72,20 @@ public class VPNActivity extends AppCompatActivity {
         VPNDefaultAdd = findViewById(R.id.vpn_default_add);
         ChangeVPNServer = findViewById(R.id.change_vpn_server_button);
         VPNURL = findViewById(R.id.vpn_url);
+        currentVpnServer = findViewById(R.id.current_vpn_server);
+        upTime = findViewById(R.id.up_time_data);
 
         updateViews();
 
-        SharedPreferences.Editor editor = getSharedPreferences(PREFS_GENERAL, MODE_PRIVATE).edit();
+        SharedPreferences prefs = getSharedPreferences(PREFS_VPN, MODE_PRIVATE);
+//        SharedPreferences.Editor prefsEditor = getSharedPreferences(PREFS_VPN, MODE_PRIVATE).edit();
 
+        SharedPreferences.Editor editor = getSharedPreferences(PREFS_GENERAL, MODE_PRIVATE).edit();
         ChangeVPNServer.setOnClickListener(v -> {
-//            isVPNServerDefault = false;
-//            selectedVPNServer = false;
             editor.putBoolean("isVPNServerDefault", false);
             editor.putBoolean("selectedVPNServer", false);
             editor.apply();
+            prefs.edit().clear().apply();
             updateViews();
         });
 
@@ -81,6 +94,7 @@ public class VPNActivity extends AppCompatActivity {
             editor.putBoolean("isVPNServerDefault", true);
             editor.putBoolean("selectedVPNServer", true);
             editor.apply();
+            setServerDefault(prefs);
             updateViews();
         });
 
@@ -89,28 +103,58 @@ public class VPNActivity extends AppCompatActivity {
             editor.putBoolean("isVPNServerDefault", true);
             editor.putBoolean("selectedVPNServer", true);
             editor.apply();
+            setServerDefault(prefs);
             updateViews();
 
         });
 
-        final Set<String> packageSet = new HashSet<>(getBlockedApps()); // This will crash if getBlockedApps == null
+        // Builds a new thread
+        timer = new Thread() {
+            @Override
+            public void run() {
 
-        final Set<String> dnsServersSet = new HashSet<>(getDnsServers());
+                try {
+                    // while the app is open...
+                    while (!mFinished) {
+
+                        // methods that need to update info
+                        updateInfo();
+
+                        // update the user interface every 10 seconds
+                        Thread.sleep(10000);
+                        // create a synchronized boolean mPauseLock
+                        synchronized (mPauseLock) {
+                            // check to see if the activity was paused
+                            while (mPaused) {
+                                // if paused, stop updating the ui
+                                try {
+                                    mPauseLock.wait();
+                                } catch (InterruptedException ignore) {
+                                    // Panic x2
+                                }
+                            }
+                        }
+                    }
+                    Log.i(TAG, "Finished Looping, this isn't supposed to happen.");
+                } catch (InterruptedException ignore) {
+                    // panic.
+                }
+            }
+        };
+
+        // start the thread
+        timer.start();
 
         SharedPreferences VPNPrefs = getSharedPreferences(PREFS_GENERAL, MODE_PRIVATE);
-
-        Log.i(TAG, "DnsServersSet : " + dnsServersSet.toString());
 
         monitoringStatus.setOnClickListener(v -> {
             if (monitoringStatus.isChecked()) {
                 if (VPNPrefs.getBoolean("isVPNServerDefault", false)) {
-                    prefs.edit()
-                            .putString(VPNActivity.Prefs.SERVER_ADDRESS, "10.120.86.219")
-                            .putInt(VPNActivity.Prefs.SERVER_PORT, 8000)
-                            .putString(VPNActivity.Prefs.SHARED_SECRET, "test")
-                            .putStringSet(VPNActivity.Prefs.PACKAGES, packageSet)
-                            .putStringSet(VPNActivity.Prefs.DNSSERVERS, dnsServersSet)
-                            .apply();
+
+                    setServerDefault(prefs);
+
+                    monitoringStatus.setEnabled(false);
+
                     Intent intent = VpnService.prepare(getBaseContext());
                     if (intent != null) {
                         VPNActivity.this.startActivityForResult(intent, 0);
@@ -119,13 +163,69 @@ public class VPNActivity extends AppCompatActivity {
                     }
                 } else {
                     Log.i(TAG, "VPN turned off");
+                    monitoringStatus.setEnabled(true);
                     VPNActivity.this.startService(VPNActivity.this.getServiceIntent().setAction(ToyVpnService.ACTION_DISCONNECT));
                 }
+
+                updateInfo();
+
             } else {
-                // TODO URL based vpn server, but for now, we scream.
+                // Otherwise do nothing?
             }
         });
 
+    }
+
+    private void setServerDefault(SharedPreferences prefs) {
+
+        final Set<String> dnsServersSet = new HashSet<>(getDnsServers());
+        final Set<String> packageSet = new HashSet<>(getBlockedApps()); // This will crash if getBlockedApps == null
+
+        Log.i(TAG, "dnsServersSet : " + dnsServersSet.toString());
+
+        prefs.edit()
+                .putString(VPNActivity.Prefs.SERVER_ADDRESS, "192.168.91.90")
+                .putInt(VPNActivity.Prefs.SERVER_PORT, 8000)
+                .putString(VPNActivity.Prefs.SHARED_SECRET, "test")
+                .putStringSet(VPNActivity.Prefs.PACKAGES, packageSet)
+                .putStringSet(VPNActivity.Prefs.DNSSERVERS, dnsServersSet)
+                .apply();
+
+        updateInfo();
+    }
+
+
+    private void updateInfo() {
+
+        SharedPreferences VPNPrefs = getSharedPreferences(PREFS_GENERAL, MODE_PRIVATE);
+
+        if (VPNPrefs.getBoolean("isVPNServerDefault", false)) {
+            currentServer = "Default VPN Server : ";
+        } else {
+            currentServer = "Something bad happened : ";
+        }
+
+        SharedPreferences prefs = getSharedPreferences(PREFS_VPN, MODE_PRIVATE);
+        String serverAddress = prefs.getString(VPNActivity.Prefs.SERVER_ADDRESS, "No data found");
+        if (!serverAddress.equals("No data found")){
+            currentServer += serverAddress;
+        } else {
+            currentServer = "No data found";
+        }
+
+        runOnUiThread(() -> currentVpnServer.setText(currentServer));
+
+
+
+        long currentTime = new Date().getTime();
+
+        long timeDifference = currentTime - OverviewActivity.startupTime;
+
+        int currentTimeDifference = (int)timeDifference / 1000;
+
+        formattedUpTime = currentTimeDifference + " seconds";
+        runOnUiThread(() -> upTime.setText(formattedUpTime));
+        Log.i(TAG, "Up-time : " + formattedUpTime);
     }
 
 
@@ -143,6 +243,7 @@ public class VPNActivity extends AppCompatActivity {
          *  it tells specific apps to be killed by the VPN whereas all the others are told to
          *  ignore it. If no apps are set, all apps are sent down the lonely VPN road.
          */
+
         BlockedApps.add("com.example.a.missing.app");
 
         for(Map.Entry<String, ?> element : keys.entrySet()){
@@ -151,6 +252,7 @@ public class VPNActivity extends AppCompatActivity {
 
         return BlockedApps;
     }
+
 
     private ArrayList<String> getDnsServers() {
         SharedPreferences DNSPrefs = getSharedPreferences(PREFS_DNS, MODE_PRIVATE);
@@ -262,4 +364,32 @@ public class VPNActivity extends AppCompatActivity {
 
         return true;
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        updateInfo();
+        updateViews();
+
+        synchronized (mPauseLock) {
+            mPaused = false;
+            mPauseLock.notifyAll();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        synchronized (mPauseLock) {
+            mPaused = true;
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
+
+
 }

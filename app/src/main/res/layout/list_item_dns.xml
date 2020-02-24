@@ -18,6 +18,8 @@
 
     <EditText
         android:id="@+id/textbox"
+        android:inputType="number"
+        android:digits="0123456789."
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"/>
