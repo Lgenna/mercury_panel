@@ -121,8 +121,8 @@ public class VPNActivity extends AppCompatActivity {
                         updateInfo();
 
                         // update the user interface every 10 seconds
-                        Thread.sleep(10000);
-                        // create a synchronized boolean mPauseLock
+                        Thread.sleep(5000);
+                         //create a synchronized boolean mPauseLock
                         synchronized (mPauseLock) {
                             // check to see if the activity was paused
                             while (mPaused) {
@@ -164,7 +164,9 @@ public class VPNActivity extends AppCompatActivity {
                 } else {
                     Log.i(TAG, "VPN turned off");
                     monitoringStatus.setEnabled(true);
-                    VPNActivity.this.startService(VPNActivity.this.getServiceIntent().setAction(ToyVpnService.ACTION_DISCONNECT));
+                    VPNActivity.this.startService(
+                            VPNActivity.this.getServiceIntent()
+                                    .setAction(ToyVpnService.ACTION_DISCONNECT));
                 }
 
                 updateInfo();
@@ -223,7 +225,15 @@ public class VPNActivity extends AppCompatActivity {
 
         int currentTimeDifference = (int)timeDifference / 1000;
 
-        formattedUpTime = currentTimeDifference + " seconds";
+        int hours = currentTimeDifference / 3600;
+        int minutes = (currentTimeDifference % 3600) / 60;
+        int seconds = currentTimeDifference % 60;
+
+        formattedUpTime = hours + " hours, " + minutes + " minutes, " + seconds + " seconds";
+
+//        timeString = String.format("%02d:%02d:%02d", hours, minutes, seconds);
+
+//        formattedUpTime = currentTimeDifference + " seconds";
         runOnUiThread(() -> upTime.setText(formattedUpTime));
         Log.i(TAG, "Up-time : " + formattedUpTime);
     }

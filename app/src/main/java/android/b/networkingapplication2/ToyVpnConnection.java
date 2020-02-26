@@ -33,13 +33,21 @@ import android.widget.Toast;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.DatagramChannel;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+
+import database.QueryLogBaseHelper;
+
 public class ToyVpnConnection implements Runnable {
     /**
      * Callback interface to let the {@link ToyVpnService} know about new connections
@@ -57,14 +65,8 @@ public class ToyVpnConnection implements Runnable {
      * TODO: don't do this; it's much better to let the connection die and then reconnect when
      *       necessary instead of keeping the network hardware up for hours on end in between.
      **/
-    private static final long KEEPALIVE_INTERVAL_MS = TimeUnit.SECONDS.toMillis(1500);
-    /**
-     * Original duration "15"
-     *
-     * 15 is a rookie number, we got to pump that number up, lets see what happens at 1500 == 25 min
-     *
-     * Edit: turns out, this doesn't do anything except make it die quicker.
-     */
+    private static final long KEEPALIVE_INTERVAL_MS = TimeUnit.SECONDS.toMillis(15);
+
     /** Time to wait without receiving any response before assuming the server is gone. */
     private static final long RECEIVE_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(20);
     /**
@@ -81,8 +83,8 @@ public class ToyVpnConnection implements Runnable {
      */
 
     private final String TAG = "ToyVpnConnection";
-//    private static final int MAX_HANDSHAKE_ATTEMPTS = 50;
-    private static final int MAX_HANDSHAKE_ATTEMPTS = 5;
+    private static final int MAX_HANDSHAKE_ATTEMPTS = 50;
+//    private static final int MAX_HANDSHAKE_ATTEMPTS = 5;
     private final VpnService mService;
     private final int mConnectionId;
     private final String mServerName;
@@ -140,7 +142,7 @@ public class ToyVpnConnection implements Runnable {
             final SocketAddress serverAddress = new InetSocketAddress(mServerName, mServerPort);
             // We try to create the tunnel several times.
             // TODO: The better way is to work with ConnectivityManager, trying only when the
-            // network is available.
+            //  network is available.
             // Here we just use a counter to keep things simple.
             for (int attempt = 0; attempt < 10; ++attempt) {
                 // Reset the counter if we were connected.
@@ -199,22 +201,69 @@ public class ToyVpnConnection implements Runnable {
             long lastSendTime = System.currentTimeMillis();
             long lastReceiveTime = System.currentTimeMillis();
             // We keep forwarding packets till something goes wrong.
+
+            QueryLogBaseHelper myQueDb;
+
             while (true) {
                 // Assume that we did not make any progress in this iteration.
                 boolean idle = true;
                 // Read the outgoing packet from the input stream.
+
+
+                final long timeNow = System.currentTimeMillis();
                 int length = in.read(packet.array());
+
+                ArrayList<String> letters = new ArrayList<>(Arrays.asList("a", "b", "c", "d", "e", "f"));
+                    StringBuilder something = new StringBuilder();
+
+                for (int i = 16; i < 20; i++) {
+                    if (packet.get(i) < 10 && packet.get(i) >= 0) {
+                        something.append(Integer.valueOf("0" + Integer.toHexString(packet.get(i) & 0xFF)));
+                    } else if (letters.contains(Integer.toHexString(packet.get(i) & 0xFF))) {
+                        int n = (int) Long.parseLong(Integer.toHexString(packet.get(i) & 0xFF), 16);
+                        something.append(Integer.decode("0" + n));
+                    } else {
+                        int n = (int) Long.parseLong(Integer.toHexString(packet.get(i) & 0xFF), 16);
+                        something.append(Integer.valueOf(n));
+                    }
+                    if (i != 19) {
+                        something.append(".");
+                    }
+                }
+
                 if (length > 0) {
+
+                    InetAddress host = InetAddress.getByName(something.toString());
+                    System.out.println(host.getHostName());
+
                     // Write the outgoing packet to the tunnel.
                     packet.limit(length);
                     tunnel.write(packet);
+
+//                    Date dateTime = new Date();
+
+                    String output = something.toString();
+
+                    myQueDb = QueryLogFragment.getMyQueDb();
+
+                    if (myQueDb != null) {
+                        myQueDb.insertData(
+                                "" + timeNow,
+                                "" + output,
+                                "Allowed");
+
+                        QueryLogFragment.setMyQueDb(myQueDb);
+                    }
+
                     packet.clear();
                     // There might be more outgoing packets.
                     idle = false;
                     lastReceiveTime = System.currentTimeMillis();
                 }
+
                 // Read the incoming packet from the tunnel.
                 length = tunnel.read(packet);
+
                 if (length > 0) {
                     // Ignore control messages, which start with zero.
                     if (packet.get(0) != 0) {
@@ -226,24 +275,35 @@ public class ToyVpnConnection implements Runnable {
                     idle = false;
                     lastSendTime = System.currentTimeMillis();
                 }
+//                }
+
                 // If we are idle or waiting for the network, sleep for a
                 // fraction of time to avoid busy looping.
+
                 if (idle) {
+
                     Thread.sleep(IDLE_INTERVAL_MS);
-                    final long timeNow = System.currentTimeMillis();
-                    if (lastSendTime + KEEPALIVE_INTERVAL_MS <= timeNow) {
-                        // We are receiving for a long time but not sending.
-                        // Send empty control messages.
-                        packet.put((byte) 0).limit(1);
-                        for (int i = 0; i < 3; ++i) {
-                            packet.position(0);
-                            tunnel.write(packet);
+
+                    if (tunnel.isConnected()) {
+
+                        if (lastReceiveTime + KEEPALIVE_INTERVAL_MS <= timeNow) {
+                            // We are receiving for a long time but not sending.
+                            Log.i(TAG, "Closing the tunnel to the server : Idle");
+//                            tunnel.wait();
+//                            tunnel.disconnect();
+                            tunnel.close();
+                            connected = false;
+                            break;
+
+//                            Thread.sleep(RECONNECT_WAIT_MS);
+                        } else if (lastReceiveTime + RECEIVE_TIMEOUT_MS <= timeNow) {
+                            // We are sending for a long time but not receiving.
+                            Log.i(TAG, "Closing the tunnel to the server : Timed Out");
+                            tunnel.close();
+                            connected = false;
+                            break;
+//                            throw new IllegalStateException("Timed out");
                         }
-                        packet.clear();
-                        lastSendTime = timeNow;
-                    } else if (lastReceiveTime + RECEIVE_TIMEOUT_MS <= timeNow) {
-                        // We are sending for a long time but not receiving.
-                        throw new IllegalStateException("Timed out");
                     }
                 }
             }
@@ -260,6 +320,8 @@ public class ToyVpnConnection implements Runnable {
         }
         return connected;
     }
+
+
     private ParcelFileDescriptor handshake(DatagramChannel tunnel)
             throws IOException, InterruptedException {
         // To build a secured tunnel, we should perform mutual authentication
@@ -330,22 +392,22 @@ public class ToyVpnConnection implements Runnable {
         // Create a new interface using the builder and save the parameters.
         final ParcelFileDescriptor vpnInterface;
 
-        for (String packageName : mPackages) {
-            try {
-//                builder.addDnsServer()
-
-//                if (mAllow) {
-//                    builder.addAllowedApplication(packageName);
-//                } else {
-                builder.addAllowedApplication(packageName); // any application enabled on the firewall
-                //  is added to a VPN which is hosted on
-                //  a server that doesn't have internet
-                //  access. AKA, The Crude Approach
-//                }
-            } catch (PackageManager.NameNotFoundException e) {
-                Log.w(TAG, "Package not available: " + packageName, e);
-            }
-        }
+//        for (String packageName : mPackages) {
+//            try {
+////                builder.addDnsServer()
+//
+////                if (mAllow) {
+////                    builder.addAllowedApplication(packageName);
+////                } else {
+//                builder.addAllowedApplication(packageName); // any application enabled on the firewall
+//                //  is added to a VPN which is hosted on
+//                //  a server that doesn't have internet
+//                //  access. AKA, The Crude Approach
+////                }
+//            } catch (PackageManager.NameNotFoundException e) {
+//                Log.w(TAG, "Package not available: " + packageName, e);
+//            }
+//        }
 
         /**
          * instead of sending every application except for a few home free, why not send all the

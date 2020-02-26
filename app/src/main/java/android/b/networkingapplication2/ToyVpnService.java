@@ -24,6 +24,7 @@ import android.content.SharedPreferences;
 import android.net.VpnService;
 import android.os.Build;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
@@ -85,9 +86,9 @@ public class ToyVpnService extends VpnService implements Handler.Callback {
 
         if (message.what != R.string.disconnected) {
             if(message.what == R.string.connected) {
-                SharedPreferences.Editor editor = getSharedPreferences(PREFS_GENERAL, MODE_PRIVATE).edit();
-                editor.putBoolean("monitoringStatus", true);
-                editor.apply();
+//                SharedPreferences.Editor editor = getSharedPreferences(PREFS_GENERAL, MODE_PRIVATE).edit();
+//                editor.putBoolean("monitoringStatus", true);
+//                editor.apply();
             }
             updateForegroundNotification(message.what);
         }
@@ -102,7 +103,6 @@ public class ToyVpnService extends VpnService implements Handler.Callback {
         final SharedPreferences prefs = getSharedPreferences(PREFS_VPN, MODE_PRIVATE);
         final String server = prefs.getString(VPNActivity.Prefs.SERVER_ADDRESS, "");
         final byte[] secret = prefs.getString(VPNActivity.Prefs.SHARED_SECRET, "").getBytes();
-//        final boolean allow = prefs.getBoolean(VPNActivity.Prefs.ALLOW, true);
         final Set<String> packages =
                 prefs.getStringSet(VPNActivity.Prefs.PACKAGES, Collections.emptySet());
         final Set<String> dnsServers =
@@ -117,17 +117,17 @@ public class ToyVpnService extends VpnService implements Handler.Callback {
         setConnectingThread(thread);
         // Handler to mark as connected once onEstablish is called.
         connection.setConfigureIntent(mConfigureIntent);
-        connection.setOnEstablishListener(new ToyVpnConnection.OnEstablishListener() {
-            @Override
-            public void onEstablish(ParcelFileDescriptor tunInterface) {
-//                DashboardActivity uI = new DashboardActivity();
-//                uI.;
-//                new DashboardActivity.RetrieveFeedTask().execute();
-                mHandler.sendEmptyMessage(R.string.connected);
+        connection.setOnEstablishListener(tunInterface -> {
 
-                mConnectingThread.compareAndSet(thread, null);
-                ToyVpnService.this.setConnection(new Connection(thread, tunInterface));
-            }
+            new Handler(Looper.getMainLooper()).post(() -> {
+                VPNActivity.monitoringStatus.setChecked(true);
+                VPNActivity.monitoringStatus.setEnabled(true);
+            });
+
+            mHandler.sendEmptyMessage(R.string.connected);
+
+            mConnectingThread.compareAndSet(thread, null);
+            ToyVpnService.this.setConnection(new Connection(thread, tunInterface));
         });
         thread.start();
     }

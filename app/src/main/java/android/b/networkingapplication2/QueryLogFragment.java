@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import database.QueryLogBaseHelper;
 
 public class QueryLogFragment extends Fragment {
-    private QueryLogBaseHelper myQueDb;
+    private static QueryLogBaseHelper myQueDb;
     private RecyclerView mQueryLogRecyclerView;
     public static View view;
 
@@ -70,6 +70,14 @@ public class QueryLogFragment extends Fragment {
         }
 
         return view;
+    }
+
+    public static QueryLogBaseHelper getMyQueDb() {
+        return myQueDb;
+    }
+
+    public static void setMyQueDb(QueryLogBaseHelper myQueDb) {
+        QueryLogFragment.myQueDb = myQueDb;
     }
 
     public void updateUI() {
