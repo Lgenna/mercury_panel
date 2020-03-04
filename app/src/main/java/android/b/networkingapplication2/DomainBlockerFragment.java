@@ -4,6 +4,7 @@ import android.app.admin.DevicePolicyManager;
 import android.app.admin.NetworkEvent;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
@@ -20,35 +21,110 @@ import com.jjoe64.graphview.LegendRenderer;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import database.MasterBlockListBaseHelper;
+import database.QueryLogBaseHelper;
 
 public class DomainBlockerFragment extends Fragment {
 
     private static final String TAG = "DomainBlockerFragment";
 
+    private Thread timer;
+    private Object mPauseLock;
+    private boolean mPaused, mFinished;
+
+    private static MasterBlockListBaseHelper myMasDb;
+    private QueryLogBaseHelper myQueDb;
+    private TextView totalQueries, blockedDomains;
+
+    private int masterListSize = 0;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_domain_blocker, container, false);
-        try {
 
-            Date startupDate = new Date();
-            long startupTime = startupDate.getTime();
-            TextView totalQueries = view.findViewById(R.id.total_queries_number);
-            totalQueries.setText(startupTime + "");
+        mPauseLock = new Object();
+        mPaused = false;
+        mFinished = false;
 
-            GraphView graph = view.findViewById(R.id.graph);
-            addData(graph);
-        }
-        catch (NullPointerException e) {
-            Toast.makeText(getContext(), "OH NO! : " + e, Toast.LENGTH_LONG).show();
-            Log.w(TAG, "Now just stop tryin' ta mess with my contraptions : " + e);
-        }
+        totalQueries = view.findViewById(R.id.total_queries_number);
+        blockedDomains = view.findViewById(R.id.blocklist_domains_number);
+
+        myMasDb = new MasterBlockListBaseHelper(getContext());
+
+        // Builds a new thread
+        timer = new Thread() {
+            @Override
+            public void run() {
+
+                try {
+                    // while the app is open...
+                    while (!mFinished) {
+
+                        // methods that need to update info
+                        updateInfo();
+
+                        // update the user interface every 10 seconds
+                        Thread.sleep(5000);
+                        //create a synchronized boolean mPauseLock
+                        synchronized (mPauseLock) {
+                            // check to see if the activity was paused
+                            while (mPaused) {
+                                // if paused, stop updating the ui
+                                try {
+                                    mPauseLock.wait();
+                                } catch (InterruptedException ignore) {
+                                    // Panic x2
+                                }
+                            }
+                        }
+                    }
+                    Log.i(TAG, "Finished Looping, this isn't supposed to happen.");
+                } catch (InterruptedException ignore) {
+                    // panic.
+                }
+            }
+        };
+
+        // start the thread
+        timer.start();
+
+        GraphView graph = view.findViewById(R.id.graph);
+        addData(graph);
+
         return view;
-
     }
 
+    public static MasterBlockListBaseHelper getMyMasDb() {
+        return myMasDb;
+    }
 
+    public static void setMyMasDb(MasterBlockListBaseHelper myMasDb) {
+        DomainBlockerFragment.myMasDb = myMasDb;
+    }
+
+    private void updateInfo() {
+        myQueDb = OverviewActivity.getMyQueDb();
+
+        int iTotalQueries;
+
+        if (myQueDb != null) {
+            Cursor myQueDbRes = myQueDb.getAllData();
+            iTotalQueries = myQueDbRes.getCount();
+        } else {
+            iTotalQueries = 0;
+        }
+        getActivity().runOnUiThread(() -> totalQueries.setText(iTotalQueries + ""));
+
+        try {
+            masterListSize = DomainBlockerFragment.getMyMasDb().getAllData().getCount();
+
+        } catch (NullPointerException ignore) {}
+            getActivity().runOnUiThread(() -> blockedDomains.setText(masterListSize + ""));
+    }
 
 
 //    LineGraphSeries<DataPoint> series1;
@@ -125,6 +201,31 @@ public class DomainBlockerFragment extends Fragment {
 //        staticLabelsFormatter.setHorizontalLabels(new String[] {">0", "1", "2", "3", "4", "5"});
 //        graph.getGridLabelRenderer().setLabelFormatter(staticLabelsFormatter);
 
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        updateInfo();
+
+        synchronized (mPauseLock) {
+            mPaused = false;
+            mPauseLock.notifyAll();
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        synchronized (mPauseLock) {
+            mPaused = true;
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
     }
 
     public static DomainBlockerFragment newInstance() {

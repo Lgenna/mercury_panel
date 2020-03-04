@@ -25,6 +25,7 @@ import static android.b.networkingapplication2.OverviewActivity.PREFS_DNS;
 import static android.b.networkingapplication2.OverviewActivity.PREFS_FIREWALL;
 import static android.b.networkingapplication2.OverviewActivity.PREFS_GENERAL;
 import static android.b.networkingapplication2.OverviewActivity.PREFS_VPN;
+import static android.b.networkingapplication2.OverviewActivity.startupTime;
 
 public class VPNActivity extends AppCompatActivity {
 
@@ -71,7 +72,7 @@ public class VPNActivity extends AppCompatActivity {
         VPNURLAdd = findViewById(R.id.vpn_url_add);
         VPNDefaultAdd = findViewById(R.id.vpn_default_add);
         ChangeVPNServer = findViewById(R.id.change_vpn_server_button);
-        VPNURL = findViewById(R.id.vpn_url);
+//        VPNURL = findViewById(R.id.vpn_url);
         currentVpnServer = findViewById(R.id.current_vpn_server);
         upTime = findViewById(R.id.up_time_data);
 
@@ -162,17 +163,25 @@ public class VPNActivity extends AppCompatActivity {
                         VPNActivity.this.onActivityResult(0, RESULT_OK, null);
                     }
                 } else {
-                    Log.i(TAG, "VPN turned off");
+                    Log.i(TAG, "VPN turned off due to connecting server");
+
                     monitoringStatus.setEnabled(true);
-                    VPNActivity.this.startService(
-                            VPNActivity.this.getServiceIntent()
-                                    .setAction(ToyVpnService.ACTION_DISCONNECT));
+                    startService(getServiceIntent()
+                            .setAction(ToyVpnService.ACTION_DISCONNECT));
+//                    VPNActivity.this.startService(
+//                            VPNActivity.this.getServiceIntent()
+//                                    .setAction(ToyVpnService.ACTION_DISCONNECT));
                 }
 
                 updateInfo();
 
             } else {
-                // Otherwise do nothing?
+                Log.i(TAG, "VPN turned off by user");
+
+                monitoringStatus.setEnabled(true);
+                VPNActivity.this.startService(
+                        VPNActivity.this.getServiceIntent()
+                                .setAction(ToyVpnService.ACTION_DISCONNECT));
             }
         });
 
@@ -181,17 +190,19 @@ public class VPNActivity extends AppCompatActivity {
     private void setServerDefault(SharedPreferences prefs) {
 
         final Set<String> dnsServersSet = new HashSet<>(getDnsServers());
-        final Set<String> packageSet = new HashSet<>(getBlockedApps()); // This will crash if getBlockedApps == null
+        final Set<String> packageSet = new HashSet<>(getBlockedApps());
 
         Log.i(TAG, "dnsServersSet : " + dnsServersSet.toString());
 
+
+
         prefs.edit()
-                .putString(VPNActivity.Prefs.SERVER_ADDRESS, "192.168.91.90")
-                .putInt(VPNActivity.Prefs.SERVER_PORT, 8000)
-                .putString(VPNActivity.Prefs.SHARED_SECRET, "test")
-                .putStringSet(VPNActivity.Prefs.PACKAGES, packageSet)
-                .putStringSet(VPNActivity.Prefs.DNSSERVERS, dnsServersSet)
-                .apply();
+            .putString(VPNActivity.Prefs.SERVER_ADDRESS, "192.168.91.90")
+            .putInt(VPNActivity.Prefs.SERVER_PORT, 8000)
+            .putString(VPNActivity.Prefs.SHARED_SECRET, "test")
+            .putStringSet(VPNActivity.Prefs.PACKAGES, packageSet)
+            .putStringSet(VPNActivity.Prefs.DNSSERVERS, dnsServersSet)
+            .apply();
 
         updateInfo();
     }
@@ -217,11 +228,9 @@ public class VPNActivity extends AppCompatActivity {
 
         runOnUiThread(() -> currentVpnServer.setText(currentServer));
 
-
-
         long currentTime = new Date().getTime();
 
-        long timeDifference = currentTime - OverviewActivity.startupTime;
+        long timeDifference = currentTime - startupTime;
 
         int currentTimeDifference = (int)timeDifference / 1000;
 
@@ -231,9 +240,6 @@ public class VPNActivity extends AppCompatActivity {
 
         formattedUpTime = hours + " hours, " + minutes + " minutes, " + seconds + " seconds";
 
-//        timeString = String.format("%02d:%02d:%02d", hours, minutes, seconds);
-
-//        formattedUpTime = currentTimeDifference + " seconds";
         runOnUiThread(() -> upTime.setText(formattedUpTime));
         Log.i(TAG, "Up-time : " + formattedUpTime);
     }
@@ -311,7 +317,7 @@ public class VPNActivity extends AppCompatActivity {
         if (!selectedVPNServer) {
             VPNSettingsBox.setForeground(getDrawable(R.color.transparent));
             VPNFileBox.setForeground(getDrawable(R.color.transparentClear));
-            VPNURL.setEnabled(true);
+//            VPNURL.setEnabled(true);
             monitoringStatus.setClickable(false);
             ChangeVPNServer.setClickable(false);
             VPNURLAdd.setClickable(true);
@@ -319,7 +325,7 @@ public class VPNActivity extends AppCompatActivity {
         } else {
             VPNFileBox.setForeground(getDrawable(R.color.transparent));
             VPNSettingsBox.setForeground(getDrawable(R.color.transparentClear));
-            VPNURL.setEnabled(false);
+//            VPNURL.setEnabled(false);
             monitoringStatus.setClickable(true);
             ChangeVPNServer.setClickable(true);
             VPNURLAdd.setClickable(false);

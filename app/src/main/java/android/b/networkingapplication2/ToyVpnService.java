@@ -153,9 +153,9 @@ public class ToyVpnService extends VpnService implements Handler.Callback {
         setConnectingThread(null);
         setConnection(null);
         stopForeground(true);
-        SharedPreferences.Editor editor = getSharedPreferences(PREFS_GENERAL, MODE_PRIVATE).edit();
-        editor.putBoolean("monitoringStatus", false);
-        editor.apply();
+//        SharedPreferences.Editor editor = getSharedPreferences(PREFS_GENERAL, MODE_PRIVATE).edit();
+//        editor.putBoolean("monitoringStatus", false);
+//        editor.apply();
     }
 
     private void updateForegroundNotification(final int message) {

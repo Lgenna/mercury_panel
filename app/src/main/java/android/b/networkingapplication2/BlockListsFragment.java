@@ -15,17 +15,23 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 
 import database.BlockListBaseHelper;
+import database.MasterBlockListBaseHelper;
 
 public class BlockListsFragment extends Fragment {
 
@@ -34,9 +40,11 @@ public class BlockListsFragment extends Fragment {
     private RecyclerView mBlockListRecyclerView;
     public static View view;
 
-    public ArrayList<String> masterBlockList = new ArrayList<>();
+//    public static ArrayList<String> masterBlockList = new ArrayList<>();
 
     Thread buildMasterList;
+
+    ArrayList<BlockList> mBlockLists;
 
     private static final String TAG = "BlockListsFragment";
 
@@ -59,11 +67,11 @@ public class BlockListsFragment extends Fragment {
 
         try {
 
-            if (myBloDb.getAllData().getCount() == 0) {
-                Log.w(TAG, "Blocklist DB empty, adding test data");
-                myBloDb.insertData(getResources().getString(R.string.no_data));
-//                myBloDb.insertData(getResources().getString(R.string.no_data), "false");
-            }
+//            if (myBloDb.getAllData().getCount() == 0) {
+//                Log.w(TAG, "Blocklist DB empty, adding test data");
+//                myBloDb.insertData("https://blocklist.site/app/dl/ransomware");
+//                myBloDb.insertData("https://blocklist.site/app/dl/ransomware");
+//            }
 
             updateUI();
 
@@ -74,31 +82,25 @@ public class BlockListsFragment extends Fragment {
 
                     if (Patterns.WEB_URL.matcher(enteredText).matches()) {
 
-                        // just a precautionary measure because there might somehow be nothing in the list
-                        try {
-                            Cursor checkInitial = myBloDb.getAllData();
-
-                            if (checkInitial.getCount() == 1) {
-                                checkInitial.moveToFirst();
-                                if (checkInitial.getString(1).equals(getResources().getString(R.string.no_data))) {
-                                    myBloDb.deleteData("1");
-                                    Log.w(TAG, "Removing initial row");
-                                }
-                            }
-                        } catch (IndexOutOfBoundsException e) {
-                            Log.e(TAG, "Phew, we were just grazed by an apocalypse...");
-                        }
-
                         myBloDb.insertData(enteredText);
 
-                        //                    myBloDb.insertData(
-                        //                            enteredText,
-                        //                            "true");
                         Toast.makeText(getContext(), "Added: " + enteredText, Toast.LENGTH_SHORT).show();
                         Log.i(TAG, "Added: " + enteredText + " to blocklist Database");
 
                         updateUI();
                         editDomain.setText("");
+
+                        Toast.makeText(getContext(), "Please Wait, we're gathering URL's from : " + enteredText, Toast.LENGTH_LONG).show();
+
+                        buildMasterList = new Thread() {
+                            @Override
+                            public void run() {
+                                buildMasterList(enteredText);
+                            }
+                        };
+
+                        buildMasterList.start();
+
                     } else {
                         Toast.makeText(getContext(), "\"" + enteredText + "\" is not a valid block list", Toast.LENGTH_SHORT).show();
                         Log.i(TAG, "\"" + enteredText + "\" is not a valid block list");
@@ -114,12 +116,13 @@ public class BlockListsFragment extends Fragment {
             Toast.makeText(getContext(), "[NullPointerException]", Toast.LENGTH_LONG).show();
             System.err.println("[NullPointerException] Now just stop tryin' ta mess with my contraptions.");
         }
+
         return view;
     }
 
     public void updateUI() {
 
-        ArrayList<BlockList> mBlockLists = new ArrayList<>();
+        mBlockLists = new ArrayList<>();
 
         Cursor blocklistRes = myBloDb.getAllData();
 
@@ -127,7 +130,6 @@ public class BlockListsFragment extends Fragment {
             while (blocklistRes.moveToNext()) {
                 BlockList BlockListItem = new BlockList();
                 BlockListItem.setDomain(blocklistRes.getString(1));
-//                BlockListItem.setStatus(Boolean.parseBoolean(blocklistRes.getString(2)));
 
                 mBlockLists.add(BlockListItem);
             }
@@ -135,57 +137,63 @@ public class BlockListsFragment extends Fragment {
 
         BlockListCustomAdapter blocklistcustomAdapter = new BlockListCustomAdapter(getContext(), mBlockLists);
         mBlockListRecyclerView.setAdapter(blocklistcustomAdapter);
+    }
 
-        // TODO for each list item, make a new thread that gets the urls contents
+    private void buildMasterList(String sBlockList) {
 
+        MasterBlockListBaseHelper myMasDb;
 
-        buildMasterList = new Thread() {
-            @Override
-            public void run() {
+        myMasDb = DomainBlockerFragment.getMyMasDb();
+        Cursor myMasDbRes = myMasDb.getAllData();
+        boolean domainsPresent = false;
 
-                URL blockListUrl;
-                InputStream inputStream;
-                BufferedReader data;
-                String s;
+        if (myMasDbRes.getCount() != 0) {
+            while (myMasDbRes.moveToNext()) {
+                if (sBlockList.equals(myMasDbRes.getString(1))) {
+                    Log.i(TAG, "Atleast one domain from " + sBlockList + ", skipping.");
+                    domainsPresent = true;
+                }
+            }
+        }
 
-                for (BlockList blockList : mBlockLists) {
-                    try {
-                        blockListUrl = new URL(blockList.getDomain());
-                        try {
+        if (!domainsPresent) {
+            Log.i(TAG, "No domains found from " + sBlockList + ", adding blocked domains...");
 
-                            inputStream = blockListUrl.openStream();
+            try {
+                URL url = new URL(sBlockList);
 
-                            data = new BufferedReader(new InputStreamReader(inputStream));
+                try {
+                    Log.i(TAG, "Looking for domains in " + sBlockList);
 
-                            while ((s = data.readLine()) != null) {
-                                masterBlockList.add(s);
-                            }
+                    BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
+                    String domainFromBlockList;
 
-                        } catch (IOException e) {
-                            Log.i(TAG, "[IOException]");
+                    int sizeBefore = myMasDbRes.getCount();
+
+                    while ((domainFromBlockList = in.readLine()) != null) {
+                        if (!domainFromBlockList.equals("") && !domainFromBlockList.equals(" ")) {
+                            myMasDb.insertData(
+                                    sBlockList,
+                                    domainFromBlockList,
+                                    1);
+
+                            DomainBlockerFragment.setMyMasDb(myMasDb);
                         }
-
-                    } catch (MalformedURLException e) {
-                        Log.i(TAG, "[MalformedURLException]");
                     }
+                    Log.i(TAG, "Added " + (myMasDb.getAllData().getCount() - sizeBefore) + " domains to blocklist from " + sBlockList);
+
+                    getActivity().runOnUiThread(() -> Toast.makeText(getContext(), "Added " + (myMasDb.getAllData().getCount() - sizeBefore) + " domains to the blocklist", Toast.LENGTH_LONG).show());
+
+                    in.close();
+
+                } catch (IOException e) {
+                    Log.i(TAG, "[IOException]");
                 }
 
-                Log.i(TAG, "Time for holy moly...");
-                Log.i(TAG, "masterBlocklist : " + masterBlockList.toString());
+            } catch (MalformedURLException e) {
+                Log.i(TAG, "[MalformedURLException]");
             }
-        };
-
-        buildMasterList.start();
-//        u = new URL("http://200.210.220.1:8080/index.html");
-//
-//        is = u.openStream();         // throws an IOException
-
-
-
-
-
-//        System.out.println("You know where ya' oughta' hide next time? Back in France.");
-
+        }
     }
 
     public static BlockListsFragment newInstance() {

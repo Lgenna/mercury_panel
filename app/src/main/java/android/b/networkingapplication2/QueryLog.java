@@ -5,7 +5,7 @@ import java.util.UUID;
 public class QueryLog {
 
     private UUID mId;
-    private String mTime;
+    private long mTime;
     private String mDomain;
     private String mStatus;
 
@@ -21,11 +21,11 @@ public class QueryLog {
         return mId;
     }
 
-    public String getTime() {
+    public long getTime() {
         return mTime;
     }
 
-    public void setTime(String time) {
+    public void setTime(long time) {
         mTime = time;
     }
 

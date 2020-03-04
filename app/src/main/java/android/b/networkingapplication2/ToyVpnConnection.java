@@ -43,6 +43,7 @@ import java.nio.channels.ClosedChannelException;
 import java.nio.channels.DatagramChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -204,56 +205,62 @@ public class ToyVpnConnection implements Runnable {
 
             QueryLogBaseHelper myQueDb;
 
+            int count = 0;
+
+//            try {
             while (true) {
                 // Assume that we did not make any progress in this iteration.
                 boolean idle = true;
                 // Read the outgoing packet from the input stream.
 
-
                 final long timeNow = System.currentTimeMillis();
                 int length = in.read(packet.array());
 
                 ArrayList<String> letters = new ArrayList<>(Arrays.asList("a", "b", "c", "d", "e", "f"));
-                    StringBuilder something = new StringBuilder();
+                StringBuilder ipAddress = new StringBuilder();
 
                 for (int i = 16; i < 20; i++) {
                     if (packet.get(i) < 10 && packet.get(i) >= 0) {
-                        something.append(Integer.valueOf("0" + Integer.toHexString(packet.get(i) & 0xFF)));
+                        ipAddress.append(Integer.valueOf("0" + Integer.toHexString(packet.get(i) & 0xFF)));
                     } else if (letters.contains(Integer.toHexString(packet.get(i) & 0xFF))) {
                         int n = (int) Long.parseLong(Integer.toHexString(packet.get(i) & 0xFF), 16);
-                        something.append(Integer.decode("0" + n));
+                        ipAddress.append(Integer.decode("0" + n));
                     } else {
                         int n = (int) Long.parseLong(Integer.toHexString(packet.get(i) & 0xFF), 16);
-                        something.append(Integer.valueOf(n));
+                        ipAddress.append(Integer.valueOf(n));
                     }
                     if (i != 19) {
-                        something.append(".");
+                        ipAddress.append(".");
                     }
                 }
 
                 if (length > 0) {
-
-                    InetAddress host = InetAddress.getByName(something.toString());
-                    System.out.println(host.getHostName());
-
                     // Write the outgoing packet to the tunnel.
                     packet.limit(length);
                     tunnel.write(packet);
 
-//                    Date dateTime = new Date();
+                    myQueDb = OverviewActivity.getMyQueDb();
 
-                    String output = something.toString();
+                    if (myQueDb != null && !ipAddress.toString().equals("")) {
 
-                    myQueDb = QueryLogFragment.getMyQueDb();
+                        Date currentDate = new Date();
 
-                    if (myQueDb != null) {
+//                            StringBuilder sPacket = new StringBuilder();
+//
+//                            for (byte element : packet.array()) {
+//                                sPacket.append(String.format("%02X ", element));
+//                            }
+//
+//                            Log.i(TAG, "Packet! : " + sPacket);
+
+                        // granted that the "domain" (the ip) wasn't on the blocklist
                         myQueDb.insertData(
-                                "" + timeNow,
-                                "" + output,
-                                "Allowed");
-
-                        QueryLogFragment.setMyQueDb(myQueDb);
+                                "" + currentDate.getTime(),
+                                "" + ipAddress.toString(),
+                                "true");
+                        OverviewActivity.setMyQueDb(myQueDb);
                     }
+
 
                     packet.clear();
                     // There might be more outgoing packets.
@@ -261,9 +268,9 @@ public class ToyVpnConnection implements Runnable {
                     lastReceiveTime = System.currentTimeMillis();
                 }
 
+
                 // Read the incoming packet from the tunnel.
                 length = tunnel.read(packet);
-
                 if (length > 0) {
                     // Ignore control messages, which start with zero.
                     if (packet.get(0) != 0) {
@@ -275,40 +282,37 @@ public class ToyVpnConnection implements Runnable {
                     idle = false;
                     lastSendTime = System.currentTimeMillis();
                 }
-//                }
 
                 // If we are idle or waiting for the network, sleep for a
                 // fraction of time to avoid busy looping.
 
                 if (idle) {
-
                     Thread.sleep(IDLE_INTERVAL_MS);
+//                        final long timeNow = System.currentTimeMillis();
+//                        if (lastSendTime + KEEPALIVE_INTERVAL_MS <= timeNow) {
+                        // We are receiving for a long time but not sending.
+                        // Send empty control messages.
 
-                    if (tunnel.isConnected()) {
+                        // No messages? I'll just chuck a scroll of scribbles at the server, that oughta' fix it :]
 
-                        if (lastReceiveTime + KEEPALIVE_INTERVAL_MS <= timeNow) {
-                            // We are receiving for a long time but not sending.
-                            Log.i(TAG, "Closing the tunnel to the server : Idle");
-//                            tunnel.wait();
-//                            tunnel.disconnect();
-                            tunnel.close();
-                            connected = false;
-                            break;
-
-//                            Thread.sleep(RECONNECT_WAIT_MS);
-                        } else if (lastReceiveTime + RECEIVE_TIMEOUT_MS <= timeNow) {
-                            // We are sending for a long time but not receiving.
-                            Log.i(TAG, "Closing the tunnel to the server : Timed Out");
-                            tunnel.close();
-                            connected = false;
-                            break;
-//                            throw new IllegalStateException("Timed out");
+                        packet.put((byte) 0).limit(1);
+                        for (int i = 0; i < 3; ++i) {
+                            packet.position(0);
+                            tunnel.write(packet);
                         }
-                    }
+                        packet.clear();
+//                            lastSendTime = timeNow;
+//                        } else if (lastReceiveTime + RECEIVE_TIMEOUT_MS <= timeNow) {
+                        // We are sending for a long time but not receiving.
+//                            Log.e(TAG,"Boy, that ther' server takin' a looong time to respond!");
+//                        }
                 }
             }
+//            } catch (InterruptedException e) {
+//                    Log.e(TAG, "Thread Interrupted, stopping VPN connection");
+//            }
         } catch (SocketException e) {
-            Log.e(getTag(), "Cannot use socket", e);
+            Log.e(TAG, "Cannot use socket", e);
         } finally {
             if (iface != null) {
                 try {
@@ -363,7 +367,6 @@ public class ToyVpnConnection implements Runnable {
     private ParcelFileDescriptor configure(String parameters) throws IllegalArgumentException {
         // Configure a builder while parsing the parameters.
         VpnService.Builder builder = mService.new Builder();
-//
 
         for (String parameter : parameters.split(" ")) {
             String[] fields = parameter.split(",");
@@ -394,7 +397,6 @@ public class ToyVpnConnection implements Runnable {
 
 //        for (String packageName : mPackages) {
 //            try {
-////                builder.addDnsServer()
 //
 ////                if (mAllow) {
 ////                    builder.addAllowedApplication(packageName);
@@ -419,6 +421,8 @@ public class ToyVpnConnection implements Runnable {
         // TODO builder.addDnsServer(dnsAddress1);
 
 //        mDnsServers
+
+
 
         builder.setSession(mServerName).setConfigureIntent(mConfigureIntent);
 //        if (!TextUtils.isEmpty(mProxyHostName)) {

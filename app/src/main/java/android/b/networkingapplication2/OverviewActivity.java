@@ -39,6 +39,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import database.QueryLogBaseHelper;
+
 public class OverviewActivity extends AppCompatActivity {
 
     public static final String PREFS_GENERAL = "NetworkingApp";
@@ -66,7 +68,7 @@ public class OverviewActivity extends AppCompatActivity {
     private boolean mPaused, mFinished, getApplications = false;
     private TextView deviceTemp, deviceCPU, memoryUsage, IPV4Address,
             IPV6Address, startTime, totalApps, blockedApps, dnsStatus,
-            dnsNumber, vpnStatus, vpnServer;
+            dnsNumber, vpnStatus, vpnServer, totalQueries, blockedQueries;
 
     private Thread uiUpdater;
 
@@ -81,7 +83,9 @@ public class OverviewActivity extends AppCompatActivity {
 
     public static long startupTime;
 
+    int iTotalQueries = 0, iBlockedQueries = 0;
 
+    private static QueryLogBaseHelper myQueDb;
 
     public static ArrayList<String> BlockedApps;
 
@@ -97,6 +101,8 @@ public class OverviewActivity extends AppCompatActivity {
 //        OverviewFragment.newInstance(); // TODO find out if this ACTUALLY does anything, turns out
                                           //  nothing because its never "officially" called.
 
+        totalQueries = findViewById(R.id.total_queries);
+        blockedQueries = findViewById(R.id.total_queries_blocked);
         deviceTemp = findViewById(R.id.cpu_temperature_status);
         memoryUsage = findViewById(R.id.memory_usage_percent);
         deviceCPU = findViewById(R.id.cpu_usage_percent);
@@ -118,6 +124,7 @@ public class OverviewActivity extends AppCompatActivity {
         // get time when OnCreate is called
         startupTime = new Date().getTime();
 
+        myQueDb = new QueryLogBaseHelper(getBaseContext());
 
         domainBlockerBox.setOnClickListener(v -> {
             intent = new Intent(this, DomainBlockerActivity.class);
@@ -152,6 +159,8 @@ public class OverviewActivity extends AppCompatActivity {
                     // while the app is open...
                     while (!mFinished) {
 
+                        getDomainBlockerInfo();
+
                         getIPAddresses();
                         getBatteryTemp();
                         getCPUUsage();
@@ -167,7 +176,7 @@ public class OverviewActivity extends AppCompatActivity {
                         runOnUiThread(() -> updateUI());
 
                         // update the user interface every 10 seconds
-                        Thread.sleep(10000);
+                        Thread.sleep(5000);
 
                         // create a synchronized boolean mPauseLock
                         synchronized (mPauseLock) {
@@ -194,10 +203,57 @@ public class OverviewActivity extends AppCompatActivity {
 
     }
 
+    public static QueryLogBaseHelper getMyQueDb() {
+        return myQueDb;
+    }
+
+    public static void setMyQueDb(QueryLogBaseHelper myQueDb) {
+        OverviewActivity.myQueDb = myQueDb;
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
+    }
+
+    private void getDomainBlockerInfo() {
+
+        if (myQueDb != null) {
+
+            iTotalQueries = 0;
+            iBlockedQueries = 0;
+
+            Cursor allQueries = myQueDb.getAllData();
+
+            int numOfQueries = allQueries.getCount();
+
+            if (numOfQueries != 0) {
+                if (numOfQueries <= 1) {
+                    allQueries.moveToFirst();
+                    if (allQueries.getString(2).equals(getResources().getString(R.string.no_data))) {
+                        Log.w(TAG, "Query Log DB empty");
+                    }
+                } else {
+                    while (allQueries.moveToNext()) {
+                        if (allQueries.getString(3).equals("true")) {
+                            iTotalQueries++;
+                        } else {
+                            iBlockedQueries++;
+                        }
+                    }
+                }
+            } else {
+                // This shouldn't happen, otherwise we have bigger fish to fry
+                Log.w(TAG, "Query Log DB is barren, like there's nothing here");
+            }
+        }
+
+        String sTotalQueries = iTotalQueries + " Total Queries";
+        String sBlockedQueries = iBlockedQueries + " Blocked Queries";
+
+        runOnUiThread(() -> totalQueries.setText(sTotalQueries));
+        runOnUiThread(() -> blockedQueries.setText(sBlockedQueries));
     }
 
     private void getDnsInfo() {
@@ -223,17 +279,19 @@ public class OverviewActivity extends AppCompatActivity {
     }
 
     private void getVPNStatus() {
-        SharedPreferences GeneralPrefs = getSharedPreferences(PREFS_GENERAL, MODE_PRIVATE);
-
-        boolean monitoringStatus = GeneralPrefs.getBoolean("monitoringStatus", false);
-
-        if (monitoringStatus) {
-            sVPNStatus = "Online!";
-        } else {
+        try {
+            if (VPNActivity.monitoringStatus.isChecked()) {
+                sVPNStatus = "Online!";
+            } else {
+                sVPNStatus = "Offline";
+            }
+        } catch (NullPointerException e) {
             sVPNStatus = "Offline";
         }
+
         runOnUiThread(() -> vpnStatus.setText(sVPNStatus));
 
+        SharedPreferences GeneralPrefs = getSharedPreferences(PREFS_GENERAL, MODE_PRIVATE);
         boolean VPNServer = GeneralPrefs.getBoolean("isVPNServerDefault", false);
 
         if (VPNServer) {
@@ -251,7 +309,12 @@ public class OverviewActivity extends AppCompatActivity {
 
         int currentTimeDifference = (int)timeDifference / 1000;
 
-        formattedUpTime = currentTimeDifference + " seconds";
+        int hours = currentTimeDifference / 3600;
+        int minutes = (currentTimeDifference % 3600) / 60;
+        int seconds = currentTimeDifference % 60;
+
+        formattedUpTime = hours + " hours, " + minutes + " minutes, " + seconds + " seconds";
+
         Log.i(TAG, "Up-time : " + formattedUpTime);
     }
 

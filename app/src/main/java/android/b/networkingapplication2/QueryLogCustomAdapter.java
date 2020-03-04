@@ -9,7 +9,10 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Locale;
 
 
 public class QueryLogCustomAdapter extends RecyclerView.Adapter<QueryLogCustomAdapter.MyViewHolder> {
@@ -35,10 +38,21 @@ public class QueryLogCustomAdapter extends RecyclerView.Adapter<QueryLogCustomAd
     @Override
     public void onBindViewHolder(MyViewHolder holder, final int position) {
 
-        holder.time.setText(mQueryLogList.get(position).getTime());
-        holder.domain.setText(mQueryLogList.get(position).getDomain());
-        holder.status.setText(mQueryLogList.get(position).getStatus());
+        SimpleDateFormat standard = new SimpleDateFormat("MM/dd/yy \n kk:mm:ss", Locale.US);
 
+        holder.time.setText(String.valueOf(standard.format(mQueryLogList.get(position).getTime())));
+        holder.domain.setText(mQueryLogList.get(position).getDomain());
+
+        String sStatus = mQueryLogList.get(position).getStatus();
+        String formattedStatus;
+
+        if (sStatus.equals("true")) {
+            formattedStatus = "Allowed";
+        } else {
+            formattedStatus = "Blocked";
+        }
+
+        holder.status.setText(formattedStatus);
     }
 
     @Override
