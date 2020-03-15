@@ -1,5 +1,7 @@
 package android.b.networkingapplication2;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
@@ -29,9 +31,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.List;
 
 import database.BlockListBaseHelper;
 import database.MasterBlockListBaseHelper;
+import database.MasterBlockListDbSchema;
 
 public class BlockListsFragment extends Fragment {
 
@@ -48,10 +52,12 @@ public class BlockListsFragment extends Fragment {
 
     private static final String TAG = "BlockListsFragment";
 
+    private List<MasterBlocklist> domainEntrys;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
+        AlertDialog.Builder builder;
         ImageButton addBlocklist;
 
         view = inflater.inflate(R.layout.activity_blocklists, container, false);
@@ -64,6 +70,8 @@ public class BlockListsFragment extends Fragment {
 
         LinearLayoutManager blocklistlinearLayoutManager = new LinearLayoutManager(getContext());
         mBlockListRecyclerView.setLayoutManager(blocklistlinearLayoutManager);
+
+        builder = new AlertDialog.Builder(getContext());
 
         try {
 
@@ -82,24 +90,46 @@ public class BlockListsFragment extends Fragment {
 
                     if (Patterns.WEB_URL.matcher(enteredText).matches()) {
 
-                        myBloDb.insertData(enteredText);
+                        Cursor myBloDbRes = myBloDb.getAllData();
 
-                        Toast.makeText(getContext(), "Added: " + enteredText, Toast.LENGTH_SHORT).show();
-                        Log.i(TAG, "Added: " + enteredText + " to blocklist Database");
+                        boolean domainPresent = false;
 
-                        updateUI();
-                        editDomain.setText("");
+                        while(myBloDbRes.moveToNext()) {
 
-                        Toast.makeText(getContext(), "Please Wait, we're gathering URL's from : " + enteredText, Toast.LENGTH_LONG).show();
-
-                        buildMasterList = new Thread() {
-                            @Override
-                            public void run() {
-                                buildMasterList(enteredText);
+                            if (myBloDbRes.getString(1).equals(enteredText)) {
+                                domainPresent = true;
                             }
-                        };
+                        }
 
-                        buildMasterList.start();
+                        if (!domainPresent) {
+                            myBloDb.insertData(enteredText);
+
+                            Log.i(TAG, "Added: " + enteredText + " to blocklist Database");
+
+                            updateUI();
+                            editDomain.setText("");
+
+                            builder.setMessage(getResources().getString(R.string.gathering) + enteredText)
+                                    .setCancelable(false);
+
+                            AlertDialog alert = builder.create();
+                            alert.setTitle(R.string.please_wait);
+                            alert.show();
+
+                            buildMasterList = new Thread() {
+                                @Override
+                                public void run() {
+                                    buildMasterList(enteredText);
+                                    alert.dismiss();
+//                                    alert.cancel();
+                                }
+                            };
+
+                            buildMasterList.start();
+
+                        } else {
+                            Toast.makeText(getContext(), "\"" + enteredText + "\" has all ready been added", Toast.LENGTH_SHORT).show();
+                        }
 
                     } else {
                         Toast.makeText(getContext(), "\"" + enteredText + "\" is not a valid block list", Toast.LENGTH_SHORT).show();
@@ -170,16 +200,24 @@ public class BlockListsFragment extends Fragment {
 
                     int sizeBefore = myMasDbRes.getCount();
 
-                    while ((domainFromBlockList = in.readLine()) != null) {
-                        if (!domainFromBlockList.equals("") && !domainFromBlockList.equals(" ")) {
-                            myMasDb.insertData(
-                                    sBlockList,
-                                    domainFromBlockList,
-                                    1);
+                    domainEntrys = new ArrayList<>();
 
-                            DomainBlockerFragment.setMyMasDb(myMasDb);
+                    while ((domainFromBlockList = in.readLine()) != null) {
+                        if (!domainFromBlockList.equals("") && !domainFromBlockList.equals(" ") && !domainFromBlockList.startsWith("#")) {
+
+                            MasterBlocklist domain = new MasterBlocklist();
+                            domain.setDomain(domainFromBlockList);
+                            domain.setBlockList(sBlockList);
+                            domain.setStatus(1);
+
+
+
+                            domainEntrys.add(domain);
                         }
                     }
+
+                    myMasDb.insertData(domainEntrys);
+
                     Log.i(TAG, "Added " + (myMasDb.getAllData().getCount() - sizeBefore) + " domains to blocklist from " + sBlockList);
 
                     getActivity().runOnUiThread(() -> Toast.makeText(getContext(), "Added " + (myMasDb.getAllData().getCount() - sizeBefore) + " domains to the blocklist", Toast.LENGTH_LONG).show());

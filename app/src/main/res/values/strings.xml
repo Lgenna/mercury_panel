@@ -71,8 +71,11 @@
     <string name="current_vpn_server_title">Current VPN Server</string>
     <string name="degree_symbol_celsius">°C</string>
     <string name="percent_symbol">%</string>
-    <string name="connecting">Mercury Panel is connecting...</string>
+    <string name="connecting">Mercury Panel is connecting…</string>
     <string name="connected">Mercury Panel is connected!</string>
     <string name="disconnected">Mercury Panel is disconnected!</string>
     <string name="chart_title">Queries over 6 Hours</string>
+    <string name="gathering">"We're gathering domains from: "</string>
+    <string name="removing">"We're removing domains from: "</string>
+    <string name="please_wait">Please Wait…</string>
 </resources>

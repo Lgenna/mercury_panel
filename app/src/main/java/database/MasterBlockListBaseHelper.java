@@ -1,10 +1,13 @@
 package database;
 
+import android.b.networkingapplication2.MasterBlocklist;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+
+import java.util.List;
 
 import static database.MasterBlockListDbSchema.MasterBlockListTable.TABLE_NAME;
 import static database.MasterBlockListDbSchema.MasterBlockListTable.Cols.BLOCKLIST;
@@ -37,13 +40,39 @@ public class MasterBlockListBaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public boolean insertData(String blocklist, String domain, int status) {
+//    public boolean insertData(String blocklist, String domain, int status) {
+//        SQLiteDatabase db = this.getWritableDatabase();
+//        ContentValues contentValues = new ContentValues();
+//        contentValues.put(BLOCKLIST, blocklist);
+//        contentValues.put(DOMAIN, domain);
+//        contentValues.put(STATUS, status);
+//        long result = db.insert(TABLE_NAME, null, contentValues);
+//        return result != -1;
+//    }
+
+    public boolean insertData(List<MasterBlocklist> listOfEntries) {
         SQLiteDatabase db = this.getWritableDatabase();
+
+        db.beginTransaction();
+
         ContentValues contentValues = new ContentValues();
-        contentValues.put(BLOCKLIST, blocklist);
-        contentValues.put(DOMAIN, domain);
-        contentValues.put(STATUS, status);
-        long result = db.insert(TABLE_NAME, null, contentValues);
+
+        long result = -1;
+
+        try {
+            for (MasterBlocklist entry : listOfEntries) {
+                contentValues.put(DOMAIN, entry.getDomain());
+                contentValues.put(BLOCKLIST, entry.getBlockList());
+                contentValues.put(STATUS, entry.getStatus());
+
+                result = db.insertOrThrow(TABLE_NAME, null, contentValues);
+            }
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+//            db.close();
+        }
+
         return result != -1;
     }
 
@@ -61,9 +90,23 @@ public class MasterBlockListBaseHelper extends SQLiteOpenHelper {
 //        return true;
 //    }
 
-    public Integer deleteData(String id) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        return db.delete(TABLE_NAME, "ID = ?", new String[]{id});
-    }
+//    public Integer deleteData(String id) {
+//        SQLiteDatabase db = this.getWritableDatabase();
+//        return db.delete(TABLE_NAME, "ID = ?", new String[]{id});
+//    }
 
+    public void deleteData(List<String> idList) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        db.beginTransaction();
+
+        try {
+            for (String id : idList) {
+                db.delete(TABLE_NAME, "ID = ?", new String[]{id});
+            }
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
+    }
 }

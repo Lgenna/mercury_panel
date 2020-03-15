@@ -175,7 +175,7 @@ public class OverviewActivity extends AppCompatActivity {
 
                         runOnUiThread(() -> updateUI());
 
-                        // update the user interface every 10 seconds
+                        // update the user interface every 5 seconds
                         Thread.sleep(5000);
 
                         // create a synchronized boolean mPauseLock
