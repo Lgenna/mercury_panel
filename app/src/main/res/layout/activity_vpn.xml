@@ -45,13 +45,13 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
 
-<!--                    <EditText-->
-<!--                        android:id="@+id/vpn_url"-->
-<!--                        android:layout_width="0dp"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:text="@string/url_temp"-->
-<!--                        android:layout_marginStart="8dp"-->
-<!--                        android:layout_weight="1"/>-->
+                    <EditText
+                        android:id="@+id/vpn_url"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/url_temp"
+                        android:layout_marginStart="8dp"
+                        android:layout_weight="1"/>
 
                     <ImageButton
                         android:id="@+id/vpn_url_add"

@@ -170,7 +170,6 @@ public class BlockListsFragment extends Fragment {
     }
 
     private void buildMasterList(String sBlockList) {
-
         MasterBlockListBaseHelper myMasDb;
 
         myMasDb = DomainBlockerFragment.getMyMasDb();
@@ -190,7 +189,15 @@ public class BlockListsFragment extends Fragment {
             Log.i(TAG, "No domains found from " + sBlockList + ", adding blocked domains...");
 
             try {
-                URL url = new URL(sBlockList);
+
+                URL url;
+
+                if(!sBlockList.startsWith("https://")) {
+                    Log.i(TAG, "Adding https:// to the blocklist input");
+                   url = new URL("https://" + sBlockList);
+                } else {
+                    url = new URL(sBlockList);
+                }
 
                 try {
                     Log.i(TAG, "Looking for domains in " + sBlockList);
@@ -210,8 +217,6 @@ public class BlockListsFragment extends Fragment {
                             domain.setBlockList(sBlockList);
                             domain.setStatus(1);
 
-
-
                             domainEntrys.add(domain);
                         }
                     }
@@ -229,10 +234,11 @@ public class BlockListsFragment extends Fragment {
                 }
 
             } catch (MalformedURLException e) {
-                Log.i(TAG, "[MalformedURLException]");
+                Toast.makeText(getContext(), "[MalformedURLException]", Toast.LENGTH_SHORT).show();
             }
         }
     }
+
 
     public static BlockListsFragment newInstance() {
         return new BlockListsFragment();
