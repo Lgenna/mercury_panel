@@ -14,42 +14,41 @@
  * limitations under the License.
  */
 package android.b.networkingapplication2;
-import static android.b.networkingapplication2.OverviewActivity.PREFS_FIREWALL;
-import static android.content.Context.MODE_PRIVATE;
 import static java.nio.charset.StandardCharsets.US_ASCII;
+
+import android.annotation.SuppressLint;
 import android.app.PendingIntent;
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.net.ProxyInfo;
 import android.net.VpnService;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
-import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
 import java.net.SocketAddress;
 import java.net.SocketException;
-import java.nio.Buffer;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.ByteBuffer;
-import java.nio.channels.ClosedChannelException;
 import java.nio.channels.DatagramChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+
 
 import database.QueryLogBaseHelper;
 
 public class ToyVpnConnection implements Runnable {
+
+    ArrayList<String> list = new ArrayList<>();
+
     /**
      * Callback interface to let the {@link ToyVpnService} know about new connections
      * and update the foreground notification with connection status.
@@ -93,6 +92,7 @@ public class ToyVpnConnection implements Runnable {
     private final byte[] mSharedSecret;
     private PendingIntent mConfigureIntent;
     private OnEstablishListener mOnEstablishListener;
+    AsyncTask<?, ?, ?> runningTask;
 
     // Proxy settings
 //    private String mProxyHostName;
@@ -100,19 +100,18 @@ public class ToyVpnConnection implements Runnable {
     // Allowed/Disallowed packages for VPN usage
 //    private final boolean mAllow;
     private final Set<String> mPackages;
-    private final Set<String> mDnsServers;
+//    private final Set<String> mDnsServers;
 
     public ToyVpnConnection(final VpnService service, final int connectionId,
                             final String serverName, final int serverPort,
-                            final byte[] sharedSecret, final Set<String> packages,
-                            final Set<String> dnsServers) {
+                            final byte[] sharedSecret, final Set<String> packages) {
 
         mService = service;
         mConnectionId = connectionId;
         mServerName = serverName;
         mServerPort= serverPort;
         mSharedSecret = sharedSecret;
-        mDnsServers = dnsServers;
+//        mDnsServers = dnsServers;
 //        if (!TextUtils.isEmpty(proxyHostName)) {
 //            mProxyHostName = proxyHostName;
 //        }
@@ -171,10 +170,15 @@ public class ToyVpnConnection implements Runnable {
 
         }
     }
+
+
+
     private boolean run(SocketAddress server)
             throws IOException, InterruptedException, IllegalArgumentException {
         ParcelFileDescriptor iface = null;
         boolean connected = false;
+
+        long startTime = System.currentTimeMillis();
         // Create a DatagramChannel as the VPN tunnel.
         try (DatagramChannel tunnel = DatagramChannel.open()) {
             // Protect the tunnel before connecting to avoid loopback.
@@ -203,10 +207,9 @@ public class ToyVpnConnection implements Runnable {
             long lastReceiveTime = System.currentTimeMillis();
             // We keep forwarding packets till something goes wrong.
 
-            QueryLogBaseHelper myQueDb;
 
-            int count = 0;
 
+//            int count = 0;
 //            try {
             while (true) {
                 // Assume that we did not make any progress in this iteration.
@@ -216,51 +219,84 @@ public class ToyVpnConnection implements Runnable {
                 final long timeNow = System.currentTimeMillis();
                 int length = in.read(packet.array());
 
-                ArrayList<String> letters = new ArrayList<>(Arrays.asList("a", "b", "c", "d", "e", "f"));
-                StringBuilder ipAddress = new StringBuilder();
-
-                for (int i = 16; i < 20; i++) {
-                    if (packet.get(i) < 10 && packet.get(i) >= 0) {
-                        ipAddress.append(Integer.valueOf("0" + Integer.toHexString(packet.get(i) & 0xFF)));
-                    } else if (letters.contains(Integer.toHexString(packet.get(i) & 0xFF))) {
-                        int n = (int) Long.parseLong(Integer.toHexString(packet.get(i) & 0xFF), 16);
-                        ipAddress.append(Integer.decode("0" + n));
-                    } else {
-                        int n = (int) Long.parseLong(Integer.toHexString(packet.get(i) & 0xFF), 16);
-                        ipAddress.append(Integer.valueOf(n));
-                    }
-                    if (i != 19) {
-                        ipAddress.append(".");
-                    }
-                }
-
                 if (length > 0) {
+
+//                    for (int i = 123; i < 144; i++)
+
+//                    ArrayList<String> letters = new ArrayList<>(Arrays.asList("a", "b", "c", "d", "e", "f"));
+//                    StringBuilder ipAddress = new StringBuilder();
+
+//                    for (int i = 16; i < 20; i++) {
+//                        if (packet.get(i) < 10 && packet.get(i) >= 0) {
+//                            ipAddress.append(Integer.valueOf("0" + Integer.toHexString(packet.get(i) & 0xFF)));
+//                        } else if (letters.contains(Integer.toHexString(packet.get(i) & 0xFF))) {
+//                            int n = (int) Long.parseLong(Integer.toHexString(packet.get(i) & 0xFF), 16);
+//                            ipAddress.append(Integer.decode("0" + n));
+//                        } else {
+//                            int n = (int) Long.parseLong(Integer.toHexString(packet.get(i) & 0xFF), 16);
+//                            ipAddress.append(Integer.valueOf(n));
+//                        }
+//                        if (i != 19) {
+//                            ipAddress.append(".");
+//                        }
+//                    }
+
                     // Write the outgoing packet to the tunnel.
                     packet.limit(length);
                     tunnel.write(packet);
 
-                    myQueDb = OverviewActivity.getMyQueDb();
 
-                    if (myQueDb != null && !ipAddress.toString().equals("")) {
 
-                        Date currentDate = new Date();
+//                    if (myQueDb != null && !ipAddress.toString().equals("")) {
+//                    if (myQueDb != null) {
+//                        StringBuilder sPacket = new StringBuilder();
 
+//                        for (byte element : packet.array()) {
+//                            sPacket.append(String.format("%02X", element));
+//                        }
+
+//                        list.add(sPacket.toString());
+
+//                    Thread jimbo = new Thread() {
+//                        @Override
+//                        public void run() {
 //                            StringBuilder sPacket = new StringBuilder();
-//
 //                            for (byte element : packet.array()) {
-//                                sPacket.append(String.format("%02X ", element));
+//                                sPacket.append(String.format("%02X", element));
 //                            }
+//                            Log.i(TAG, sPacket.toString());
+//                        }
+//                    };
 //
-//                            Log.i(TAG, "Packet! : " + sPacket);
+//                    jimbo.start();
 
-                        // granted that the "domain" (the ip) wasn't on the blocklist
-                        myQueDb.insertData(
-                                "" + currentDate.getTime(),
-                                "" + ipAddress.toString(),
-                                "true");
-                        OverviewActivity.setMyQueDb(myQueDb);
+//                    if (!alreadyPrinted && startTime + 20000 < System.currentTimeMillis()) {
+//
+//
+//                        for (int i = 0; i < list.size(); i++) {
+//                            Log.i(TAG, "Packet " + i + " : " + list.get(i));
+//                        }
+//                        alreadyPrinted = true;
+//                    }
+
+//                        Log.i(TAG, "Packet! : " + sPacket);
+
+//                    System.out.println(Arrays.toString(packet.array()));
+
+                    StringBuilder hexedPacket = new StringBuilder();
+
+                    byte[] array = packet.array();
+                    for (int i = 0; i < 250; i++) { // 1 byte = 2 hex, maximum hex we would need being around 400, but to keep it safe, use 250 bytes which equals 500 hex chars
+                        hexedPacket.append(String.format("%02X", array[i]));
                     }
 
+                    String sHexedPacket = hexedPacket.toString();
+
+                    if (sHexedPacket.startsWith("160301", 104)) {
+                        String domain = handyHector(sHexedPacket, 358);
+
+                        queryLogUpdater(domain);
+                    }
 
                     packet.clear();
                     // There might be more outgoing packets.
@@ -323,6 +359,64 @@ public class ToyVpnConnection implements Runnable {
             }
         }
         return connected;
+    }
+
+    /**
+     * Looks for client handshakes, because these contain server domains. Starts off by looking at
+     *  where the length byte of a packet would be for the domain length. Then it takes that number
+     *  of bytes after the starting point and stores it as a possibleDomain. It runs this through
+     *  another method that checks to see if the domain generated is valid by passing it through
+     *  a url and a uri validator to see if it is malformed. If it is, it tries again using this
+     *  method but with a different starting point. If this try is unsuccessful it returns null,
+     *  otherwise it returns the generated domain.
+     * @param input A packet in hex form as ascii text;
+     * @param startingPoint the known point where the domain usually is, there are two variations.
+     * @return returns a recursive call with a different starting point, null if no valid domain
+     *  was found, or the valid domain that was found.
+     */
+
+    private String handyHector(String input, int startingPoint) {
+        int length = 0;
+        StringBuilder str = new StringBuilder();
+
+        for(int i = startingPoint - 4; i < startingPoint; i += 2) {
+            length = Integer.parseInt(input.substring(i, i + 2), 16);
+        }
+
+        int endingPoint = startingPoint + (length * 2);
+
+        if (endingPoint < input.length()) {
+            for (int i = startingPoint; i < endingPoint; i += 2) {
+                str.append((char) Integer.parseInt(input.substring(i, i + 2), 16));
+            }
+        }
+
+        String possibleDomain = str.toString();
+
+        if (domainChecker(possibleDomain)) {
+            // domain is valid, add it to the query log
+            Log.i(TAG, "Adding \"" + possibleDomain + "\" to the query Log");
+//            Log.i(TAG, "Packet : " + input);
+            return possibleDomain;
+        } else if (startingPoint != 362) {
+//             try a different starting point
+            return handyHector(input, 362);
+        } else {
+            // was not valid, ignore
+            return null;
+        }
+    }
+
+    private boolean domainChecker (String possibleDomain) {
+        try {
+            URL url = new URL("https://" + possibleDomain);
+            url.toURI();
+            return true;
+
+        } catch (MalformedURLException | URISyntaxException ignore) {
+            return false;
+        }
+
     }
 
 
@@ -440,4 +534,20 @@ public class ToyVpnConnection implements Runnable {
     private final String getTag() {
         return ToyVpnConnection.class.getSimpleName() + "[" + mConnectionId + "]";
     }
+
+
+
+    private void queryLogUpdater(String domain) {
+
+        QueryLogBaseHelper myQueDb = OverviewActivity.getMyQueDb();
+
+        if (myQueDb != null && domain != null) {
+            myQueDb.insertData(
+                    "" + System.currentTimeMillis(),
+                    "" + domain,
+                    "true");
+            OverviewActivity.setMyQueDb(myQueDb);
+        }
+    }
 }
+

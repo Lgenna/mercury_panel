@@ -194,14 +194,12 @@ public class VPNActivity extends AppCompatActivity {
 
         Log.i(TAG, "dnsServersSet : " + dnsServersSet.toString());
 
-
-
         prefs.edit()
-            .putString(VPNActivity.Prefs.SERVER_ADDRESS, "192.168.91.90")
+            .putString(VPNActivity.Prefs.SERVER_ADDRESS, "192.168.0.12")
             .putInt(VPNActivity.Prefs.SERVER_PORT, 8000)
             .putString(VPNActivity.Prefs.SHARED_SECRET, "test")
             .putStringSet(VPNActivity.Prefs.PACKAGES, packageSet)
-            .putStringSet(VPNActivity.Prefs.DNSSERVERS, dnsServersSet)
+//            .putStringSet(VPNActivity.Prefs.DNSSERVERS, dnsServersSet)
             .apply();
 
         updateInfo();

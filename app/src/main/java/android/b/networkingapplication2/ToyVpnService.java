@@ -105,11 +105,11 @@ public class ToyVpnService extends VpnService implements Handler.Callback {
         final byte[] secret = prefs.getString(VPNActivity.Prefs.SHARED_SECRET, "").getBytes();
         final Set<String> packages =
                 prefs.getStringSet(VPNActivity.Prefs.PACKAGES, Collections.emptySet());
-        final Set<String> dnsServers =
-                prefs.getStringSet(VPNActivity.Prefs.DNSSERVERS, Collections.emptySet());
+//        final Set<String> dnsServers =
+//                prefs.getStringSet(VPNActivity.Prefs.DNSSERVERS, Collections.emptySet());
         final int port = prefs.getInt(VPNActivity.Prefs.SERVER_PORT, 0);
         startConnection(new ToyVpnConnection(
-                this, mNextConnectionId.getAndIncrement(), server, port, secret, packages, dnsServers));
+                this, mNextConnectionId.getAndIncrement(), server, port, secret, packages));
     }
     private void startConnection(final ToyVpnConnection connection) {
         // Replace any existing connecting thread with the  new one.
