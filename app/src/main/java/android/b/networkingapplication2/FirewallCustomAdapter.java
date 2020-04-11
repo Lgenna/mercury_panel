@@ -59,7 +59,6 @@ public class FirewallCustomAdapter extends RecyclerView.Adapter<FirewallCustomAd
             } else {
                 Log.i(TAG, "Changed state of " + mApplications.get(position).getApplication() + " to false");
                 editor.remove(mApplications.get(position).getProcessName());
-//                editor.putBoolean(mApplications.get(position).getProcessName(), false);
             }
 
             editor.apply();

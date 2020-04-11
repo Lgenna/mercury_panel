@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Mercury Panel 2</string>
+    <string name="app_name">Mercury Panel</string>
     <string name="overview">Overview</string>
     <string name="domain_blocker">Domain Blocker</string>
     <string name="vpn">VPN Servers</string>
