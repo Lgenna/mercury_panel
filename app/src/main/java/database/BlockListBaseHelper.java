@@ -70,4 +70,9 @@ public class BlockListBaseHelper extends SQLiteOpenHelper {
         return db.delete(TABLE_NAME, "ID = ?", new String[]{id});
     }
 
+    public Cursor selectData(String selectElement) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        return db.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE " + DOMAIN + " = '" + selectElement + "'", null);
+    }
+
 }

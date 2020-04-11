@@ -39,6 +39,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import database.BlockListBaseHelper;
+import database.MasterBlockListBaseHelper;
 import database.QueryLogBaseHelper;
 
 public class OverviewActivity extends AppCompatActivity {
@@ -86,6 +88,8 @@ public class OverviewActivity extends AppCompatActivity {
     int iTotalQueries = 0, iBlockedQueries = 0;
 
     private static QueryLogBaseHelper myQueDb;
+    private static BlockListBaseHelper myBloDb;
+    private static MasterBlockListBaseHelper myMasDb;
 
     public static ArrayList<String> BlockedApps;
 
@@ -125,6 +129,8 @@ public class OverviewActivity extends AppCompatActivity {
         startupTime = new Date().getTime();
 
         myQueDb = new QueryLogBaseHelper(getBaseContext());
+        myBloDb = new BlockListBaseHelper(getBaseContext());
+        myMasDb = new MasterBlockListBaseHelper(getBaseContext());
 
         domainBlockerBox.setOnClickListener(v -> {
             intent = new Intent(this, DomainBlockerActivity.class);
@@ -200,7 +206,6 @@ public class OverviewActivity extends AppCompatActivity {
 
         // start the thread
         uiUpdater.start();
-
     }
 
     public static QueryLogBaseHelper getMyQueDb() {
@@ -211,7 +216,24 @@ public class OverviewActivity extends AppCompatActivity {
         OverviewActivity.myQueDb = myQueDb;
     }
 
-    @Override
+    public static BlockListBaseHelper getMyBloDb() {
+        return myBloDb;
+    }
+
+    public static void setMyBloDb(BlockListBaseHelper myBloDb) {
+        OverviewActivity.myBloDb = myBloDb;
+    }
+
+    public static MasterBlockListBaseHelper getMyMasDb() {
+        return myMasDb;
+    }
+
+    public static void setMyMasDb(MasterBlockListBaseHelper myMasDb) {
+        OverviewActivity.myMasDb = myMasDb;
+    }
+
+
+@Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;

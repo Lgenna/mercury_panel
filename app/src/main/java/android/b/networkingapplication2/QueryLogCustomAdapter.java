@@ -42,17 +42,7 @@ public class QueryLogCustomAdapter extends RecyclerView.Adapter<QueryLogCustomAd
 
         holder.time.setText(String.valueOf(standard.format(mQueryLogList.get(position).getTime())));
         holder.domain.setText(mQueryLogList.get(position).getDomain());
-
-        String sStatus = mQueryLogList.get(position).getStatus();
-        String formattedStatus;
-
-        if (sStatus.equals("true")) {
-            formattedStatus = "Allowed";
-        } else {
-            formattedStatus = "Blocked";
-        }
-
-        holder.status.setText(formattedStatus);
+        holder.status.setText(mQueryLogList.get(position).getStatus());
     }
 
     @Override

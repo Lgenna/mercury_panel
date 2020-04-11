@@ -3,6 +3,7 @@ package database;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
@@ -58,5 +59,10 @@ public class QueryLogBaseHelper extends SQLiteOpenHelper {
         return db.delete(TABLE_NAME, "ID = ?", new String[]{id});
     }
 
-
+    public long countData() {
+    SQLiteDatabase db = this.getReadableDatabase();
+        long count = DatabaseUtils.queryNumEntries(db, MasterBlockListDbSchema.MasterBlockListTable.TABLE_NAME);
+        db.close();
+        return count;
+    }
 }

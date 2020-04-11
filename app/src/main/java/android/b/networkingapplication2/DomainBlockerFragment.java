@@ -36,11 +36,11 @@ public class DomainBlockerFragment extends Fragment {
     private Object mPauseLock;
     private boolean mPaused, mFinished;
 
-    private static MasterBlockListBaseHelper myMasDb;
     private QueryLogBaseHelper myQueDb;
+    private MasterBlockListBaseHelper myMasDb;
     private TextView totalQueries, blockedDomains;
 
-    private int masterListSize = 0;
+    private long masterListSize = 0;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -52,8 +52,6 @@ public class DomainBlockerFragment extends Fragment {
 
         totalQueries = view.findViewById(R.id.total_queries_number);
         blockedDomains = view.findViewById(R.id.blocklist_domains_number);
-
-        myMasDb = new MasterBlockListBaseHelper(getContext());
 
         // Builds a new thread
         timer = new Thread() {
@@ -98,16 +96,17 @@ public class DomainBlockerFragment extends Fragment {
         return view;
     }
 
-    public static MasterBlockListBaseHelper getMyMasDb() {
-        return myMasDb;
-    }
-
-    public static void setMyMasDb(MasterBlockListBaseHelper myMasDb) {
-        DomainBlockerFragment.myMasDb = myMasDb;
-    }
+//    public static MasterBlockListBaseHelper getMyMasDb() {
+//        return myMasDb;
+//    }
+//
+//    public static void setMyMasDb(MasterBlockListBaseHelper myMasDb) {
+//        DomainBlockerFragment.myMasDb = myMasDb;
+//    }
 
     private void updateInfo() {
         myQueDb = OverviewActivity.getMyQueDb();
+        myMasDb = OverviewActivity.getMyMasDb();
 
         int iTotalQueries;
 
@@ -120,10 +119,10 @@ public class DomainBlockerFragment extends Fragment {
         getActivity().runOnUiThread(() -> totalQueries.setText(iTotalQueries + ""));
 
         try {
-            masterListSize = DomainBlockerFragment.getMyMasDb().getAllData().getCount();
+            masterListSize = myMasDb.countData();
+        } catch (NullPointerException | IllegalStateException ignore) {}
 
-        } catch (NullPointerException ignore) {}
-            getActivity().runOnUiThread(() -> blockedDomains.setText(masterListSize + ""));
+        getActivity().runOnUiThread(() -> blockedDomains.setText(masterListSize + ""));
     }
 
 

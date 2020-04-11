@@ -189,10 +189,10 @@ public class VPNActivity extends AppCompatActivity {
 
     private void setServerDefault(SharedPreferences prefs) {
 
-        final Set<String> dnsServersSet = new HashSet<>(getDnsServers());
+//        final Set<String> dnsServersSet = new HashSet<>(getDnsServers());
         final Set<String> packageSet = new HashSet<>(getBlockedApps());
 
-        Log.i(TAG, "dnsServersSet : " + dnsServersSet.toString());
+//        Log.i(TAG, "dnsServersSet : " + dnsServersSet.toString());
 
         prefs.edit()
             .putString(VPNActivity.Prefs.SERVER_ADDRESS, "192.168.0.12")

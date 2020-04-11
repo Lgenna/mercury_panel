@@ -4,8 +4,10 @@ import android.b.networkingapplication2.MasterBlocklist;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteQueryBuilder;
 
 import java.util.List;
 
@@ -22,6 +24,7 @@ public class MasterBlockListBaseHelper extends SQLiteOpenHelper {
     public MasterBlockListBaseHelper(Context context) {
         super(context, DATABASE_NAME, null, VERSION);
     }
+
 
     @Override
     public void onCreate(SQLiteDatabase db) {
@@ -108,5 +111,18 @@ public class MasterBlockListBaseHelper extends SQLiteOpenHelper {
         } finally {
             db.endTransaction();
         }
+    }
+
+    public Cursor selectData(String selectElement) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        return db.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE " + DOMAIN + " = '" + selectElement + "'", null);
+
+    }
+
+    public long countData() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        long count = DatabaseUtils.queryNumEntries(db, TABLE_NAME);
+        db.close();
+        return count;
     }
 }

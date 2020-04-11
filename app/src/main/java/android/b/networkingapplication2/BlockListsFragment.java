@@ -62,7 +62,8 @@ public class BlockListsFragment extends Fragment {
 
         view = inflater.inflate(R.layout.activity_blocklists, container, false);
 
-        myBloDb = new BlockListBaseHelper(getContext());
+//        myBloDb = new BlockListBaseHelper(getContext());
+        myBloDb = OverviewActivity.getMyBloDb();
 
         addBlocklist = view.findViewById(R.id.blocklist_urls_add);
         editDomain = view.findViewById(R.id.custom_blocklists_textfield);
@@ -75,12 +76,6 @@ public class BlockListsFragment extends Fragment {
 
         try {
 
-//            if (myBloDb.getAllData().getCount() == 0) {
-//                Log.w(TAG, "Blocklist DB empty, adding test data");
-//                myBloDb.insertData("https://blocklist.site/app/dl/ransomware");
-//                myBloDb.insertData("https://blocklist.site/app/dl/ransomware");
-//            }
-
             updateUI();
 
             addBlocklist.setOnClickListener(v -> {
@@ -90,15 +85,12 @@ public class BlockListsFragment extends Fragment {
 
                     if (Patterns.WEB_URL.matcher(enteredText).matches()) {
 
-                        Cursor myBloDbRes = myBloDb.getAllData();
-
                         boolean domainPresent = false;
 
-                        while(myBloDbRes.moveToNext()) {
+                        Cursor cursor = myBloDb.selectData(enteredText);
 
-                            if (myBloDbRes.getString(1).equals(enteredText)) {
-                                domainPresent = true;
-                            }
+                        if (cursor == null || cursor.getCount() > 0) {
+                            domainPresent = true;
                         }
 
                         if (!domainPresent) {
@@ -172,17 +164,16 @@ public class BlockListsFragment extends Fragment {
     private void buildMasterList(String sBlockList) {
         MasterBlockListBaseHelper myMasDb;
 
-        myMasDb = DomainBlockerFragment.getMyMasDb();
-        Cursor myMasDbRes = myMasDb.getAllData();
+        myMasDb = OverviewActivity.getMyMasDb();
+//        Cursor myMasDbRes = myMasDb.getAllData();
         boolean domainsPresent = false;
 
-        if (myMasDbRes.getCount() != 0) {
-            while (myMasDbRes.moveToNext()) {
-                if (sBlockList.equals(myMasDbRes.getString(1))) {
-                    Log.i(TAG, "Atleast one domain from " + sBlockList + ", skipping.");
-                    domainsPresent = true;
-                }
-            }
+        Cursor cursor = myMasDb.selectData(sBlockList);
+
+        if (cursor == null || cursor.getCount() > 0) {
+            Log.i(TAG, "Atleast one domain from " + sBlockList + ", skipping.");
+            domainsPresent = true;
+
         }
 
         if (!domainsPresent) {
@@ -193,7 +184,7 @@ public class BlockListsFragment extends Fragment {
                 URL url;
 
                 if(!sBlockList.startsWith("https://")) {
-                    Log.i(TAG, "Adding https:// to the blocklist input");
+                    Log.i(TAG, "Adding \"https://\" to the blocklist input");
                    url = new URL("https://" + sBlockList);
                 } else {
                     url = new URL(sBlockList);
@@ -205,7 +196,7 @@ public class BlockListsFragment extends Fragment {
                     BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
                     String domainFromBlockList;
 
-                    int sizeBefore = myMasDbRes.getCount();
+                    long sizeBefore = myMasDb.countData();
 
                     domainEntrys = new ArrayList<>();
 
@@ -223,7 +214,7 @@ public class BlockListsFragment extends Fragment {
 
                     myMasDb.insertData(domainEntrys);
 
-                    Log.i(TAG, "Added " + (myMasDb.getAllData().getCount() - sizeBefore) + " domains to blocklist from " + sBlockList);
+                    Log.i(TAG, "Added " + (myMasDb.countData() - sizeBefore) + " domains to blocklist from " + sBlockList);
 
                     getActivity().runOnUiThread(() -> Toast.makeText(getContext(), "Added " + (myMasDb.getAllData().getCount() - sizeBefore) + " domains to the blocklist", Toast.LENGTH_LONG).show());
 
