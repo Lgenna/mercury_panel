@@ -49,9 +49,9 @@ public class DNSActivity extends AppCompatActivity {
             case R.id.action_vpn_servers:
                 intent = new Intent(this, VPNActivity.class);
                 break;
-            case R.id.action_dns_servers:
-                intent = new Intent(this, DNSActivity.class);
-                break;
+//            case R.id.action_dns_servers:
+//                intent = new Intent(this, DNSActivity.class);
+//                break;
             case R.id.action_firewall:
                 intent  = new Intent(this, FirewallActivity.class);
                 break;

@@ -122,7 +122,7 @@ public class MasterBlockListBaseHelper extends SQLiteOpenHelper {
     public long countData() {
         SQLiteDatabase db = this.getReadableDatabase();
         long count = DatabaseUtils.queryNumEntries(db, TABLE_NAME);
-        db.close();
+//        db.close();
         return count;
     }
 }

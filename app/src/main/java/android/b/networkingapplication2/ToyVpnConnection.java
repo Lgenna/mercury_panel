@@ -173,7 +173,7 @@ public class ToyVpnConnection implements Runnable {
             new Handler(Looper.getMainLooper()).post(() -> {
                 VPNActivity.monitoringStatus.setChecked(false);
                 VPNActivity.monitoringStatus.setEnabled(true);
-                Toast.makeText(VPNActivity.context, "There was an error connecting", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(VPNActivity.context, "There was an error connecting", Toast.LENGTH_SHORT).show();
             });
 
         }
@@ -240,10 +240,20 @@ public class ToyVpnConnection implements Runnable {
 
                     String sHexedPacket = hexedPacket.toString();
 
+
+//                    if (sHexedPacket.contains("55736572")) {
+//
+//                        System.out.println("UserAgent-Packet : " + sHexedPacket); // testing
+//
+//                    }
+
+
                     boolean allowPacket = true;
 
                     if (sHexedPacket.startsWith("160301", 104)) {
                         String domain = handyHector(sHexedPacket, 358);
+
+//                        System.out.println("Handshake-Packet : " + sHexedPacket); // testing
 
                         if (domain != null) {
                             allowPacket = domainMatcher(domain);
@@ -259,7 +269,7 @@ public class ToyVpnConnection implements Runnable {
 
                         if (myQueDb != null && domain != null) {
                             myQueDb.insertData(
-                                    "" + System.currentTimeMillis(),
+                                    System.currentTimeMillis(),
                                     "" + domain,
                                     sAllowPacket);
                             OverviewActivity.setMyQueDb(myQueDb);
@@ -367,7 +377,7 @@ public class ToyVpnConnection implements Runnable {
 
         if (domainChecker(possibleDomain)) {
             // domain is valid, add it to the query log
-            Log.i(TAG, "Handshake made : " + possibleDomain);
+//            Log.i(TAG, "Handshake made : " + possibleDomain);
 //            Log.i(TAG, "Packet : " + input);
             return possibleDomain;
         } else if (startingPoint != 362) {
@@ -463,15 +473,18 @@ public class ToyVpnConnection implements Runnable {
 
         for (String packageName : mPackages) {
             try {
-
-//                if (mAllow) {
-//                    builder.addAllowedApplication(packageName);
-//                } else {
+//
+////                if (mAllow) {
+////                    builder.addAllowedApplication(packageName);
+////                } else {
+                Log.i(TAG, "Blocking application : " + packageName);
+//                builder.addAllowedApplication(packageName); // any application enabled on the firewall
                 builder.addAllowedApplication(packageName); // any application enabled on the firewall
-                //  is added to a VPN which is hosted on
-                //  a server that doesn't have internet
-                //  access. AKA, The Crude Approach
-//                }
+
+//                //  is added to a VPN which is hosted on
+//                //  a server that doesn't have internet
+//                //  access. AKA, The Crude Approach
+////                }
             } catch (PackageManager.NameNotFoundException e) {
                 Log.w(TAG, "Package not available: " + packageName, e);
             }
@@ -484,13 +497,11 @@ public class ToyVpnConnection implements Runnable {
          *  otherwise use the one that was provided.
          */
 
-        // TODO builder.addDnsServer(dnsAddress1);
-
-//        mDnsServers
-
-
 
         builder.setSession(mServerName).setConfigureIntent(mConfigureIntent);
+
+
+
 //        if (!TextUtils.isEmpty(mProxyHostName)) {
 //            builder.setHttpProxy(ProxyInfo.buildDirectProxy(mProxyHostName, mProxyHostPort));
 //        }
@@ -522,7 +533,7 @@ public class ToyVpnConnection implements Runnable {
         Cursor cursor = myMasDb.selectData(foundDomain);
 
         if (cursor == null || cursor.getCount() > 0) {
-            Log.i(TAG, "Blocked : " + foundDomain);
+//            Log.i(TAG, "Blocked : " + foundDomain);
             return false;
         } else {
             return true;

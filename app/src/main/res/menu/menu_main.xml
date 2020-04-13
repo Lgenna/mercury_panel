@@ -13,10 +13,6 @@
         android:title="@string/vpn"
         app:showAsAction="never" />
     <item
-        android:id="@+id/action_dns_servers"
-        android:title="@string/dns_servers"
-        app:showAsAction="never" />
-    <item
         android:id="@+id/action_firewall"
         android:title="@string/firewall"
         app:showAsAction="never" />

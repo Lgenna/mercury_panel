@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Switch;
+import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -40,24 +41,29 @@ public class FirewallCustomAdapter extends RecyclerView.Adapter<FirewallCustomAd
     @Override
     public void onBindViewHolder(MyViewHolder holder, final int position) {
 
+        Firewall currentApp = mApplications.get(position);
+
         SharedPreferences FirewallPrefs = context.getSharedPreferences(PREFS_FIREWALL, MODE_PRIVATE);
 
-        boolean appStatus = FirewallPrefs.getBoolean(mApplications.get(position).getProcessName(), false);
+        String processName = currentApp.getProcessName();
+        boolean appStatus = FirewallPrefs.getBoolean(processName, false);
 
+        holder.processName.setText(processName);
         holder.status.setChecked(appStatus);
-        holder.prettyPicture.setImageDrawable(mApplications.get(position).getPicture());
-        holder.status.setText(mApplications.get(position).getApplication());
+        holder.uid.setText(currentApp.getUid());
+        holder.prettyPicture.setImageDrawable(currentApp.getPicture());
+        holder.status.setText(currentApp.getApplication());
         holder.status.setOnClickListener(v -> {
 
             SharedPreferences.Editor editor = context.getSharedPreferences(PREFS_FIREWALL, MODE_PRIVATE).edit();
 
             if(holder.status.isChecked()) {
 
-                Log.i(TAG, "Changed state of " + mApplications.get(position).getApplication() + " to true");
+                Log.i(TAG, "Changed state of " + currentApp.getApplication() + " to true");
                 editor.putBoolean(mApplications.get(position).getProcessName(), true);
 
             } else {
-                Log.i(TAG, "Changed state of " + mApplications.get(position).getApplication() + " to false");
+                Log.i(TAG, "Changed state of " + currentApp.getApplication() + " to false");
                 editor.remove(mApplications.get(position).getProcessName());
             }
 
@@ -72,13 +78,17 @@ public class FirewallCustomAdapter extends RecyclerView.Adapter<FirewallCustomAd
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         Switch status;
+        TextView uid;
+        TextView processName;
         ImageView prettyPicture;
 
         public MyViewHolder(View itemView) {
             super(itemView);
 
             // get the reference of item view's
-            status = itemView.findViewById(R.id.application_name);
+            uid = itemView.findViewById(R.id.application_uid);
+            status = itemView.findViewById(R.id.application_display_name);
+            processName = itemView.findViewById(R.id.process_name);
             prettyPicture = itemView.findViewById(R.id.application_image);
 
         }

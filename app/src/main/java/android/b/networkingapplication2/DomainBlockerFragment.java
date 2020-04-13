@@ -1,9 +1,5 @@
 package android.b.networkingapplication2;
 
-import android.app.admin.DevicePolicyManager;
-import android.app.admin.NetworkEvent;
-import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -12,17 +8,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import androidx.fragment.app.Fragment;
 
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.LegendRenderer;
+import com.jjoe64.graphview.helper.StaticLabelsFormatter;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Arrays;
 import java.util.List;
 
 import database.MasterBlockListBaseHelper;
@@ -32,15 +27,15 @@ public class DomainBlockerFragment extends Fragment {
 
     private static final String TAG = "DomainBlockerFragment";
 
-    private Thread timer;
+    private Thread timer, graphTimer;
     private Object mPauseLock;
     private boolean mPaused, mFinished;
 
-    private QueryLogBaseHelper myQueDb;
-    private MasterBlockListBaseHelper myMasDb;
-    private TextView totalQueries, blockedDomains;
+    private QueryLogBaseHelper myQueDb = OverviewActivity.getMyQueDb();
+    private MasterBlockListBaseHelper myMasDb = OverviewActivity.getMyMasDb();
 
-    private long masterListSize = 0;
+    private TextView totalQueries, blockedDomains, blockedQueries, percentBlocked;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -52,6 +47,11 @@ public class DomainBlockerFragment extends Fragment {
 
         totalQueries = view.findViewById(R.id.total_queries_number);
         blockedDomains = view.findViewById(R.id.blocklist_domains_number);
+        blockedQueries = view.findViewById(R.id.queries_blocked_number);
+        percentBlocked = view.findViewById(R.id.percent_blocked_number);
+
+        graphFiddler(view);
+
 
         // Builds a new thread
         timer = new Thread() {
@@ -64,7 +64,8 @@ public class DomainBlockerFragment extends Fragment {
 
                         // methods that need to update info
                         updateInfo();
-
+                        graphTotalQueries.resetData(getTotalQueriesGraphData());
+                        graphBlockedQueries.resetData(getBlockedQueriesGraphData());
                         // update the user interface every 10 seconds
                         Thread.sleep(5000);
                         //create a synchronized boolean mPauseLock
@@ -90,101 +91,57 @@ public class DomainBlockerFragment extends Fragment {
         // start the thread
         timer.start();
 
-        GraphView graph = view.findViewById(R.id.graph);
-        addData(graph);
+
 
         return view;
     }
 
-//    public static MasterBlockListBaseHelper getMyMasDb() {
-//        return myMasDb;
-//    }
-//
-//    public static void setMyMasDb(MasterBlockListBaseHelper myMasDb) {
-//        DomainBlockerFragment.myMasDb = myMasDb;
-//    }
+    private long lBlockedQueries = 0;
+    private long lMasterListSize = 0;
+    private long lTotalQueries = 0;
+    private long lPercentBlocked = 0;
 
     private void updateInfo() {
-        myQueDb = OverviewActivity.getMyQueDb();
-        myMasDb = OverviewActivity.getMyMasDb();
-
-        int iTotalQueries;
 
         if (myQueDb != null) {
-            Cursor myQueDbRes = myQueDb.getAllData();
-            iTotalQueries = myQueDbRes.getCount();
-        } else {
-            iTotalQueries = 0;
+            lTotalQueries = myQueDb.countData();
+            Cursor blockedQueriesRes = myQueDb.selectData("STATUS", "Blocked (trashed)");
+
+            if (blockedQueriesRes != null) {
+                lBlockedQueries = blockedQueriesRes.getCount();
+            }
+
+            if (lBlockedQueries != 0) {
+                lPercentBlocked = (long)((float)lBlockedQueries / lTotalQueries * 100);
+            }
         }
-        getActivity().runOnUiThread(() -> totalQueries.setText(iTotalQueries + ""));
 
-        try {
-            masterListSize = myMasDb.countData();
-        } catch (NullPointerException | IllegalStateException ignore) {}
+        if(myMasDb != null) {
+            lMasterListSize = myMasDb.countData();
+        }
 
-        getActivity().runOnUiThread(() -> blockedDomains.setText(masterListSize + ""));
+        if(getActivity() != null) {
+            getActivity().runOnUiThread(() -> {
+                totalQueries.setText(String.valueOf(lTotalQueries));
+                blockedQueries.setText(String.valueOf(lBlockedQueries));
+                blockedDomains.setText(String.valueOf(lMasterListSize));
+                percentBlocked.setText(String.valueOf(lPercentBlocked));
+            });
+        }
     }
 
 
 //    LineGraphSeries<DataPoint> series1;
 //    LineGraphSeries<DataPoint> series2;
 
-    private void addData(GraphView graph) {
+    private LineGraphSeries<DataPoint> graphTotalQueries;
+    private LineGraphSeries<DataPoint> graphBlockedQueries;
 
-//        DataPoint[] totalQueriesData;
-//        DataPoint[] blockedQueriesData;
+    private void graphFiddler(View view) {
+        GraphView graph = view.findViewById(R.id.graph);
 
-//        int[] anotherList = {2, 7, 3, 2, 8, 9};
-//        totalQueriesData = new DataPoint[6];
-//
-//        for (int i = 0; i < 6; i++) {
-//            totalQueriesData[i] = new DataPoint(i, anotherList[i]);
-//        }
-
-        LineGraphSeries<DataPoint> series1 = new LineGraphSeries<>(new DataPoint[] {
-                new DataPoint(0, 2),
-                new DataPoint(1, 6),
-                new DataPoint(2, 4),
-                new DataPoint(3, 3),
-                new DataPoint(4, 12),
-                new DataPoint(5, 3),
-                new DataPoint(6, 4)
-        });
-
-//        series1 = new LineGraphSeries<>(totalQueriesData);
-        series1.setTitle("Total Queries");
-        series1.setDrawBackground(true);
-        series1.setBackgroundColor(Color.argb(10, 95, 210, 70));
-        series1.setColor(Color.argb(100, 80, 180, 60));
-
-        graph.addSeries(series1);
-
-//        blockedQueriesData = new DataPoint[6];
-//        int[] values = {1, 5, 3, 2, 6, 8};
-//
-//        for (int i = 0; i < 6; i++) {
-//            blockedQueriesData[i] = new DataPoint(i, values[i]);
-//        }
-
-        LineGraphSeries<DataPoint> series2 = new LineGraphSeries<>(new DataPoint[] {
-                new DataPoint(0, 1),
-                new DataPoint(1, 5),
-                new DataPoint(2, 3),
-                new DataPoint(3, 2),
-                new DataPoint(4, 6)
-        });
-
-//        series2 = new LineGraphSeries<>(blockedQueriesData);
-        series2.setTitle("Blocked Queries");
-        series2.setDrawBackground(true);
-        series2.setBackgroundColor(Color.argb(40, 70, 150, 210));
-        series2.setColor(Color.argb(100, 50, 110, 150));
-
-        graph.addSeries(series2);
-
-        //-----------------------------------------------------
-
-        graph.setTitle(getText(R.string.chart_title).toString());
+        graph.setTitle("Queries over 6 minutes");
+//        graph.setTitle(getText(R.string.chart_title).toString());
 //        graph.getGridLabelRenderer().setVerticalAxisTitle("Queries"); // if it renders this, the graph is cut off
 //        graph.getGridLabelRenderer().setHorizontalAxisTitle("Hours");
 
@@ -192,15 +149,146 @@ public class DomainBlockerFragment extends Fragment {
         graph.getLegendRenderer().setAlign(LegendRenderer.LegendAlign.TOP);
 
         graph.getViewport().setXAxisBoundsManual(true);
-        graph.getViewport().setMinX(0);
+        graph.getViewport().setMinX(1);
         graph.getViewport().setMaxX(6);
+//        graph.getGridLabelRenderer().setHorizontalAxisTitle("Minutes");
+//        graph.getGridLabelRenderer().setVerticalAxisTitle("Queries");
+
+        graphTotalQueries = new LineGraphSeries<>(getTotalQueriesGraphData());
+        graphTotalQueries.setTitle("Total Queries");
+        graphTotalQueries.setDrawBackground(true);
+        graphTotalQueries.setBackgroundColor(Color.argb(10, 95, 210, 70));
+        graphTotalQueries.setColor(Color.argb(100, 80, 180, 60));
+
+        graph.addSeries(graphTotalQueries);
+//        graphTotalQueries.resetData(getTotalQueriesGraphData());
+
+        graphBlockedQueries = new LineGraphSeries<>(getBlockedQueriesGraphData());
+        graphBlockedQueries.setTitle("Blocked Queries");
+        graphBlockedQueries.setDrawBackground(true);
+        graphBlockedQueries.setBackgroundColor(Color.argb(40, 70, 150, 210));
+        graphBlockedQueries.setColor(Color.argb(100, 50, 110, 150));
+
+        graph.addSeries(graphBlockedQueries);
+//        graphBlockedQueries.resetData(getBlockedQueriesGraphData());
 
 
-//        StaticLabelsFormatter staticLabelsFormatter = new StaticLabelsFormatter(graph);
-//        staticLabelsFormatter.setHorizontalLabels(new String[] {">0", "1", "2", "3", "4", "5"});
-//        graph.getGridLabelRenderer().setLabelFormatter(staticLabelsFormatter);
-
+        StaticLabelsFormatter staticLabelsFormatter = new StaticLabelsFormatter(graph);
+        staticLabelsFormatter.setHorizontalLabels(new String[] {">0", "1", "2", "3", "4", "5"});
+        graph.getGridLabelRenderer().setLabelFormatter(staticLabelsFormatter);
     }
+
+    private DataPoint[] getTotalQueriesGraphData() {
+
+        long currentTime = System.currentTimeMillis();
+        long startupTime = OverviewActivity.startupTime;
+
+        int[] tempList = {0, 0, 0, 0, 0, 0};
+
+        DataPoint[] totalQueriesData = new DataPoint[6];
+
+        if (myQueDb != null) {
+            int i = 0;
+            for (int j = 0; j < 360000; j += 60000) {
+                String sSpanStart = String.valueOf(currentTime - j - 60000);
+//                for (int j = 0; j < 21600000; j += 3600000) {
+//                    String sSpanStart = String.valueOf(currentTime - j - 3600000);
+                String sSpanEnd = String.valueOf(currentTime - j);
+
+                int totalQueriesOverLastMin = myQueDb.specialSelectData("TIME", ">=", sSpanStart, "<", sSpanEnd).getCount();
+
+                tempList[i] = totalQueriesOverLastMin;
+                i++;
+            }
+
+        }
+
+        for (int i = 0; i < tempList.length; i++) {
+            totalQueriesData[i] = new DataPoint(i + 1, tempList[i]);
+        }
+
+        return totalQueriesData;
+    }
+
+    private DataPoint[] getBlockedQueriesGraphData() {
+
+        long currentTime = System.currentTimeMillis();
+        long startupTime = OverviewActivity.startupTime;
+
+        int[] tempList = {0, 0, 0, 0, 0, 0};
+
+        DataPoint[] blockedQueriesData = new DataPoint[6];
+
+        if (myQueDb != null) {
+            int i = 0;
+            for (int j = 0; j < 360000; j += 60000) {
+                String sSpanStart = String.valueOf(currentTime - j - 60000);
+//                for (int j = 0; j < 21600000; j += 3600000) {
+//                    String sSpanStart = String.valueOf(currentTime - j - 3600000);
+                String sSpanEnd = String.valueOf(currentTime - j);
+
+                int blockedQueriesOverLastMin =  myQueDb.moreSpecialSelectData("TIME", ">=", sSpanStart, "<", sSpanEnd, "Blocked (trashed)").getCount();
+
+                tempList[i] = blockedQueriesOverLastMin;
+                i++;
+            }
+
+        }
+
+        for (int i = 0; i < tempList.length; i++) {
+            blockedQueriesData[i] = new DataPoint(i + 1, tempList[i]);
+        }
+
+        return blockedQueriesData;
+    }
+
+//        if(graphTotalQueries == null) {
+//            graphTotalQueries.resetData();
+//        }
+//
+//        graphTotalQueries = new LineGraphSeries<>(totalQueriesData);
+//        graphTotalQueries.setTitle("Total Queries");
+//        graphTotalQueries.setDrawBackground(true);
+//        graphTotalQueries.setBackgroundColor(Color.argb(10, 95, 210, 70));
+//        graphTotalQueries.setColor(Color.argb(100, 80, 180, 60));
+//
+//        graph.addSeries(graphTotalQueries);
+//
+////        blockedQueriesData = new DataPoint[6];
+////        int[] values = {1, 5, 3, 2, 6, 8};
+////
+////        for (int i = 0; i < 6; i++) {
+////            blockedQueriesData[i] = new DataPoint(i, values[i]);
+////        }
+//
+//        LineGraphSeries<DataPoint> blockedQueries = new LineGraphSeries<>(new DataPoint[] {
+//                new DataPoint(0, 1),
+//                new DataPoint(1, 5),
+//                new DataPoint(2, 3),
+//                new DataPoint(3, 2),
+//                new DataPoint(4, 6)
+//        });
+//
+////        series2 = new LineGraphSeries<>(blockedQueriesData);
+//        blockedQueries.setTitle("Blocked Queries");
+//        blockedQueries.setDrawBackground(true);
+//        blockedQueries.setBackgroundColor(Color.argb(40, 70, 150, 210));
+//        blockedQueries.setColor(Color.argb(100, 50, 110, 150));
+//
+//
+//        graph.addSeries(blockedQueries);
+//
+//        graph.getSeries();
+//        //-----------------------------------------------------
+//
+//
+//
+//
+////        StaticLabelsFormatter staticLabelsFormatter = new StaticLabelsFormatter(graph);
+////        staticLabelsFormatter.setHorizontalLabels(new String[] {">0", "1", "2", "3", "4", "5"});
+////        graph.getGridLabelRenderer().setLabelFormatter(staticLabelsFormatter);
+//
+//    }
 
     @Override
     public void onResume() {

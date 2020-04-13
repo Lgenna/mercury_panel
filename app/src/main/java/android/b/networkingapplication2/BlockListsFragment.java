@@ -165,18 +165,13 @@ public class BlockListsFragment extends Fragment {
         MasterBlockListBaseHelper myMasDb;
 
         myMasDb = OverviewActivity.getMyMasDb();
-//        Cursor myMasDbRes = myMasDb.getAllData();
-        boolean domainsPresent = false;
 
         Cursor cursor = myMasDb.selectData(sBlockList);
 
         if (cursor == null || cursor.getCount() > 0) {
             Log.i(TAG, "Atleast one domain from " + sBlockList + ", skipping.");
-            domainsPresent = true;
 
-        }
-
-        if (!domainsPresent) {
+        } else {
             Log.i(TAG, "No domains found from " + sBlockList + ", adding blocked domains...");
 
             try {

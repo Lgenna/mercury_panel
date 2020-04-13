@@ -95,7 +95,7 @@ public class QueryLogFragment extends Fragment {
 
             if (checkInitial.getCount() == 0) {
                 Log.w(TAG, "DB empty, adding test data");
-                myQueDb.insertData("", getResources().getString(R.string.no_data), "");
+//                myQueDb.insertData("", getResources().getString(R.string.no_data), "");
             } else if (checkInitial.getCount() != 1) {
                 checkInitial.moveToFirst();
                 if (checkInitial.getString(2).equals(getResources().getString(R.string.no_data))) {

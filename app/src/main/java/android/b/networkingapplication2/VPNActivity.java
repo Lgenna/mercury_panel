@@ -32,7 +32,7 @@ public class VPNActivity extends AppCompatActivity {
     public static Switch monitoringStatus;
     LinearLayout VPNFileBox, VPNSettingsBox;
     ImageButton VPNURLAdd, VPNDefaultAdd, ChangeVPNServer;
-    TextView VPNURL, currentVpnServer, upTime;
+    TextView currentVpnServer, upTime;
     Thread timer;
 
     public static Context context; // this might be very bad to do this...
@@ -195,7 +195,7 @@ public class VPNActivity extends AppCompatActivity {
 //        Log.i(TAG, "dnsServersSet : " + dnsServersSet.toString());
 
         prefs.edit()
-            .putString(VPNActivity.Prefs.SERVER_ADDRESS, "192.168.0.12")
+            .putString(VPNActivity.Prefs.SERVER_ADDRESS, "192.168.0.30")
             .putInt(VPNActivity.Prefs.SERVER_PORT, 8000)
             .putString(VPNActivity.Prefs.SHARED_SECRET, "test")
             .putStringSet(VPNActivity.Prefs.PACKAGES, packageSet)
@@ -220,6 +220,7 @@ public class VPNActivity extends AppCompatActivity {
         String serverAddress = prefs.getString(VPNActivity.Prefs.SERVER_ADDRESS, "No data found");
         if (!serverAddress.equals("No data found")){
             currentServer += serverAddress;
+//            currentServer += "192.168.0.12";
         } else {
             currentServer = "No data found";
         }
@@ -364,9 +365,9 @@ public class VPNActivity extends AppCompatActivity {
             case R.id.action_vpn_servers:
                 intent = new Intent(this, VPNActivity.class);
                 break;
-            case R.id.action_dns_servers:
-                intent = new Intent(this, DNSActivity.class);
-                break;
+//            case R.id.action_dns_servers:
+//                intent = new Intent(this, DNSActivity.class);
+//                break;
             case R.id.action_firewall:
                 intent = new Intent(this, FirewallActivity.class);
                 break;

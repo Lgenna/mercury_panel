@@ -60,20 +60,19 @@ public class FirewallActivity extends AppCompatActivity {
             });
         }
 
-        uiUpdater = new Thread() {
-            @Override
-            public void run() {
-                runOnUiThread(() -> updateUI());
-            }
-        };
-        uiUpdater.start();
+        buildApplicationList();
+
+//        uiUpdater = new Thread() {
+//            @Override
+//            public void run() {
+//                runOnUiThread(() -> updateUI());
+//            }
+//        };
+//        uiUpdater.start();
 
     }
 
-    public void updateUI() {
-
-        Log.i(TAG, "updateUI");
-
+    public void buildApplicationList() {
         installedApps = OverviewActivity.installedApps;
 
         mApplications = new ArrayList<>();
@@ -83,8 +82,8 @@ public class FirewallActivity extends AppCompatActivity {
 
                 PackageManager pm = getPackageManager();
                 Firewall FirewallItem = new Firewall();
-
                 FirewallItem.setProcessName(element.processName);
+                FirewallItem.setUid("" + element.uid);
                 FirewallItem.setPicture(pm.getApplicationIcon(element));
                 FirewallItem.setApplication(pm.getApplicationLabel(element) + "");
                 FirewallItem.setStatus(false);
@@ -117,9 +116,9 @@ public class FirewallActivity extends AppCompatActivity {
             case R.id.action_vpn_servers:
                 intent = new Intent(this, VPNActivity.class);
                 break;
-            case R.id.action_dns_servers:
-                intent = new Intent(this, DNSActivity.class);
-                break;
+//            case R.id.action_dns_servers:
+//                intent = new Intent(this, DNSActivity.class);
+//                break;
             case R.id.action_firewall:
                 intent = new Intent(this, FirewallActivity.class);
                 break;

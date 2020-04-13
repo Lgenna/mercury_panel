@@ -9,6 +9,7 @@ public class Firewall {
     private UUID mId;
     private String mProcessName;
     private String mApplication;
+    private String mUid;
     private boolean mStatus;
     private Drawable mPicture;
 
@@ -32,6 +33,13 @@ public class Firewall {
         mProcessName = processName;
     }
 
+    public String getUid() {
+        return mUid;
+    }
+
+    public void setUid(String uid) {
+        mUid = uid;
+    }
 
     public String getApplication() {
         return mApplication;

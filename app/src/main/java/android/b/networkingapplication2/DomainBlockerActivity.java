@@ -2,20 +2,12 @@ package android.b.networkingapplication2;
 
 import android.b.networkingapplication2.ui.main.SectionsPagerAdapter;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.ImageButton;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.material.tabs.TabLayout;
@@ -59,9 +51,9 @@ public class DomainBlockerActivity extends AppCompatActivity {
             case R.id.action_vpn_servers:
                 intent = new Intent(this, VPNActivity.class);
                 break;
-            case R.id.action_dns_servers:
-                intent = new Intent(this, DNSActivity.class);
-                break;
+//            case R.id.action_dns_servers:
+//                intent = new Intent(this, DNSActivity.class);
+//                break;
             case R.id.action_firewall:
                 intent  = new Intent(this, FirewallActivity.class);
                 break;

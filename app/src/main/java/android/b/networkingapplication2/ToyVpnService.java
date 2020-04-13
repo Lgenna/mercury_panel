@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 package android.b.networkingapplication2;
-//package com.example.android.toyvpn;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -39,7 +38,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static android.b.networkingapplication2.OverviewActivity.PREFS_GENERAL;
 import static android.b.networkingapplication2.OverviewActivity.PREFS_VPN;
 
 public class ToyVpnService extends VpnService implements Handler.Callback {

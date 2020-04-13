@@ -38,7 +38,7 @@ public class QueryLogBaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public boolean insertData(String time, String domain, String status) {
+    public boolean insertData(long time, String domain, String status) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(TIME, time);
@@ -59,10 +59,29 @@ public class QueryLogBaseHelper extends SQLiteOpenHelper {
         return db.delete(TABLE_NAME, "ID = ?", new String[]{id});
     }
 
+    public Cursor selectData(String column, String element) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        return db.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE " + column + " = '" + element + "'", null);
+//        return db.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE " + selectType + " = '" + selectElement + "'", null);
+
+    }
+
+    public Cursor specialSelectData(String column, String operation1, String element1, String operation2, String element2) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        return db.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE " + column + " " + operation1 + " " + element1 + " AND " + column + " " + operation2 + " " + element2, null);
+
+    }
+
+    public Cursor moreSpecialSelectData(String column, String operation1, String element1, String operation2, String element2, String element3) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        return db.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE " + column + " " + operation1 + " " + element1 + " AND " + column + " " + operation2 + " " + element2 + " AND STATUS = '" + element3 + "'" , null);
+
+    }
+
     public long countData() {
-    SQLiteDatabase db = this.getReadableDatabase();
-        long count = DatabaseUtils.queryNumEntries(db, MasterBlockListDbSchema.MasterBlockListTable.TABLE_NAME);
-        db.close();
+        SQLiteDatabase db = this.getReadableDatabase();
+        long count = DatabaseUtils.queryNumEntries(db, TABLE_NAME);
+//        db.close();
         return count;
     }
 }

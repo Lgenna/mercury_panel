@@ -115,13 +115,13 @@ public class OverviewActivity extends AppCompatActivity {
         startTime = findViewById(R.id.up_time_data);
         totalApps = findViewById(R.id.allowed_applications);
         blockedApps = findViewById(R.id.blocked_applications);
-        dnsStatus = findViewById(R.id.dns_status);
-        dnsNumber = findViewById(R.id.dns_ip_address);
+//        dnsStatus = findViewById(R.id.dns_status);
+//        dnsNumber = findViewById(R.id.dns_ip_address);
         vpnStatus = findViewById(R.id.vpn_status);
         vpnServer = findViewById(R.id.vpn_server);
 
         domainBlockerBox = findViewById(R.id.domain_blocker_info_box);
-        DNSBox = findViewById(R.id.dns_info_box);
+//        DNSBox = findViewById(R.id.dns_info_box);
         FirewallBox = findViewById(R.id.firewall_info_box);
         VPNBox = findViewById(R.id.vpn_info_box);
 
@@ -138,11 +138,11 @@ public class OverviewActivity extends AppCompatActivity {
             this.startActivity(intent);
         });
 
-        DNSBox.setOnClickListener(v -> {
-            intent = new Intent(this, DNSActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-            this.startActivity(intent);
-        });
+//        DNSBox.setOnClickListener(v -> {
+//            intent = new Intent(this, DNSActivity.class);
+//            intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+//            this.startActivity(intent);
+//        });
 
         FirewallBox.setOnClickListener(v -> {
             intent = new Intent(this, FirewallActivity.class);
@@ -239,43 +239,28 @@ public class OverviewActivity extends AppCompatActivity {
         return true;
     }
 
+
+    private long lBlockedQueries = 0;
+    private long lTotalQueries = 0;
+
     private void getDomainBlockerInfo() {
 
         if (myQueDb != null) {
+            lTotalQueries = myQueDb.countData();
+            Cursor blockedQueriesRes = myQueDb.selectData("STATUS", "Blocked (trashed)");
 
-            iTotalQueries = 0;
-            iBlockedQueries = 0;
-
-            Cursor allQueries = myQueDb.getAllData();
-
-            int numOfQueries = allQueries.getCount();
-
-            if (numOfQueries != 0) {
-                if (numOfQueries <= 1) {
-                    allQueries.moveToFirst();
-                    if (allQueries.getString(2).equals(getResources().getString(R.string.no_data))) {
-                        Log.w(TAG, "Query Log DB empty");
-                    }
-                } else {
-                    while (allQueries.moveToNext()) {
-                        if (allQueries.getString(3).equals("true")) {
-                            iTotalQueries++;
-                        } else {
-                            iBlockedQueries++;
-                        }
-                    }
-                }
-            } else {
-                // This shouldn't happen, otherwise we have bigger fish to fry
-                Log.w(TAG, "Query Log DB is barren, like there's nothing here");
+            if (blockedQueriesRes != null) {
+                lBlockedQueries = blockedQueriesRes.getCount();
             }
         }
 
-        String sTotalQueries = iTotalQueries + " Total Queries";
-        String sBlockedQueries = iBlockedQueries + " Blocked Queries";
+        String sTotalQueries = lTotalQueries + " Total Queries";
+        String sBlockedQueries = lBlockedQueries + " Blocked Queries";
 
-        runOnUiThread(() -> totalQueries.setText(sTotalQueries));
-        runOnUiThread(() -> blockedQueries.setText(sBlockedQueries));
+        runOnUiThread(() -> {
+            totalQueries.setText(sTotalQueries);
+            blockedQueries.setText(sBlockedQueries);
+        });
     }
 
     private void getDnsInfo() {
@@ -321,6 +306,7 @@ public class OverviewActivity extends AppCompatActivity {
             runOnUiThread(() -> vpnServer.setText(sVPNServer));
         }
     }
+
 
     private void getUpTime() {
         // System Uptime - get current time
@@ -543,9 +529,9 @@ public class OverviewActivity extends AppCompatActivity {
             case R.id.action_vpn_servers:
                 intent = new Intent(this, VPNActivity.class);
                 break;
-            case R.id.action_dns_servers:
-                intent = new Intent(this, DNSActivity.class);
-                break;
+//            case R.id.action_dns_servers:
+//                intent = new Intent(this, DNSActivity.class);
+//                break;
             case R.id.action_firewall:
                 intent  = new Intent(this, FirewallActivity.class);
                 break;
