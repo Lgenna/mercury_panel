@@ -13,7 +13,6 @@ import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
 import java.util.ArrayList;
 import java.util.Date;
@@ -195,7 +194,7 @@ public class VPNActivity extends AppCompatActivity {
 //        Log.i(TAG, "dnsServersSet : " + dnsServersSet.toString());
 
         prefs.edit()
-            .putString(VPNActivity.Prefs.SERVER_ADDRESS, "192.168.0.30")
+            .putString(VPNActivity.Prefs.SERVER_ADDRESS, "192.168.0.12")
             .putInt(VPNActivity.Prefs.SERVER_PORT, 8000)
             .putString(VPNActivity.Prefs.SHARED_SECRET, "test")
             .putStringSet(VPNActivity.Prefs.PACKAGES, packageSet)
@@ -220,7 +219,6 @@ public class VPNActivity extends AppCompatActivity {
         String serverAddress = prefs.getString(VPNActivity.Prefs.SERVER_ADDRESS, "No data found");
         if (!serverAddress.equals("No data found")){
             currentServer += serverAddress;
-//            currentServer += "192.168.0.12";
         } else {
             currentServer = "No data found";
         }
@@ -251,13 +249,6 @@ public class VPNActivity extends AppCompatActivity {
         ArrayList<String> BlockedApps = new ArrayList<>();
 
         Map<String, ?> keys = FirewallPrefs.getAll();
-
-        /**
-         * Add a dud item, otherwise if the user doesn't add anything, it blocks ALL network
-         *  traffic, even though the list given is empty. This is because with the Crude Approach
-         *  it tells specific apps to be killed by the VPN whereas all the others are told to
-         *  ignore it. If no apps are set, all apps are sent down the lonely VPN road.
-         */
 
         BlockedApps.add("com.example.a.missing.app");
 

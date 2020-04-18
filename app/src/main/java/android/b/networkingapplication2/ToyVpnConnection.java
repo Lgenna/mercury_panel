@@ -228,55 +228,40 @@ public class ToyVpnConnection implements Runnable {
 
                 if (length > 0) {
 
-                    // Write the outgoing packet to the tunnel.
+
                     packet.limit(length);
 
                     StringBuilder hexedPacket = new StringBuilder();
 
                     byte[] array = packet.array();
-                    for (int i = 0; i < 250; i++) { // 1 byte = 2 hex, maximum hex we would need being around 400, but to keep it safe, use 250 bytes which equals 500 hex chars
+                    for (int i = 0; i < 250; i++) {                                          // 1 byte = 2 hex, maximum hex we would need being around 400, but to keep it safe, use 250 bytes which equals 500 hex chars
                         hexedPacket.append(String.format("%02X", array[i]));
                     }
 
-                    String sHexedPacket = hexedPacket.toString();
-
-
-//                    if (sHexedPacket.contains("55736572")) {
-//
-//                        System.out.println("UserAgent-Packet : " + sHexedPacket); // testing
-//
-//                    }
-
-
+                    String sAllowPacket = "Blocked (trashed)", domain,
+                            sHexedPacket = hexedPacket.toString();
                     boolean allowPacket = true;
 
                     if (sHexedPacket.startsWith("160301", 104)) {
-                        String domain = handyHector(sHexedPacket, 358);
-
-//                        System.out.println("Handshake-Packet : " + sHexedPacket); // testing
+                         domain = handyHector(sHexedPacket, 358);
 
                         if (domain != null) {
-                            allowPacket = domainMatcher(domain);
-                        }
 
-                        String sAllowPacket;
+                            if (allowPacket = domainMatcher(domain)) {
+                                sAllowPacket = "OK (forwarded)";
+                            }
 
-                        if (allowPacket) {
-                            sAllowPacket = "OK (forwarded)";
-                        } else {
-                            sAllowPacket = "Blocked (trashed)";
-                        }
-
-                        if (myQueDb != null && domain != null) {
-                            myQueDb.insertData(
-                                    System.currentTimeMillis(),
-                                    "" + domain,
-                                    sAllowPacket);
-                            OverviewActivity.setMyQueDb(myQueDb);
+                            if (myQueDb != null) {
+                                myQueDb.insertData(
+                                        System.currentTimeMillis(),
+                                        domain,
+                                        sAllowPacket);
+                                OverviewActivity.setMyQueDb(myQueDb);
+                            }
                         }
                     }
-
-                    if (allowPacket) { // you can either get through or get thrown out
+                    // Write the outgoing packet to the tunnel.
+                    if (allowPacket) {
                         tunnel.write(packet);
                     }
 
@@ -377,11 +362,9 @@ public class ToyVpnConnection implements Runnable {
 
         if (domainChecker(possibleDomain)) {
             // domain is valid, add it to the query log
-//            Log.i(TAG, "Handshake made : " + possibleDomain);
-//            Log.i(TAG, "Packet : " + input);
             return possibleDomain;
         } else if (startingPoint != 362) {
-//             try a different starting point
+            // try a different starting point
             return handyHector(input, 362);
         } else {
             // was not valid, ignore
@@ -479,7 +462,7 @@ public class ToyVpnConnection implements Runnable {
 ////                } else {
                 Log.i(TAG, "Blocking application : " + packageName);
 //                builder.addAllowedApplication(packageName); // any application enabled on the firewall
-                builder.addAllowedApplication(packageName); // any application enabled on the firewall
+                builder.addDisallowedApplication(packageName); // any application enabled on the firewall
 
 //                //  is added to a VPN which is hosted on
 //                //  a server that doesn't have internet
@@ -533,7 +516,7 @@ public class ToyVpnConnection implements Runnable {
         Cursor cursor = myMasDb.selectData(foundDomain);
 
         if (cursor == null || cursor.getCount() > 0) {
-//            Log.i(TAG, "Blocked : " + foundDomain);
+            Log.i(TAG, "Blocked : " + foundDomain);
             return false;
         } else {
             return true;

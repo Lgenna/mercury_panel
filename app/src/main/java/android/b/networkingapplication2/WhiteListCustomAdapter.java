@@ -9,11 +9,8 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.recyclerview.widget.RecyclerView;
-
 import java.util.ArrayList;
-
 import database.WhiteListBaseHelper;
 
 public class WhiteListCustomAdapter extends RecyclerView.Adapter<WhiteListCustomAdapter.MyViewHolder> {

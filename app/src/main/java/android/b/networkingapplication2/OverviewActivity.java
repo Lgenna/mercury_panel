@@ -1,35 +1,20 @@
 package android.b.networkingapplication2;
 
 import android.app.ActivityManager;
-import android.app.usage.NetworkStats;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ApplicationInfo;
 import android.database.Cursor;
-import android.net.NetworkInfo;
-import android.net.NetworkSpecifier;
-import android.net.Uri;
-import android.net.wifi.WifiConfiguration;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import androidx.appcompat.app.AppCompatActivity;
-
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -38,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-
 import database.BlockListBaseHelper;
 import database.MasterBlockListBaseHelper;
 import database.QueryLogBaseHelper;
@@ -85,13 +69,9 @@ public class OverviewActivity extends AppCompatActivity {
 
     public static long startupTime;
 
-    int iTotalQueries = 0, iBlockedQueries = 0;
-
     private static QueryLogBaseHelper myQueDb;
     private static BlockListBaseHelper myBloDb;
     private static MasterBlockListBaseHelper myMasDb;
-
-    public static ArrayList<String> BlockedApps;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -366,6 +346,12 @@ public class OverviewActivity extends AppCompatActivity {
     }
 
     private void getIPAddresses() {
+
+//        WifiInfo network = ((WifiManager) getBaseContext().getSystemService(Context.WIFI_SERVICE)).getConnectionInfo();
+//
+//        int ip = network.getIpAddress();
+//
+//        addressIPV4 = format("%d.%d.%d.%d", (ip & 0xff), (ip >> 8 & 0xff), (ip >> 16 & 0xff), (ip >> 24 & 0xff));
 
         // Code created with help of Stack Overflow question
         // https://stackoverflow.com/questions/6064510/how-to-get-ip-address-of-the-device-from-code

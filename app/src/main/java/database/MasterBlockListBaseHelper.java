@@ -73,7 +73,6 @@ public class MasterBlockListBaseHelper extends SQLiteOpenHelper {
             db.setTransactionSuccessful();
         } finally {
             db.endTransaction();
-//            db.close();
         }
 
         return result != -1;
@@ -122,7 +121,6 @@ public class MasterBlockListBaseHelper extends SQLiteOpenHelper {
     public long countData() {
         SQLiteDatabase db = this.getReadableDatabase();
         long count = DatabaseUtils.queryNumEntries(db, TABLE_NAME);
-//        db.close();
         return count;
     }
 }

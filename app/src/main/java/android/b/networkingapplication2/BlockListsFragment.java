@@ -62,7 +62,6 @@ public class BlockListsFragment extends Fragment {
 
         view = inflater.inflate(R.layout.activity_blocklists, container, false);
 
-//        myBloDb = new BlockListBaseHelper(getContext());
         myBloDb = OverviewActivity.getMyBloDb();
 
         addBlocklist = view.findViewById(R.id.blocklist_urls_add);
@@ -113,7 +112,6 @@ public class BlockListsFragment extends Fragment {
                                 public void run() {
                                     buildMasterList(enteredText);
                                     alert.dismiss();
-//                                    alert.cancel();
                                 }
                             };
 

@@ -62,7 +62,6 @@ public class QueryLogBaseHelper extends SQLiteOpenHelper {
     public Cursor selectData(String column, String element) {
         SQLiteDatabase db = this.getReadableDatabase();
         return db.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE " + column + " = '" + element + "'", null);
-//        return db.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE " + selectType + " = '" + selectElement + "'", null);
 
     }
 

@@ -14,7 +14,6 @@ public class OverviewFragment extends Fragment {
         return inflater.inflate(R.layout.activity_overview, container, false);
     }
 
-
     public static OverviewFragment newInstance() {
         return new OverviewFragment();
     }

@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PermissionInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -62,14 +63,6 @@ public class FirewallActivity extends AppCompatActivity {
 
         buildApplicationList();
 
-//        uiUpdater = new Thread() {
-//            @Override
-//            public void run() {
-//                runOnUiThread(() -> updateUI());
-//            }
-//        };
-//        uiUpdater.start();
-
     }
 
     public void buildApplicationList() {
@@ -79,8 +72,8 @@ public class FirewallActivity extends AppCompatActivity {
 
         if (installedApps != null && installedApps.size() != 0) {
             for (ApplicationInfo element : installedApps) {
-
                 PackageManager pm = getPackageManager();
+
                 Firewall FirewallItem = new Firewall();
                 FirewallItem.setProcessName(element.processName);
                 FirewallItem.setUid("" + element.uid);

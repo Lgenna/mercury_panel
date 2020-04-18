@@ -29,9 +29,7 @@ import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import android.util.Pair;
 import android.widget.Toast;
-
 import androidx.core.app.NotificationManagerCompat;
-
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Set;

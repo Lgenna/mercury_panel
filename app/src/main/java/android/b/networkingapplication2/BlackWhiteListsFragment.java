@@ -10,13 +10,10 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import java.util.ArrayList;
-
 import database.BlackListBaseHelper;
 import database.WhiteListBaseHelper;
 
@@ -151,7 +148,7 @@ public class BlackWhiteListsFragment extends Fragment {
         return view;
     }
 
-    public void updateUI() {
+    private void updateUI() {
 
         ArrayList<BlackWhiteList> mBlackLists = new ArrayList<>();
         ArrayList<BlackWhiteList> mWhiteLists = new ArrayList<>();
@@ -182,9 +179,6 @@ public class BlackWhiteListsFragment extends Fragment {
 
         WhiteListCustomAdapter whitelistcustomAdapter = new WhiteListCustomAdapter(getContext(), mWhiteLists);
         mWhiteListRecyclerView.setAdapter(whitelistcustomAdapter);
-
-//        System.out.println("You know where ya' oughta' hide next time? Back in France.");
-
     }
 
     public static BlackWhiteListsFragment newInstance() {
