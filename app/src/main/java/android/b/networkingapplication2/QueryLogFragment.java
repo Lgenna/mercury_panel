@@ -82,21 +82,21 @@ public class QueryLogFragment extends Fragment {
     private QueryLogCustomAdapter querylogcustomAdapter;
 
     private void updateInfo() {
-        if (myQueDb != null) {
-
-            Cursor checkInitial = myQueDb.getAllData();
-
-            if (checkInitial.getCount() == 0) {
-                Log.w(TAG, "DB empty, adding test data");
-//                myQueDb.insertData("", getResources().getString(R.string.no_data), "");
-            } else if (checkInitial.getCount() != 1) {
-                checkInitial.moveToFirst();
-                if (checkInitial.getString(2).equals(getResources().getString(R.string.no_data))) {
-                    myQueDb.deleteData("1");
-                    Log.w(TAG, "Removing initial row");
-                }
-            }
-        }
+//        if (myQueDb != null) {
+//
+//            Cursor checkInitial = myQueDb.getAllData();
+//
+//            if (checkInitial.getCount() == 0) {
+//                Log.w(TAG, "DB empty, adding test data");
+////                myQueDb.insertData("", getResources().getString(R.string.no_data), "");
+//            } else if (checkInitial.getCount() != 1) {
+//                checkInitial.moveToFirst();
+//                if (checkInitial.getString(2).equals(getResources().getString(R.string.no_data))) {
+//                    myQueDb.deleteData("1");
+//                    Log.w(TAG, "Removing initial row");
+//                }
+//            }
+//        }
 
         ArrayList<QueryLog> mQueryLogList = new ArrayList<>();
 

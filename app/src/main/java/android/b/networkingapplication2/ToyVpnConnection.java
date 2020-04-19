@@ -30,7 +30,6 @@ import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import android.widget.Toast;
-
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -46,16 +45,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-
-
-import database.BlockListBaseHelper;
 import database.MasterBlockListBaseHelper;
 import database.QueryLogBaseHelper;
 
 public class ToyVpnConnection implements Runnable {
-
-    ArrayList<String> list = new ArrayList<>();
-    private QueryLogBaseHelper myQueDb;
 
     /**
      * Callback interface to let the {@link ToyVpnService} know about new connections
@@ -100,13 +93,12 @@ public class ToyVpnConnection implements Runnable {
     private final byte[] mSharedSecret;
     private PendingIntent mConfigureIntent;
     private OnEstablishListener mOnEstablishListener;
-    AsyncTask<?, ?, ?> runningTask;
 
     // Proxy settings
 //    private String mProxyHostName;
 //    private int mProxyHostPort;
-    // Allowed/Disallowed packages for VPN usage
 //    private final boolean mAllow;
+    // Allowed/Disallowed packages for VPN usage
     private final Set<String> mPackages;
 //    private final Set<String> mDnsServers;
 
@@ -120,13 +112,6 @@ public class ToyVpnConnection implements Runnable {
         mServerPort= serverPort;
         mSharedSecret = sharedSecret;
 //        mDnsServers = dnsServers;
-//        if (!TextUtils.isEmpty(proxyHostName)) {
-//            mProxyHostName = proxyHostName;
-//        }
-//        if (proxyHostPort > 0) {
-//             The port value is always an integer due to the configured inputType.
-//            mProxyHostPort = proxyHostPort;
-//        }
 //        mAllow = allow;
         mPackages = packages;
     }
@@ -179,8 +164,6 @@ public class ToyVpnConnection implements Runnable {
         }
     }
 
-
-
     private boolean run(SocketAddress server)
             throws IOException, InterruptedException, IllegalArgumentException {
         ParcelFileDescriptor iface = null;
@@ -215,8 +198,7 @@ public class ToyVpnConnection implements Runnable {
             long lastReceiveTime = System.currentTimeMillis();
             // We keep forwarding packets till something goes wrong.
 
-            myQueDb = OverviewActivity.getMyQueDb();
-
+            QueryLogBaseHelper myQueDb = OverviewActivity.getMyQueDb();
 
             while (true) {
                 // Assume that we did not make any progress in this iteration.
@@ -479,7 +461,6 @@ public class ToyVpnConnection implements Runnable {
          *  dns server, whereas all the other ones use... well, somehow get a default dns server
          *  otherwise use the one that was provided.
          */
-
 
         builder.setSession(mServerName).setConfigureIntent(mConfigureIntent);
 
