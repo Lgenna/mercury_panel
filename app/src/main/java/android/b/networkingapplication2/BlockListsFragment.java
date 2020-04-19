@@ -1,66 +1,52 @@
 package android.b.networkingapplication2;
 
 import android.app.AlertDialog;
-import android.content.DialogInterface;
+import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Patterns;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
 import database.BlockListBaseHelper;
 import database.MasterBlockListBaseHelper;
-import database.MasterBlockListDbSchema;
 
 public class BlockListsFragment extends Fragment {
 
     private TextView editDomain;
     private BlockListBaseHelper myBloDb;
     private RecyclerView mBlockListRecyclerView;
-    public static View view;
-
-//    public static ArrayList<String> masterBlockList = new ArrayList<>();
-
-    Thread buildMasterList;
-
-    ArrayList<BlockList> mBlockLists;
 
     private static final String TAG = "BlockListsFragment";
 
-    private List<MasterBlocklist> domainEntries;
+    AlertDialog.Builder alertBuilder;
+    Context context;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.activity_blocklists, container, false);
 
-        AlertDialog.Builder builder;
         ImageButton addBlocklist;
+        context = getContext();
 
-        view = inflater.inflate(R.layout.activity_blocklists, container, false);
 
         myBloDb = OverviewActivity.getMyBloDb();
 
@@ -71,65 +57,27 @@ public class BlockListsFragment extends Fragment {
         LinearLayoutManager blocklistlinearLayoutManager = new LinearLayoutManager(getContext());
         mBlockListRecyclerView.setLayoutManager(blocklistlinearLayoutManager);
 
-        builder = new AlertDialog.Builder(getContext());
 
         try {
 
             updateUI();
 
-            addBlocklist.setOnClickListener(v -> {
-                if (!editDomain.getText().toString().equals("")) {
+            editDomain.setOnEditorActionListener((v, actionId, event) -> {
 
-                    String enteredText = editDomain.getText().toString();
+                if ((actionId == EditorInfo.IME_ACTION_DONE)) {
 
-                    if (Patterns.WEB_URL.matcher(enteredText).matches()) {
+                    BlockListsFragment.this.addBlocklist();
 
-                        boolean domainPresent = false;
+                    InputMethodManager imm = (InputMethodManager) BlockListsFragment.this.getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
 
-                        Cursor cursor = myBloDb.selectData(enteredText);
-
-                        if (cursor == null || cursor.getCount() > 0) {
-                            domainPresent = true;
-                        }
-
-                        if (!domainPresent) {
-                            myBloDb.insertData(enteredText);
-
-                            Log.i(TAG, "Added: " + enteredText + " to blocklist Database");
-
-                            updateUI();
-                            editDomain.setText("");
-
-                            builder.setMessage(getResources().getString(R.string.gathering) + enteredText)
-                                    .setCancelable(false);
-
-                            AlertDialog alert = builder.create();
-                            alert.setTitle(R.string.please_wait);
-                            alert.show();
-
-                            buildMasterList = new Thread() {
-                                @Override
-                                public void run() {
-                                    buildMasterList(enteredText);
-                                    alert.dismiss();
-                                }
-                            };
-
-                            buildMasterList.start();
-
-                        } else {
-                            Toast.makeText(getContext(), "\"" + enteredText + "\" has all ready been added", Toast.LENGTH_SHORT).show();
-                        }
-
-                    } else {
-                        Toast.makeText(getContext(), "\"" + enteredText + "\" is not a valid block list", Toast.LENGTH_SHORT).show();
-                        Log.i(TAG, "\"" + enteredText + "\" is not a valid block list");
-
-                    }
-
-                } else {
-                    Toast.makeText(getContext(), "Block list can't be blank", Toast.LENGTH_SHORT).show();
+                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                    return true;
                 }
+                return false;
+            });
+
+            addBlocklist.setOnClickListener(v -> {
+                addBlocklist();
             });
 
         } catch (NullPointerException e) {
@@ -140,9 +88,67 @@ public class BlockListsFragment extends Fragment {
         return view;
     }
 
+
+    private void addBlocklist() {
+        alertBuilder = new AlertDialog.Builder(context);
+
+        if (!editDomain.getText().toString().equals("")) {
+
+            String enteredText = editDomain.getText().toString();
+
+            if (Patterns.WEB_URL.matcher(enteredText).matches()) {
+
+                boolean domainPresent = false;
+
+                Cursor cursor = myBloDb.selectData(enteredText);
+
+                if (cursor == null || cursor.getCount() > 0) {
+                    domainPresent = true;
+                }
+
+                if (!domainPresent) {
+                    myBloDb.insertData(enteredText);
+
+                    Log.i(TAG, "Added: " + enteredText + " to blocklist Database");
+
+                    updateUI();
+                    editDomain.setText("");
+
+                    alertBuilder.setMessage(getResources().getString(R.string.gathering) + enteredText)
+                            .setCancelable(false);
+
+                    AlertDialog alert = alertBuilder.create();
+                    alert.setTitle(R.string.please_wait);
+                    alert.show();
+
+                    Thread buildMasterList = new Thread() {
+                        @Override
+                        public void run() {
+                            buildMasterList(enteredText);
+                            alert.dismiss();
+                        }
+                    };
+
+                    buildMasterList.start();
+
+                } else {
+                    Toast.makeText(getContext(), "\"" + enteredText + "\" has all ready been added", Toast.LENGTH_SHORT).show();
+                }
+
+            } else {
+                Toast.makeText(getContext(), "\"" + enteredText + "\" is not a valid block list", Toast.LENGTH_SHORT).show();
+                Log.i(TAG, "\"" + enteredText + "\" is not a valid block list");
+
+            }
+
+        } else {
+            Toast.makeText(getContext(), "Block list can't be blank", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     public void updateUI() {
 
-        mBlockLists = new ArrayList<>();
+        ArrayList<BlockList> mBlockLists = new ArrayList<>();
 
         Cursor blocklistRes = myBloDb.getAllData();
 
@@ -189,7 +195,7 @@ public class BlockListsFragment extends Fragment {
 
                     long sizeBefore = myMasDb.countData();
 
-                    domainEntries = new ArrayList<>();
+                    List<MasterBlocklist> domainEntries = new ArrayList<>();
 
                     while ((domainFromBlockList = in.readLine()) != null) {
                         if (!domainFromBlockList.equals("") && !domainFromBlockList.equals(" ") && !domainFromBlockList.startsWith("#")) {
