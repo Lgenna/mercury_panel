@@ -35,7 +35,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <EditText
-                android:hint="@string/domain_example"
+                android:hint="@string/annoying_domain"
                 android:id="@+id/blacklist_textbox"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -121,7 +121,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:hint="@string/domain_example"
+                android:hint="@string/favorable_domain"
                 android:text=""
                 app:layout_constraintEnd_toStartOf="@+id/addWhitelist"
                 app:layout_constraintStart_toStartOf="parent"

@@ -43,16 +43,6 @@ public class MasterBlockListBaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-//    public boolean insertData(String blocklist, String domain, int status) {
-//        SQLiteDatabase db = this.getWritableDatabase();
-//        ContentValues contentValues = new ContentValues();
-//        contentValues.put(BLOCKLIST, blocklist);
-//        contentValues.put(DOMAIN, domain);
-//        contentValues.put(STATUS, status);
-//        long result = db.insert(TABLE_NAME, null, contentValues);
-//        return result != -1;
-//    }
-
     public boolean insertData(List<MasterBlocklist> listOfEntries) {
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -92,11 +82,6 @@ public class MasterBlockListBaseHelper extends SQLiteOpenHelper {
         return true;
     }
 
-//    public Integer deleteData(String id) {
-//        SQLiteDatabase db = this.getWritableDatabase();
-//        return db.delete(TABLE_NAME, "ID = ?", new String[]{id});
-//    }
-
     public void deleteData(List<String> idList) {
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -114,7 +99,7 @@ public class MasterBlockListBaseHelper extends SQLiteOpenHelper {
 
     public Cursor selectData(String selectElement) {
         SQLiteDatabase db = this.getReadableDatabase();
-        return db.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE " + DOMAIN + " = '" + selectElement + "'", null);
+        return db.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE " + DOMAIN + " = '" + selectElement + "' AND " + STATUS + " = 1", null);
 
     }
 

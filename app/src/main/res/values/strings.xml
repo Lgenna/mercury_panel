@@ -78,4 +78,7 @@
     <string name="gathering">"We're gathering domains from: "</string>
     <string name="removing">"We're removing domains from: "</string>
     <string name="please_wait">Please Wait…</string>
+    <string name="annoying_domain">Ex: annoyingWeb.site</string>
+    <string name="favorable_domain">Ex: blockedWeb.site</string>
+    <string name="blocklist_example">Ex: blocklist.site/app/dl/ads</string>
 </resources>
