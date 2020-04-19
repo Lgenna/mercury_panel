@@ -52,7 +52,7 @@ public class BlockListsFragment extends Fragment {
 
     private static final String TAG = "BlockListsFragment";
 
-    private List<MasterBlocklist> domainEntrys;
+    private List<MasterBlocklist> domainEntries;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -160,9 +160,7 @@ public class BlockListsFragment extends Fragment {
     }
 
     private void buildMasterList(String sBlockList) {
-        MasterBlockListBaseHelper myMasDb;
-
-        myMasDb = OverviewActivity.getMyMasDb();
+        MasterBlockListBaseHelper myMasDb = OverviewActivity.getMyMasDb();
 
         Cursor cursor = myMasDb.selectData(sBlockList);
 
@@ -191,7 +189,7 @@ public class BlockListsFragment extends Fragment {
 
                     long sizeBefore = myMasDb.countData();
 
-                    domainEntrys = new ArrayList<>();
+                    domainEntries = new ArrayList<>();
 
                     while ((domainFromBlockList = in.readLine()) != null) {
                         if (!domainFromBlockList.equals("") && !domainFromBlockList.equals(" ") && !domainFromBlockList.startsWith("#")) {
@@ -201,11 +199,11 @@ public class BlockListsFragment extends Fragment {
                             domain.setBlockList(sBlockList);
                             domain.setStatus(1);
 
-                            domainEntrys.add(domain);
+                            domainEntries.add(domain);
                         }
                     }
 
-                    myMasDb.insertData(domainEntrys);
+                    myMasDb.insertData(domainEntries);
 
                     Log.i(TAG, "Added " + (myMasDb.countData() - sizeBefore) + " domains to blocklist from " + sBlockList);
 

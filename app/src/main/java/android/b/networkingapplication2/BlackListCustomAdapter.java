@@ -12,6 +12,7 @@ import android.widget.Toast;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import database.BlackListBaseHelper;
+import database.MasterBlockListBaseHelper;
 
 public class BlackListCustomAdapter extends RecyclerView.Adapter<BlackListCustomAdapter.MyViewHolder> {
 
@@ -39,8 +40,10 @@ public class BlackListCustomAdapter extends RecyclerView.Adapter<BlackListCustom
         holder.domain.setText(mBlackLists.get(position).getDomain());
         holder.removeBlacklist.setOnClickListener(v -> {
 
+            String domain = mBlackLists.get(position).getDomain();
+
             // Throw some toast at the user stating what happened
-            Toast.makeText(context, "Removed: " + (mBlackLists.get(position).getDomain()), Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Removed: " + domain, Toast.LENGTH_SHORT).show();
 
             BlackListBaseHelper database = new BlackListBaseHelper(context);
 
@@ -59,6 +62,20 @@ public class BlackListCustomAdapter extends RecyclerView.Adapter<BlackListCustom
                 // remove that id, and state what the value was
                 Log.w(TAG, "Removing ID #" + databaseIndex + " from the database: " + databaseRes.getString(1));
                 database.deleteData(databaseIndex);
+            }
+
+            MasterBlockListBaseHelper myMasDb = OverviewActivity.getMyMasDb();
+            Cursor cursor = myMasDb.selectData(domain);
+            ArrayList<String> idList = new ArrayList<>();
+
+            if (cursor.getCount() > 0) {
+                Log.i(TAG, "Found " + domain + " in the database, removing it");
+                while (cursor.moveToNext()) {
+                    if (domain.equals(cursor.getString(1))) {
+                        idList.add(cursor.getString(0));
+                    }
+                }
+                myMasDb.deleteData(idList);
             }
 
             // remove the value also from the array list, this ones easier

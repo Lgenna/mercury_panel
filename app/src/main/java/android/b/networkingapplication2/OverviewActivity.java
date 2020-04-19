@@ -1,11 +1,18 @@
 package android.b.networkingapplication2;
 
 import android.app.ActivityManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ApplicationInfo;
 import android.database.Cursor;
+import android.net.DhcpInfo;
+import android.net.Network;
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -15,6 +22,10 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -26,6 +37,8 @@ import java.util.List;
 import database.BlockListBaseHelper;
 import database.MasterBlockListBaseHelper;
 import database.QueryLogBaseHelper;
+
+import static java.lang.String.format;
 
 public class OverviewActivity extends AppCompatActivity {
 
@@ -82,8 +95,6 @@ public class OverviewActivity extends AppCompatActivity {
         mFinished = false;
 
         setContentView(R.layout.activity_overview);
-//        OverviewFragment.newInstance(); // TODO find out if this ACTUALLY does anything, turns out
-                                          //  nothing because its never "officially" called.
 
         totalQueries = findViewById(R.id.total_queries);
         blockedQueries = findViewById(R.id.total_queries_blocked);
@@ -142,7 +153,7 @@ public class OverviewActivity extends AppCompatActivity {
             public void run() {
 
                 try {
-                    // while the app is open...
+                    // while this activity is open...
                     while (!mFinished) {
 
                         getDomainBlockerInfo();
@@ -186,6 +197,14 @@ public class OverviewActivity extends AppCompatActivity {
 
         // start the thread
         uiUpdater.start();
+
+//        WifiManager wifiManager = (WifiManager)getSystemService(Context.WIFI_SERVICE);
+//        DhcpInfo info = wifiManager.getDhcpInfo();
+//
+//        System.out.println("DNS 1: " + String.format("%d.%d.%d.%d", (info.dns1 & 0xff), (info.dns1 >> 8 & 0xff), (info.dns1 >> 16 & 0xff), (info.dns1 >> 24 & 0xff)));
+//        System.out.println("DNS 2: " + String.format("%d.%d.%d.%d", (info.dns2 & 0xff), (info.dns2 >> 8 & 0xff), (info.dns2 >> 16 & 0xff), (info.dns2 >> 24 & 0xff)));
+
+
     }
 
     public static QueryLogBaseHelper getMyQueDb() {

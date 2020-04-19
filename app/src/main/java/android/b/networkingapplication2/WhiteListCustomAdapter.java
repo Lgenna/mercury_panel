@@ -11,6 +11,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
+
+import database.MasterBlockListBaseHelper;
 import database.WhiteListBaseHelper;
 
 public class WhiteListCustomAdapter extends RecyclerView.Adapter<WhiteListCustomAdapter.MyViewHolder> {
@@ -39,8 +41,10 @@ public class WhiteListCustomAdapter extends RecyclerView.Adapter<WhiteListCustom
         holder.domain.setText(mWhiteLists.get(position).getDomain());
         holder.removeWhiteList.setOnClickListener(v -> {
 
+            String domain = mWhiteLists.get(position).getDomain();
+
             // Throw some toast at the user stating what happened
-            Toast.makeText(context, "Removed: " + (mWhiteLists.get(position).getDomain()), Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Removed: " + domain, Toast.LENGTH_SHORT).show();
 
             WhiteListBaseHelper database = new WhiteListBaseHelper(context);
 
@@ -60,6 +64,20 @@ public class WhiteListCustomAdapter extends RecyclerView.Adapter<WhiteListCustom
                 // remove that id, and state what the value was
                 Log.w(TAG, "Removing ID #" + databaseIndex + " from the database: " + databaseRes.getString(1));
                 database.deleteData(databaseIndex);
+            }
+
+            MasterBlockListBaseHelper myMasDb = OverviewActivity.getMyMasDb();
+            Cursor cursor = myMasDb.selectData(domain);
+            ArrayList<String> idList = new ArrayList<>();
+
+            if (cursor.getCount() > 0) {
+                Log.i(TAG, "Found " + domain + " in the database, updating its status");
+                // move to the "first" value, otherwise it will be -1
+                while (cursor.moveToNext()) {
+                    // get the value in the first column of that first value and change that
+                    myMasDb.updateData(1, cursor.getString(0));
+                }
+                myMasDb.deleteData(idList);
             }
 
             // remove the value also from the array list, this ones easier

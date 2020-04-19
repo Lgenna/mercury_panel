@@ -84,13 +84,13 @@ public class MasterBlockListBaseHelper extends SQLiteOpenHelper {
         return res;
     }
 
-//    public boolean updateData(String domain, String status, String id) {
-//        SQLiteDatabase db = this.getWritableDatabase();
-//        ContentValues contentValues = new ContentValues();
-//        contentValues.put(DOMAIN, domain);
-//        db.update(TABLE_NAME, contentValues, "ID = ?", new String[]{id});
-//        return true;
-//    }
+    public boolean updateData(int status, String id) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(STATUS, status);
+        db.update(TABLE_NAME, contentValues, "ID = " + id, null);
+        return true;
+    }
 
 //    public Integer deleteData(String id) {
 //        SQLiteDatabase db = this.getWritableDatabase();

@@ -14,7 +14,10 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
+import java.util.List;
+
 import database.BlackListBaseHelper;
+import database.MasterBlockListBaseHelper;
 import database.WhiteListBaseHelper;
 
 public class BlackWhiteListsFragment extends Fragment {
@@ -94,8 +97,11 @@ public class BlackWhiteListsFragment extends Fragment {
                         Toast.makeText(getContext(), "Added: " + enteredText, Toast.LENGTH_SHORT).show();
                         Log.i(BLTAG, "Added: " + enteredText);
 
+                        addEntryToDatabase(enteredText, true);
+
                         updateUI();
                         editBlackListDomain.setText("");
+
                     } else {
                         Toast.makeText(getContext(), "\"" + enteredText + "\" is not a valid black list", Toast.LENGTH_SHORT).show();
                         Log.i(BLTAG, "\"" + enteredText + "\" is not a valid black list");
@@ -130,6 +136,8 @@ public class BlackWhiteListsFragment extends Fragment {
                         Toast.makeText(getContext(), "Added: " + enteredText, Toast.LENGTH_SHORT).show();
                         Log.i(WLTAG, "Added: " + enteredText);
 
+                        addEntryToDatabase(enteredText, false);
+
                         updateUI();
                         editWhiteListDomain.setText("");
                     } else {
@@ -146,6 +154,51 @@ public class BlackWhiteListsFragment extends Fragment {
             System.err.println("[NullPointerException] Now just stop tryin' ta mess with my contraptions.");
         }
         return view;
+    }
+
+    /**
+     *
+     * @param input
+     * @param isBlackListItem true = block it, or false = allow it
+     */
+
+    private void addEntryToDatabase(String input, boolean isBlackListItem) {
+        // Lets now add it where it to where it can do something
+        MasterBlockListBaseHelper myMasDb = OverviewActivity.getMyMasDb();
+
+        Cursor cursor = myMasDb.selectData(input);
+
+        if (isBlackListItem) {
+            if (cursor.getCount() > 0) {
+                Log.i(TAG, "Found " + input + " at-least once, skipping.");
+
+            } else {
+                // lets make a list, add one item, and return that list
+                Log.i(TAG, "Adding " + input + " to the blacklist.");
+                List<MasterBlocklist> domainEntries = new ArrayList<>();
+
+                MasterBlocklist domain = new MasterBlocklist();
+                domain.setDomain(input);
+                domain.setBlockList(input);
+                domain.setStatus(1);
+
+                domainEntries.add(domain);
+
+                myMasDb.insertData(domainEntries);
+            }
+        } else {
+            if (cursor.getCount() > 0) {
+                Log.i(TAG, "Found " + input + " in the database, updating its status");
+                // move to the "first" value, otherwise it will be -1
+                while (cursor.moveToNext()) {
+                    // get the value in the first column of that first value and change that
+                    myMasDb.updateData(0, cursor.getString(0));
+
+                }
+            } else {
+                Log.i(TAG, "Didn't find " + input + " in the database, ignoring");
+            }
+        }
     }
 
     private void updateUI() {
