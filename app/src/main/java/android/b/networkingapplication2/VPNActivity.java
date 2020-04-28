@@ -1,6 +1,5 @@
 package android.b.networkingapplication2;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.VpnService;
@@ -30,13 +29,12 @@ import static android.b.networkingapplication2.OverviewActivity.startupTime;
 
 public class VPNActivity extends AppCompatActivity {
 
-    public static Switch monitoringStatus;
-    LinearLayout VPNFileBox, VPNSettingsBox;
-    ImageButton VPNURLAdd, VPNDefaultAdd, ChangeVPNServer;
-    TextView currentVpnServer, upTime;
-    Thread timer;
+    private String serverAddress = "192.168.0.12";
 
-    public static Context context; // this might be very bad to do this...
+    public static Switch monitoringStatus;
+    private LinearLayout VPNFileBox, VPNSettingsBox;
+    private ImageButton VPNURLAdd, VPNDefaultAdd, ChangeVPNServer;
+    private TextView currentVpnServer, upTime;
 
     String currentServer;
 
@@ -60,8 +58,6 @@ public class VPNActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_vpn);
-
-        context = getBaseContext();
 
         mPauseLock = new Object();
         mPaused = false;
@@ -111,7 +107,7 @@ public class VPNActivity extends AppCompatActivity {
         });
 
         // Builds a new thread
-        timer = new Thread() {
+        Thread timer = new Thread() {
             @Override
             public void run() {
 
@@ -124,7 +120,7 @@ public class VPNActivity extends AppCompatActivity {
 
                         // update the user interface every 10 seconds
                         Thread.sleep(5000);
-                         //create a synchronized boolean mPauseLock
+                        //create a synchronized boolean mPauseLock
                         synchronized (mPauseLock) {
                             // check to see if the activity was paused
                             while (mPaused) {
@@ -196,7 +192,7 @@ public class VPNActivity extends AppCompatActivity {
 //        Log.i(TAG, "dnsServersSet : " + dnsServersSet.toString());
 
         prefs.edit()
-            .putString(VPNActivity.Prefs.SERVER_ADDRESS, "192.168.0.12")
+            .putString(VPNActivity.Prefs.SERVER_ADDRESS, serverAddress)
             .putInt(VPNActivity.Prefs.SERVER_PORT, 8000)
             .putString(VPNActivity.Prefs.SHARED_SECRET, "test")
             .putStringSet(VPNActivity.Prefs.PACKAGES, packageSet)

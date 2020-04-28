@@ -145,10 +145,12 @@ public class ToyVpnConnection implements Runnable {
             }
             Log.i(getTag(), "Giving up");
 
+
+
             new Handler(Looper.getMainLooper()).post(() -> {
                 VPNActivity.monitoringStatus.setChecked(false);
                 VPNActivity.monitoringStatus.setEnabled(true);
-                Toast.makeText(VPNActivity.context, "The server timed out", Toast.LENGTH_SHORT).show();
+                Toast.makeText(mService.getApplicationContext(), "The server timed out", Toast.LENGTH_SHORT).show();
             });
 
         } catch (IOException | InterruptedException | IllegalArgumentException e) {
@@ -156,7 +158,7 @@ public class ToyVpnConnection implements Runnable {
             new Handler(Looper.getMainLooper()).post(() -> {
                 VPNActivity.monitoringStatus.setChecked(false);
                 VPNActivity.monitoringStatus.setEnabled(true);
-//                Toast.makeText(VPNActivity.context, "There was an error connecting", Toast.LENGTH_SHORT).show();
+                Toast.makeText(mService.getApplicationContext(), "There was an error connecting", Toast.LENGTH_SHORT).show();
             });
 
         }

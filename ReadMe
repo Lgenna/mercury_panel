@@ -1,4 +1,6 @@
-Commands to set up the VPN server
+This is an Android 7 to 9 application that can provide domain blocking functionality and in addition a firewall to block specific applications network connectivity. This application needs a virtual private network (VPN) connection in order to function. To change the default address of the VPN server, you need to edit the serverAddress string stored in the VPNActivity. This application might work on Android 10+, but there is the possibility that everything might break.
+
+Commands to set up the VPN server:
 
 echo 1 | sudo tee /proc/sys/net/ipv4/ip_forward
 sudo iptables -t nat -A POSTROUTING -s 10.0.0.0/8 -o eth0 -j MASQUERADE
