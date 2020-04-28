@@ -250,7 +250,7 @@ public class VPNActivity extends AppCompatActivity {
 
         Map<String, ?> keys = FirewallPrefs.getAll();
 
-        BlockedApps.add("com.example.a.missing.app");
+//        BlockedApps.add("com.example.a.missing.app");
 
         for(Map.Entry<String, ?> element : keys.entrySet()){
             BlockedApps.add(element.getKey());

@@ -76,9 +76,9 @@ public class FirewallActivity extends AppCompatActivity {
 
                 Firewall FirewallItem = new Firewall();
                 FirewallItem.setProcessName(element.processName);
-                FirewallItem.setUid("" + element.uid);
+                FirewallItem.setUid(String.valueOf(element.uid));
                 FirewallItem.setPicture(pm.getApplicationIcon(element));
-                FirewallItem.setApplication(pm.getApplicationLabel(element) + "");
+                FirewallItem.setApplication(String.valueOf(pm.getApplicationLabel(element)));
                 FirewallItem.setStatus(false);
 
                 mApplications.add(FirewallItem);

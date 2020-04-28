@@ -438,7 +438,6 @@ public class ToyVpnConnection implements Runnable {
 
         for (String packageName : mPackages) {
             try {
-//
 ////                if (mAllow) {
 ////                    builder.addAllowedApplication(packageName);
 ////                } else {
