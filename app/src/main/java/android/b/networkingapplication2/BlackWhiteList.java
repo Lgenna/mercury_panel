@@ -7,11 +7,11 @@ public class BlackWhiteList {
     private UUID mId;
     private String mDomain;
 
-    public BlackWhiteList() {
+    BlackWhiteList() {
         this(UUID.randomUUID());
     }
 
-    public BlackWhiteList(UUID id) {
+    private BlackWhiteList(UUID id) {
         mId = id;
     }
 

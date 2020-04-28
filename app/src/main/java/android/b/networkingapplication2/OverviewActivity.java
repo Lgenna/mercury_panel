@@ -1,31 +1,22 @@
 package android.b.networkingapplication2;
 
 import android.app.ActivityManager;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.net.DhcpInfo;
-import android.net.Network;
-import android.net.wifi.WifiConfiguration;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
 import androidx.appcompat.app.AppCompatActivity;
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -34,19 +25,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+
 import database.BlockListBaseHelper;
 import database.MasterBlockListBaseHelper;
 import database.QueryLogBaseHelper;
 
-import static java.lang.String.format;
-
 public class OverviewActivity extends AppCompatActivity {
-
-    public static final String PREFS_GENERAL = "NetworkingApp";
-    public static final String PREFS_FIREWALL = "Firewall";
-    public static final String PREFS_DNS = "DomainNameSystem";
-    public static final String PREFS_DOMAINBLOCKER = "DomainBlocker";
-    public static final String PREFS_VPN = "VirtualPrivateNetwork";
 
     String[] locations = new String[]  {"/sys/devices/system/cpu/cpu0/cpufreq/cpu_temp",
             "/sys/devices/system/cpu/cpu0/cpufreq/FakeShmoo_cpu_temp",
@@ -64,27 +48,26 @@ public class OverviewActivity extends AppCompatActivity {
             "/sys/devices/platform/s5p-tmu/curr_temp"};
 
     private Object mPauseLock;
-    private boolean mPaused, mFinished, getApplications = false;
+    private boolean mPaused, mFinished;
     private TextView deviceTemp, deviceCPU, memoryUsage, IPV4Address,
             IPV6Address, startTime, totalApps, blockedApps, dnsStatus,
             dnsNumber, vpnStatus, vpnServer, totalQueries, blockedQueries;
-
-    private Thread uiUpdater;
-
-    private LinearLayout domainBlockerBox, DNSBox, FirewallBox, VPNBox;
-    private static final String TAG = "OverviewActivity";
     private Intent intent;
-    public static ArrayList<ApplicationInfo> installedApps = new ArrayList<>();
-
     private String addressIPV6, sTotalApps, addressIPV4, formattedMemoryUsed, formattedTemperature,
             formattedCPUUsage, formattedUpTime, sBlockedApps, sDNSStatus, sDNSNumber,
-            sVPNStatus, sVPNServer;
+            sVPNStatus = "Offline!", sVPNServer;
 
     public static long startupTime;
+    public static ArrayList<ApplicationInfo> installedApps = new ArrayList<>();
+    public static final String PREFS_GENERAL = "NetworkingApp";
+    public static final String PREFS_FIREWALL = "Firewall";
+    public static final String PREFS_DNS = "DomainNameSystem";
+    public static final String PREFS_VPN = "VirtualPrivateNetwork";
 
     private static QueryLogBaseHelper myQueDb;
     private static BlockListBaseHelper myBloDb;
     private static MasterBlockListBaseHelper myMasDb;
+    private static final String TAG = "OverviewActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,10 +94,10 @@ public class OverviewActivity extends AppCompatActivity {
         vpnStatus = findViewById(R.id.vpn_status);
         vpnServer = findViewById(R.id.vpn_server);
 
-        domainBlockerBox = findViewById(R.id.domain_blocker_info_box);
-//        DNSBox = findViewById(R.id.dns_info_box);
-        FirewallBox = findViewById(R.id.firewall_info_box);
-        VPNBox = findViewById(R.id.vpn_info_box);
+        LinearLayout domainBlockerBox = findViewById(R.id.domain_blocker_info_box);
+//        LinearLayout DNSBox = findViewById(R.id.dns_info_box);
+        LinearLayout firewallBox = findViewById(R.id.firewall_info_box);
+        LinearLayout VPNBox = findViewById(R.id.vpn_info_box);
 
         // get time when OnCreate is called
         startupTime = new Date().getTime();
@@ -135,7 +118,7 @@ public class OverviewActivity extends AppCompatActivity {
 //            this.startActivity(intent);
 //        });
 
-        FirewallBox.setOnClickListener(v -> {
+        firewallBox.setOnClickListener(v -> {
             intent = new Intent(this, FirewallActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             this.startActivity(intent);
@@ -148,7 +131,7 @@ public class OverviewActivity extends AppCompatActivity {
         });
 
         // Builds a new thread
-        uiUpdater = new Thread() {
+        Thread uiUpdater = new Thread() {
             @Override
             public void run() {
 
@@ -166,7 +149,7 @@ public class OverviewActivity extends AppCompatActivity {
                         getApplications();
 
                         getVPNStatus();
-                        getDnsInfo();
+//                        getDnsInfo();
 
                         getUpTime();
 
@@ -198,46 +181,25 @@ public class OverviewActivity extends AppCompatActivity {
         // start the thread
         uiUpdater.start();
 
-//        WifiManager wifiManager = (WifiManager)getSystemService(Context.WIFI_SERVICE);
-//        DhcpInfo info = wifiManager.getDhcpInfo();
-//
-//        System.out.println("DNS 1: " + String.format("%d.%d.%d.%d", (info.dns1 & 0xff), (info.dns1 >> 8 & 0xff), (info.dns1 >> 16 & 0xff), (info.dns1 >> 24 & 0xff)));
-//        System.out.println("DNS 2: " + String.format("%d.%d.%d.%d", (info.dns2 & 0xff), (info.dns2 >> 8 & 0xff), (info.dns2 >> 16 & 0xff), (info.dns2 >> 24 & 0xff)));
-
-
     }
 
     public static QueryLogBaseHelper getMyQueDb() {
         return myQueDb;
     }
 
-    public static void setMyQueDb(QueryLogBaseHelper myQueDb) {
-        OverviewActivity.myQueDb = myQueDb;
-    }
-
     public static BlockListBaseHelper getMyBloDb() {
         return myBloDb;
-    }
-
-    public static void setMyBloDb(BlockListBaseHelper myBloDb) {
-        OverviewActivity.myBloDb = myBloDb;
     }
 
     public static MasterBlockListBaseHelper getMyMasDb() {
         return myMasDb;
     }
 
-    public static void setMyMasDb(MasterBlockListBaseHelper myMasDb) {
-        OverviewActivity.myMasDb = myMasDb;
-    }
-
-
-@Override
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
-
 
     private long lBlockedQueries = 0;
     private long lTotalQueries = 0;
@@ -262,37 +224,35 @@ public class OverviewActivity extends AppCompatActivity {
         });
     }
 
-    private void getDnsInfo() {
-
-        SharedPreferences DNSPrefs = getSharedPreferences(PREFS_DNS, MODE_PRIVATE);
-
-        String[] DNSNames = {"Custom 1 (IPV4)", "Custom 2 (IPV4)", "Custom 3 (IPV6)", "Custom 4 (IPV6)"};
-
-        int counter = 0;
-        for (String element : DNSNames) {
-            boolean currentValue = DNSPrefs.getBoolean("b" + element, false);
-            if (currentValue) {
-                counter++;
-            }
-        }
-
-        if (counter > 0) {
-            sDNSNumber = counter + " DNS(s) Active";
-            sDNSStatus = "Online!";
-            runOnUiThread(() -> dnsNumber.setText(sDNSNumber));
-            runOnUiThread(() -> dnsStatus.setText(sDNSStatus));
-        }
-    }
+//    private void getDnsInfo() {
+//
+//        SharedPreferences DNSPrefs = getSharedPreferences(PREFS_DNS, MODE_PRIVATE);
+//
+//        String[] DNSNames = {"Custom 1 (IPV4)", "Custom 2 (IPV4)", "Custom 3 (IPV6)", "Custom 4 (IPV6)"};
+//
+//        int counter = 0;
+//        for (String element : DNSNames) {
+//            boolean currentValue = DNSPrefs.getBoolean("b" + element, false);
+//            if (currentValue) {
+//                counter++;
+//            }
+//        }
+//
+//        if (counter > 0) {
+//            sDNSNumber = counter + " DNS(s) Active";
+//            sDNSStatus = "Online!";
+//            runOnUiThread(() -> dnsNumber.setText(sDNSNumber));
+//            runOnUiThread(() -> dnsStatus.setText(sDNSStatus));
+//        }
+//    }
 
     private void getVPNStatus() {
         try {
             if (VPNActivity.monitoringStatus.isChecked()) {
                 sVPNStatus = "Online!";
-            } else {
-                sVPNStatus = "Offline";
             }
-        } catch (NullPointerException e) {
-            sVPNStatus = "Offline";
+        } catch (NullPointerException ignore) {
+            // VPNActivity was never initialized yet
         }
 
         runOnUiThread(() -> vpnStatus.setText(sVPNStatus));
@@ -353,7 +313,7 @@ public class OverviewActivity extends AppCompatActivity {
             }
         }
 
-        getApplications = true;
+        boolean getApplications = true;
 
         sTotalApps = installedApps.size() + " Total Apps";
         Log.i(TAG, sTotalApps);
@@ -365,12 +325,6 @@ public class OverviewActivity extends AppCompatActivity {
     }
 
     private void getIPAddresses() {
-
-//        WifiInfo network = ((WifiManager) getBaseContext().getSystemService(Context.WIFI_SERVICE)).getConnectionInfo();
-//
-//        int ip = network.getIpAddress();
-//
-//        addressIPV4 = format("%d.%d.%d.%d", (ip & 0xff), (ip >> 8 & 0xff), (ip >> 16 & 0xff), (ip >> 24 & 0xff));
 
         // Code created with help of Stack Overflow question
         // https://stackoverflow.com/questions/6064510/how-to-get-ip-address-of-the-device-from-code

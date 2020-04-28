@@ -14,7 +14,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import database.BlockListBaseHelper;
 import database.MasterBlockListBaseHelper;
@@ -24,10 +23,9 @@ public class BlockListCustomAdapter extends RecyclerView.Adapter<BlockListCustom
     private ArrayList<BlockList> mBlockLists;
     private static final String TAG = "BlockListCustomAdapter";
     private Context context;
-//    List<String> idList;
-    Thread removeBlocklist;
+    private Thread removeBlocklist;
 
-    public BlockListCustomAdapter(Context context, ArrayList<BlockList> mBlockLists) {
+    BlockListCustomAdapter(Context context, ArrayList<BlockList> mBlockLists) {
         this.context = context;
         this.mBlockLists = mBlockLists;
     }
@@ -130,17 +128,15 @@ public class BlockListCustomAdapter extends RecyclerView.Adapter<BlockListCustom
         return mBlockLists.size();
     }
 
-    public class MyViewHolder extends RecyclerView.ViewHolder {
+    static class MyViewHolder extends RecyclerView.ViewHolder {
         TextView domain;
-//        Switch status;
         ImageButton removeBlocklist;
 
-        public MyViewHolder(View itemView) {
+        MyViewHolder(View itemView) {
             super(itemView);
 
             // get the reference of item view's
             domain = itemView.findViewById(R.id.item_text);
-//            status = itemView.findViewById(R.id.domain_status);
             removeBlocklist = itemView.findViewById(R.id.remove_button);
 
         }

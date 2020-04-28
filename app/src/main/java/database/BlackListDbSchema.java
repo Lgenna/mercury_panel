@@ -1,6 +1,6 @@
 package database;
 
-public class BlackListDbSchema {
+class BlackListDbSchema {
     public static final class BlackListTable {
         public static final String TABLE_NAME = "blacklist_list";
 

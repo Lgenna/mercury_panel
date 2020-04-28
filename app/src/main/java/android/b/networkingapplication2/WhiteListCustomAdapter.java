@@ -9,7 +9,9 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.recyclerview.widget.RecyclerView;
+
 import java.util.ArrayList;
 
 import database.MasterBlockListBaseHelper;
@@ -21,7 +23,7 @@ public class WhiteListCustomAdapter extends RecyclerView.Adapter<WhiteListCustom
     private static final String TAG = "WhiteListCustomAdapter";
     private Context context;
 
-    public WhiteListCustomAdapter(Context context, ArrayList<BlackWhiteList> mWhiteLists) {
+    WhiteListCustomAdapter(Context context, ArrayList<BlackWhiteList> mWhiteLists) {
         this.context = context;
         this.mWhiteLists = mWhiteLists;
     }
@@ -96,11 +98,11 @@ public class WhiteListCustomAdapter extends RecyclerView.Adapter<WhiteListCustom
         return mWhiteLists.size();
     }
 
-    public class MyViewHolder extends RecyclerView.ViewHolder {
+    static class MyViewHolder extends RecyclerView.ViewHolder {
         TextView domain;
         ImageButton removeWhiteList;
 
-        public MyViewHolder(View itemView) {
+        MyViewHolder(View itemView) {
             super(itemView);
 
             // get the reference of item view's

@@ -6,7 +6,6 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Patterns;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,9 +14,11 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -34,11 +35,9 @@ public class BlockListsFragment extends Fragment {
     private TextView editDomain;
     private BlockListBaseHelper myBloDb;
     private RecyclerView mBlockListRecyclerView;
+    private Context context;
 
     private static final String TAG = "BlockListsFragment";
-
-    AlertDialog.Builder alertBuilder;
-    Context context;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -56,7 +55,6 @@ public class BlockListsFragment extends Fragment {
 
         LinearLayoutManager blocklistlinearLayoutManager = new LinearLayoutManager(getContext());
         mBlockListRecyclerView.setLayoutManager(blocklistlinearLayoutManager);
-
 
         try {
 
@@ -88,9 +86,8 @@ public class BlockListsFragment extends Fragment {
         return view;
     }
 
-
     private void addBlocklist() {
-        alertBuilder = new AlertDialog.Builder(context);
+        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(context);
 
         if (!editDomain.getText().toString().equals("")) {
 
@@ -146,7 +143,7 @@ public class BlockListsFragment extends Fragment {
         }
     }
 
-    public void updateUI() {
+    private void updateUI() {
 
         ArrayList<BlockList> mBlockLists = new ArrayList<>();
 
@@ -226,7 +223,6 @@ public class BlockListsFragment extends Fragment {
             }
         }
     }
-
 
     public static BlockListsFragment newInstance() {
         return new BlockListsFragment();

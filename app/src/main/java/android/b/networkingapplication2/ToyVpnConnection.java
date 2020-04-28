@@ -14,22 +14,17 @@
  * limitations under the License.
  */
 package android.b.networkingapplication2;
-import static database.MasterBlockListDbSchema.MasterBlockListTable.Cols.DOMAIN;
-import static database.MasterBlockListDbSchema.MasterBlockListTable.TABLE_NAME;
-import static java.nio.charset.StandardCharsets.US_ASCII;
 
-import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.VpnService;
-import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import android.widget.Toast;
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -45,8 +40,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+
 import database.MasterBlockListBaseHelper;
 import database.QueryLogBaseHelper;
+
+import static java.nio.charset.StandardCharsets.US_ASCII;
 
 public class ToyVpnConnection implements Runnable {
 
@@ -238,7 +236,7 @@ public class ToyVpnConnection implements Runnable {
                                         System.currentTimeMillis(),
                                         domain,
                                         sAllowPacket);
-                                OverviewActivity.setMyQueDb(myQueDb);
+//                                OverviewActivity.setMyQueDb(myQueDb);
                             }
                         }
                     }
@@ -366,7 +364,6 @@ public class ToyVpnConnection implements Runnable {
 
     }
 
-
     private ParcelFileDescriptor handshake(DatagramChannel tunnel)
             throws IOException, InterruptedException {
         // To build a secured tunnel, we should perform mutual authentication
@@ -398,12 +395,6 @@ public class ToyVpnConnection implements Runnable {
         throw new IOException("Timed out");
 
     }
-
-//    String[] appPackages = {
-//            "com.android.chrome",
-//            "com.google.android.youtube",
-//            "com.example.a.missing.app"};
-
 
     private ParcelFileDescriptor configure(String parameters) throws IllegalArgumentException {
         // Configure a builder while parsing the parameters.

@@ -7,9 +7,9 @@ import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import static database.QueryLogDbSchema.QueryLogTable.Cols.TIME;
 import static database.QueryLogDbSchema.QueryLogTable.Cols.DOMAIN;
 import static database.QueryLogDbSchema.QueryLogTable.Cols.STATUS;
+import static database.QueryLogDbSchema.QueryLogTable.Cols.TIME;
 import static database.QueryLogDbSchema.QueryLogTable.TABLE_NAME;
 
 public class QueryLogBaseHelper extends SQLiteOpenHelper {
@@ -65,22 +65,10 @@ public class QueryLogBaseHelper extends SQLiteOpenHelper {
 
     }
 
-    public Cursor specialSelectData(String column, String operation1, String element1, String operation2, String element2) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        return db.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE " + column + " " + operation1 + " " + element1 + " AND " + column + " " + operation2 + " " + element2, null);
-
-    }
-
-    public Cursor moreSpecialSelectData(String column, String operation1, String element1, String operation2, String element2, String element3) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        return db.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE " + column + " " + operation1 + " " + element1 + " AND " + column + " " + operation2 + " " + element2 + " AND STATUS = '" + element3 + "'" , null);
-
-    }
-
     public long countData() {
         SQLiteDatabase db = this.getReadableDatabase();
         long count = DatabaseUtils.queryNumEntries(db, TABLE_NAME);
-//        db.close();
+        db.close();
         return count;
     }
 }

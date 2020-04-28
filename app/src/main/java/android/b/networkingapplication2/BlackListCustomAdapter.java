@@ -9,8 +9,11 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.recyclerview.widget.RecyclerView;
+
 import java.util.ArrayList;
+
 import database.BlackListBaseHelper;
 import database.MasterBlockListBaseHelper;
 
@@ -20,7 +23,7 @@ public class BlackListCustomAdapter extends RecyclerView.Adapter<BlackListCustom
     private static final String TAG = "BlackListCustomAdapter";
     private Context context;
 
-    public BlackListCustomAdapter(Context context, ArrayList<BlackWhiteList> mBlackLists) {
+    BlackListCustomAdapter(Context context, ArrayList<BlackWhiteList> mBlackLists) {
         this.context = context;
         this.mBlackLists = mBlackLists;
     }
@@ -87,20 +90,6 @@ public class BlackListCustomAdapter extends RecyclerView.Adapter<BlackListCustom
             notifyItemRangeRemoved(position, getItemCount());
             notifyDataSetChanged();
 
-//            // hey, if the user deletes the last row, add a "no data" row. not sure what happens
-//            //  if they delete these however...
-//            if (databaseRes.getCount() == 1) {
-//
-//
-//                database.insertData(context.getString(R.string.no_data));
-//                Log.w(TAG, "Adding initial row");
-//
-//                notifyItemRemoved(position);
-//                notifyItemRangeRemoved(position, getItemCount());
-//                notifyDataSetChanged();
-//
-//            }
-
         });
     }
 
@@ -109,11 +98,11 @@ public class BlackListCustomAdapter extends RecyclerView.Adapter<BlackListCustom
         return mBlackLists.size();
     }
 
-    public class MyViewHolder extends RecyclerView.ViewHolder {
+    static class MyViewHolder extends RecyclerView.ViewHolder {
         TextView domain;
         ImageButton removeBlacklist;
 
-        public MyViewHolder(View itemView) {
+        MyViewHolder(View itemView) {
             super(itemView);
 
             // get the reference of item view's

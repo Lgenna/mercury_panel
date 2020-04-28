@@ -7,11 +7,11 @@ public class BlockList {
     private UUID mId;
     private String mDomain;
 
-    public BlockList() {
+    BlockList() {
         this(UUID.randomUUID());
     }
 
-    public BlockList(UUID id) {
+    private BlockList(UUID id) {
         mId = id;
     }
 

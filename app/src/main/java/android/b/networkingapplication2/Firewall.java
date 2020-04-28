@@ -13,11 +13,11 @@ public class Firewall {
     private boolean mStatus;
     private Drawable mPicture;
 
-    public Firewall() {
+    Firewall() {
         this(UUID.randomUUID());
     }
 
-    public Firewall(UUID id) {
+    private Firewall(UUID id) {
         mId = id;
     }
 
@@ -25,19 +25,19 @@ public class Firewall {
         return mId;
     }
 
-    public String getProcessName() {
+    String getProcessName() {
         return mProcessName;
     }
 
-    public void setProcessName(String processName) {
+    void setProcessName(String processName) {
         mProcessName = processName;
     }
 
-    public String getUid() {
+    String getUid() {
         return mUid;
     }
 
-    public void setUid(String uid) {
+    void setUid(String uid) {
         mUid = uid;
     }
 
@@ -49,11 +49,11 @@ public class Firewall {
         mApplication = application;
     }
 
-    public Drawable getPicture() {
+    Drawable getPicture() {
         return mPicture;
     }
 
-    public void setPicture(Drawable picture) {
+    void setPicture(Drawable picture) {
         mPicture = picture;
     }
 

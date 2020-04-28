@@ -5,20 +5,19 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
 import androidx.recyclerview.widget.RecyclerView;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Locale;
-
 
 public class QueryLogCustomAdapter extends RecyclerView.Adapter<QueryLogCustomAdapter.MyViewHolder> {
 
     private ArrayList<QueryLog> mQueryLogList;
     private static final String TAG = "QueryLogCustomAdapter";
-    private Context context;
 
-    public QueryLogCustomAdapter(Context context, ArrayList<QueryLog> mQueryLogList) {
-        this.context = context;
+    QueryLogCustomAdapter(Context context, ArrayList<QueryLog> mQueryLogList) {
         this.mQueryLogList = mQueryLogList;
     }
 
@@ -46,12 +45,12 @@ public class QueryLogCustomAdapter extends RecyclerView.Adapter<QueryLogCustomAd
         return mQueryLogList.size();
     }
 
-    public class MyViewHolder extends RecyclerView.ViewHolder {
+    static class MyViewHolder extends RecyclerView.ViewHolder {
         TextView time;
         TextView domain;
         TextView status;
 
-        public MyViewHolder(View itemView) {
+        MyViewHolder(View itemView) {
             super(itemView);
 
             // get the reference of item view's

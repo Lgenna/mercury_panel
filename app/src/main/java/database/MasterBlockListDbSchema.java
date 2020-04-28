@@ -5,9 +5,9 @@ public class MasterBlockListDbSchema {
         public static final String TABLE_NAME = "master_block_list_list";
 
         public static final class Cols {
-            public static final String BLOCKLIST = "BLOCKLIST";
+            static final String BLOCKLIST = "BLOCKLIST";
             public static final String DOMAIN = "DOMAIN";
-            public static final String STATUS = "STATUS";
+            static final String STATUS = "STATUS";
         }
     }
 }

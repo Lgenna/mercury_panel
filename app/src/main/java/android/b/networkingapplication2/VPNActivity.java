@@ -13,7 +13,9 @@ import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -327,6 +329,7 @@ public class VPNActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int request, int result, Intent data) {
+        super.onActivityResult(request, result, data);
         if (result == RESULT_OK) {
             startService(getServiceIntent().setAction(ToyVpnService.ACTION_CONNECT));
         }

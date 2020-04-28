@@ -4,9 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PermissionInfo;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,8 +22,6 @@ import static android.b.networkingapplication2.OverviewActivity.PREFS_GENERAL;
 public class FirewallActivity extends AppCompatActivity {
 
     private RecyclerView mFirewallRecyclerView;
-    private ArrayList<ApplicationInfo> installedApps;
-    private Thread uiUpdater;
     public static ArrayList<Firewall> mApplications;
 
     private static final String TAG = "FirewallActivity";
@@ -66,7 +62,7 @@ public class FirewallActivity extends AppCompatActivity {
     }
 
     public void buildApplicationList() {
-        installedApps = OverviewActivity.installedApps;
+        ArrayList<ApplicationInfo> installedApps = OverviewActivity.installedApps;
 
         mApplications = new ArrayList<>();
 
@@ -123,34 +119,4 @@ public class FirewallActivity extends AppCompatActivity {
 
         return true;
     }
-
-
-//    private final class GetApplicationsTask extends AsyncTask<Void, Void, String> {
-//
-//        ArrayList<ApplicationInfo> installedApps;
-//
-//        protected String doInBackground(Void... params) {
-//            installedApps = new ArrayList<>();
-//
-//            PackageManager pm = getPackageManager();
-//            List<ApplicationInfo> apps = pm.getInstalledApplications(0);
-//
-//            for (ApplicationInfo app : apps) {
-//                if ((app.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0) {
-//                    installedApps.add(app);
-//
-//                    System.out.println("Added " + app.processName + " the Firewall Database");
-//                } else if ((app.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
-//                } else {
-//                    installedApps.add(app);
-//                }
-//            }
-//            return "Executed";
-//        }
-//
-//        @Override
-//        protected void onPostExecute(String result) {
-//            runOnUiThread(() -> updateUI());
-//        }
-//    }
 }

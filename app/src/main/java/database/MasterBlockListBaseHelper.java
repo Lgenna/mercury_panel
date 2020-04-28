@@ -7,14 +7,13 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.database.sqlite.SQLiteQueryBuilder;
 
 import java.util.List;
 
-import static database.MasterBlockListDbSchema.MasterBlockListTable.TABLE_NAME;
 import static database.MasterBlockListDbSchema.MasterBlockListTable.Cols.BLOCKLIST;
 import static database.MasterBlockListDbSchema.MasterBlockListTable.Cols.DOMAIN;
 import static database.MasterBlockListDbSchema.MasterBlockListTable.Cols.STATUS;
+import static database.MasterBlockListDbSchema.MasterBlockListTable.TABLE_NAME;
 
 public class MasterBlockListBaseHelper extends SQLiteOpenHelper {
 

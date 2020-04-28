@@ -6,17 +6,18 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import java.util.ArrayList;
+
 import database.QueryLogBaseHelper;
 
 public class QueryLogFragment extends Fragment {
     private RecyclerView mQueryLogRecyclerView;
-    public static View view;
 
-    private Thread timer;
     private Object mPauseLock;
     private boolean mPaused, mFinished;
     private QueryLogBaseHelper myQueDb;
@@ -25,7 +26,7 @@ public class QueryLogFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.activity_query_log, container, false);
+        View view = inflater.inflate(R.layout.activity_query_log, container, false);
 
         mPauseLock = new Object();
         mPaused = false;
@@ -34,7 +35,7 @@ public class QueryLogFragment extends Fragment {
         mQueryLogRecyclerView = view.findViewById(R.id.query_log_recycler_view);
 
         // Builds a new thread
-        timer = new Thread() {
+        Thread timer = new Thread() {
             @Override
             public void run() {
 
@@ -82,21 +83,6 @@ public class QueryLogFragment extends Fragment {
     private QueryLogCustomAdapter querylogcustomAdapter;
 
     private void updateInfo() {
-//        if (myQueDb != null) {
-//
-//            Cursor checkInitial = myQueDb.getAllData();
-//
-//            if (checkInitial.getCount() == 0) {
-//                Log.w(TAG, "DB empty, adding test data");
-////                myQueDb.insertData("", getResources().getString(R.string.no_data), "");
-//            } else if (checkInitial.getCount() != 1) {
-//                checkInitial.moveToFirst();
-//                if (checkInitial.getString(2).equals(getResources().getString(R.string.no_data))) {
-//                    myQueDb.deleteData("1");
-//                    Log.w(TAG, "Removing initial row");
-//                }
-//            }
-//        }
 
         ArrayList<QueryLog> mQueryLogList = new ArrayList<>();
 
@@ -115,15 +101,7 @@ public class QueryLogFragment extends Fragment {
         }
 
         querylogcustomAdapter = new QueryLogCustomAdapter(getContext(), mQueryLogList);
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mQueryLogRecyclerView.setAdapter(querylogcustomAdapter);
-            }
-        });
-
-
-
+        getActivity().runOnUiThread(() -> mQueryLogRecyclerView.setAdapter(querylogcustomAdapter));
 
     }
 

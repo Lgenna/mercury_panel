@@ -8,12 +8,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
 import androidx.fragment.app.Fragment;
+
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.LegendRenderer;
 import com.jjoe64.graphview.helper.StaticLabelsFormatter;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
+
 import database.MasterBlockListBaseHelper;
 import database.QueryLogBaseHelper;
 
@@ -56,11 +59,9 @@ public class DomainBlockerFragment extends Fragment {
                     // while the app is open...
                     while (!mFinished) {
 
-
-
                         // methods that need to update info
                         updateInfo();
-                        if (minuteCounter >= 12) { // changed from 12
+                        if (minuteCounter >= 12) {
                             graphTotalQueries.resetData(getQueriesGraphData(true, totalQueriesArray, prevTotalQueries));
                             graphBlockedQueries.resetData(getQueriesGraphData(false, blockedQueriesArray, prevBlockedQueries));
                             minuteCounter = 0;
@@ -128,8 +129,6 @@ public class DomainBlockerFragment extends Fragment {
             });
         }
     }
-
-
 
     private void graphFiddler(View view) {
         GraphView graph = view.findViewById(R.id.graph);

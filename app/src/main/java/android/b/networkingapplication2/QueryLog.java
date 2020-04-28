@@ -9,11 +9,11 @@ public class QueryLog {
     private String mDomain;
     private String mStatus;
 
-    public QueryLog() {
+    QueryLog() {
         this(UUID.randomUUID());
     }
 
-    public QueryLog(UUID id) {
+    private QueryLog(UUID id) {
         mId = id;
     }
 
@@ -21,11 +21,11 @@ public class QueryLog {
         return mId;
     }
 
-    public long getTime() {
+    long getTime() {
         return mTime;
     }
 
-    public void setTime(long time) {
+    void setTime(long time) {
         mTime = time;
     }
 

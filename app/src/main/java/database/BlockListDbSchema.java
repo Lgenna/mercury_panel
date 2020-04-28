@@ -1,6 +1,6 @@
 package database;
 
-public class BlockListDbSchema {
+class BlockListDbSchema {
     public static final class BlockListTable {
         public static final String TABLE_NAME = "blocklist_list";
 

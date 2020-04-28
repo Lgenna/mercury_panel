@@ -9,11 +9,11 @@ public class MasterBlocklist {
     private String mDomain;
     private int mStatus;
 
-    public MasterBlocklist() {
+    MasterBlocklist() {
         this(UUID.randomUUID());
     }
 
-    public MasterBlocklist(UUID id) {
+    private MasterBlocklist(UUID id) {
         mId = id;
     }
 
@@ -33,7 +33,7 @@ public class MasterBlocklist {
         return mBlockList;
     }
 
-    public void setBlockList(String blockList) {
+    void setBlockList(String blockList) {
         mBlockList = blockList;
     }
 

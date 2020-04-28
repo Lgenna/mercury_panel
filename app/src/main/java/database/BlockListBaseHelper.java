@@ -7,7 +7,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import static database.BlockListDbSchema.BlockListTable.Cols.DOMAIN;
-import static database.BlockListDbSchema.BlockListTable.Cols.STATUS;
 import static database.BlockListDbSchema.BlockListTable.TABLE_NAME;
 
 public class BlockListBaseHelper extends SQLiteOpenHelper {
@@ -26,13 +25,6 @@ public class BlockListBaseHelper extends SQLiteOpenHelper {
                 DOMAIN +
                 ")"
         );
-
-//        db.execSQL("create table " + TABLE_NAME + " ( " +
-//                " ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
-//                DOMAIN + ", " +
-//                STATUS +
-//                ")"
-//        );
     }
 
     @Override
@@ -45,7 +37,6 @@ public class BlockListBaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(DOMAIN, domain);
-//        contentValues.put(STATUS, status);
         long result = db.insert(TABLE_NAME, null, contentValues);
         return result != -1;
     }
@@ -55,15 +46,6 @@ public class BlockListBaseHelper extends SQLiteOpenHelper {
         Cursor res = db.rawQuery("select * from " + TABLE_NAME, null);
         return res;
     }
-
-//    public boolean updateData(String domain, String status, String id) {
-//        SQLiteDatabase db = this.getWritableDatabase();
-//        ContentValues contentValues = new ContentValues();
-//        contentValues.put(DOMAIN, domain);
-//        contentValues.put(STATUS, status);
-//        db.update(TABLE_NAME, contentValues, "ID = ?", new String[]{id});
-//        return true;
-//    }
 
     public Integer deleteData(String id) {
         SQLiteDatabase db = this.getWritableDatabase();

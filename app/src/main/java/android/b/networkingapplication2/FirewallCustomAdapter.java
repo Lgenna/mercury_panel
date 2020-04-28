@@ -9,7 +9,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
+
 import androidx.recyclerview.widget.RecyclerView;
+
 import java.util.ArrayList;
 
 import static android.b.networkingapplication2.OverviewActivity.PREFS_FIREWALL;
@@ -22,7 +24,7 @@ public class FirewallCustomAdapter extends RecyclerView.Adapter<FirewallCustomAd
 
     private Context context;
 
-    public FirewallCustomAdapter(Context context, ArrayList<Firewall> mApplications) {
+    FirewallCustomAdapter(Context context, ArrayList<Firewall> mApplications) {
         this.context = context;
         this.mApplications = mApplications;
     }
@@ -74,13 +76,13 @@ public class FirewallCustomAdapter extends RecyclerView.Adapter<FirewallCustomAd
         return mApplications.size();
     }
 
-    public class MyViewHolder extends RecyclerView.ViewHolder {
+    static class MyViewHolder extends RecyclerView.ViewHolder {
         Switch status;
         TextView uid;
         TextView processName;
         ImageView prettyPicture;
 
-        public MyViewHolder(View itemView) {
+        MyViewHolder(View itemView) {
             super(itemView);
 
             // get the reference of item view's

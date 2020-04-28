@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 package android.b.networkingapplication2;
+
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -29,7 +30,9 @@ import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import android.util.Pair;
 import android.widget.Toast;
+
 import androidx.core.app.NotificationManagerCompat;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Set;
@@ -44,7 +47,7 @@ public class ToyVpnService extends VpnService implements Handler.Callback {
     public static final String ACTION_DISCONNECT = "com.example.android.toyvpn.STOP";
     private Handler mHandler;
     private static class Connection extends Pair<Thread, ParcelFileDescriptor> {
-        public Connection(Thread thread, ParcelFileDescriptor pfd) {
+        Connection(Thread thread, ParcelFileDescriptor pfd) {
             super(thread, pfd);
         }
     }
